@@ -12,6 +12,21 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
+  authors: [
+    {
+      name: "Ukanah Dean",
+      url: "https://www.harrylever.dev",
+    },
+  ],
+  creator: "Ukanah Dean",
+  publisher: "Ukanah Dean @ Vercel",
+  applicationName: "Harrylever Portfolio",
+  generator: "Next.js",
+  keywords: ["Harrylever", "Portfolio", "Ukanah Dean"],
+  robots: {
+    index: true,
+    follow: true,
+  },
   metadataBase: new URL("https://www.harrylever.dev"),
   description: siteConfig.description,
   icons: {
@@ -22,13 +37,23 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     url: "https://www.harrylever.dev",
     siteName: siteConfig.name,
-    images: { url: "/hL.png" },
+    images: [
+      { url: "https://www.harrylever.dev/hL.png", width: 620, height: 620 },
+    ],
+    locale: "en_US",
+    type: "website",
   },
   alternates: {
     canonical: "/",
     languages: {
       "en-US": "/en-US",
     },
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: { url: "https://www.harrylever.dev/hL.png" },
   },
 };
 
