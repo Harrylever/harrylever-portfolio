@@ -52,7 +52,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="group">
+      <div className="w-fit group">
         <a
           className="flex items-center gap-2"
           href={project.link}
