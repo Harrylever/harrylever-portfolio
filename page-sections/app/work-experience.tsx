@@ -57,7 +57,7 @@ export const WorkExperience = () => {
 
               <div>
                 <Chip size="sm" variant="bordered">
-                  <span className="text-sm text-white/80">
+                  <span className="text-sm text-white/80 select-none">
                     {prettyDate(workExperience.startDate)} -{" "}
                     {workExperience.isPresent
                       ? "Present"
