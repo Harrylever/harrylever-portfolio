@@ -19,20 +19,19 @@ const projects: Project[] = [
     repository: "https://github.com/Harrylever/Quotura",
   },
   {
-    name: "Wordlift",
-    description:
-      "Built an AI-powered content enhancement platform for writers and marketers struggling with producing SEO-optimized content efficiently. I developed the full-stack Next.js/FastAPI application with secure authentication, tiered subscription management (integrated with Paystack), and a credit-based usage system. Integrated Google AI (Gemini) for real-time writing suggestions, grammar/style correction, and content clarity improvements. Solved scalability and payment tracking challenges by implementing robust REST APIs and background tasks. Reduced content editing time for users from hours to minutes and improved content quality, enabling creators to publish more effectively and boost their reach.",
-    link: "https://wordlift.vercel.app",
-    image: "/images/wordlift.png",
-    repository: "https://github.com/Harrylever/Wordlift",
-  },
-  {
     name: "Market Insight",
     description:
       "Built a SaaS platform for businesses seeking actionable market insights and strategic planning. I developed the full-stack Next.js/FastAPI application with AI-powered market simulation, SWOT analysis, and go-to-market strategy generation—integrating Google AI for advanced analytics. The system features secure authentication, Paystack-powered tiered subscriptions, and a credit-based usage model. Addressed challenges in scaling custom analytics and payment tracking by engineering robust REST APIs and asynchronous processing. Enabled businesses to reduce manual research time, improve their market strategies, and make data-driven decisions faster—empowering teams to outperform competitors and capture new growth opportunities.",
     link: "https://market-insight-alpha.vercel.app",
     image: "/images/market-insight.png",
     repository: "https://github.com/Harrylever/Market-Insight",
+  },
+  {
+    name: "TCD Community",
+    description:
+      "I developed a community platform for developers within my WhatsApp Dev Community. For this project, I created a scalable web application to support the TCD community. Features include user authentication, community forums, project showcases, and resource libraries. Deployed on Vercel, I ensured a responsive design and optimized performance. Ensured interoperability in modern web development, database design, and community-driven product development.",
+    link: "https://tcd-main.vercel.app",
+    image: "/images/tcd-community.png",
   },
   {
     name: "Express Typescript Starter Template",
