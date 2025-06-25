@@ -2,10 +2,8 @@ import Image from "next/image";
 import { Button } from "@heroui/button";
 import { RiGithubLine, RiTwitterXLine, RiLinkedinLine } from "react-icons/ri";
 
-import { title } from "@/components/primitives";
+import { subtitle, title } from "@/components/primitives";
 import { EncryptButton } from "@/components/encrypt-button";
-
-// const skills = ["Python", "React", "Next.js", "React-Native", "NestJS"];
 
 export const Hero = () => {
   return (
@@ -22,7 +20,10 @@ export const Hero = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className={title({ size: "sm" })}>Harrylever</h1>
+          <h1 className={title({ size: "sm" })}>&mdash; Harrylever</h1>
+          <p className={`${subtitle()} text-gray-500`}>
+            &mdash; Ukanah Dean Onesi
+          </p>
           <p className="text-sm text-gray-500 text-justify">
             Fullstack Web & Mobile Developer/Engineer with a passion for shiny,
             neo-classical digital experiences. I craft sleek, professional web
@@ -32,14 +33,6 @@ export const Hero = () => {
           </p>
         </div>
 
-        {/* <div className="flex flex-row items-center gap-4">
-          {skills.map((skill) => (
-            <Chip key={skill} size="sm" variant="solid">
-              <span className="font-semibold">{skill}</span>
-            </Chip>
-          ))}
-        </div> */}
-
         <div className="flex flex-row items-center gap-5">
           <Button
             isIconOnly
@@ -48,6 +41,7 @@ export const Hero = () => {
             color="primary"
             href="https://github.com/harrylever"
             radius="md"
+            target="_blank"
             variant="flat"
           >
             <RiGithubLine size={20} />
@@ -60,6 +54,7 @@ export const Hero = () => {
             color="primary"
             href="https://www.linkedin.com/in/deanukanah/"
             radius="md"
+            target="_blank"
             variant="flat"
           >
             <RiLinkedinLine size={20} />
@@ -72,6 +67,7 @@ export const Hero = () => {
             color="primary"
             href="https://x.com/onesiukanah"
             radius="md"
+            target="_blank"
             variant="flat"
           >
             <RiTwitterXLine size={20} />

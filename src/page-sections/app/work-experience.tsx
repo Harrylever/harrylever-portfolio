@@ -8,10 +8,10 @@ import { WorkExperience as WorkExperienceType } from "@/types";
 const workExperiences: WorkExperienceType[] = [
   {
     company: "Clique",
-    title: "Full-Stack Engineer",
+    title: "Full-Stack Software Engineer",
     description:
-      "Developed and maintained web applications using React, Next.js, and Tailwind CSS.",
-    startDate: "2025-04-07T23:01:39.000Z",
+      "Develop and maintain web applications using Typescript, React, Vite, Material UI, NestJS, and PostgreSQL.",
+    startDate: "2024-07-01T11:00:00.000Z",
     isPresent: true,
   },
   {
@@ -19,8 +19,8 @@ const workExperiences: WorkExperienceType[] = [
     title: "Engineering Lead",
     description:
       "Led a team of engineers to develop and maintain web applications using React, Next.js, and Tailwind CSS.",
-    startDate: "2025-04-07T23:01:39.000Z",
-    endDate: "2025-04-07T23:01:39.000Z",
+    startDate: "2024-05-01T11:00:00.000Z",
+    endDate: "2024-08-31T23:00:00.000Z",
   },
   {
     company: "Jejelove Solutions",
@@ -28,17 +28,17 @@ const workExperiences: WorkExperienceType[] = [
     description:
       "Developed and maintained web applications using React, Next.js, and Tailwind CSS.",
     isRemote: true,
-    startDate: "2024-01-01T23:01:39.000Z",
-    endDate: "2024-01-01T23:01:39.000Z",
+    startDate: "2023-03-31T23:00:00.000Z",
+    endDate: "2023-07-31T23:00:00.000Z",
   },
   {
     company: "Stanrute Technologies",
     title: "Backend Engineer",
     description:
-      "Developed and maintained web applications using React, Next.js, and Tailwind CSS.",
+      "Developed and maintained backend web applications using Node.js, Express, NestJS and MongoDB.",
     isRemote: true,
-    startDate: "2024-01-01T23:01:39.000Z",
-    endDate: "2024-01-01T23:01:39.000Z",
+    startDate: "2022-11-01T00:00:00.000Z",
+    endDate: "2023-02-01T00:00:00.000Z",
   },
 ];
 
@@ -52,7 +52,7 @@ export const WorkExperience = () => {
       <div className="mt-5 grid grid-cols-1 gap-6">
         {workExperiences.map((workExperience) => (
           <div key={workExperience.company} className="flex flex-col w-full">
-            <div className="w-full flex items-center justify-between">
+            <div className="w-full flex flex-col md:flex-row md:items-center justify-between">
               <h3 className={subtitle()}>{workExperience.company}</h3>
 
               <div>
@@ -66,7 +66,9 @@ export const WorkExperience = () => {
                 </Chip>
               </div>
             </div>
-            <p className="text-sm text-gray-500">{workExperience.title}</p>
+            <p className="text-sm text-gray-500 mt-3 md:mt-0">
+              {workExperience.title}
+            </p>
             <p className="text-sm text-gray-500">
               {workExperience.description}
             </p>

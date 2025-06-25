@@ -60,12 +60,20 @@ export const EncryptButton = forwardRef((props, ref) => {
   const { onAnimationStart, onDragStart, onDragEnd, onDrag, ...buttonProps } =
     getButtonProps({});
 
+  const handleClick = () => {
+    window.open(
+      "https://drive.google.com/file/d/1w1srOLZzbwlg1m3mNrjS5eslrxo-E04-/view?usp=drive_link",
+      "_blank",
+    );
+  };
+
   return (
     <motion.button
       ref={domRef as React.RefObject<HTMLButtonElement>}
       {...buttonProps}
-      whileHover={{ scale: 1.025 }}
+      whileHover={{ scale: 1 }}
       whileTap={{ scale: 0.975 }}
+      onClick={handleClick}
       onMouseEnter={scramble}
       onMouseLeave={stopScramble}
     >
@@ -73,22 +81,6 @@ export const EncryptButton = forwardRef((props, ref) => {
         <FileDown size={16} />
         <span>{text}</span>
       </div>
-
-      {/* <motion.span
-        animate={{
-          y: "-100%",
-        }}
-        className="duration-300 absolute inset-0 z-0 scale-125 bg-gradient-to-t from-indigo-400/0 from-40% via-white/50 to-indigo-400/20 to-60% opacity-0 transition-opacity group-hover:opacity-100"
-        initial={{
-          y: "100%",
-        }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "mirror",
-          duration: 1,
-          ease: "linear",
-        }}
-      /> */}
     </motion.button>
   );
 });

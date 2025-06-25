@@ -17,6 +17,7 @@ export type WorkExperience = {
 export type Project = {
   name: string;
   description: string;
-  link: string;
-  image: string;
+  link?: string;
+  image?: string;
+  repository?: string;
 };

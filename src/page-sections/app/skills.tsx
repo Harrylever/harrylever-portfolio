@@ -4,31 +4,40 @@ import { title } from "@/components/primitives";
 
 const skills: string[] = [
   "React",
-  "Next.JS",
-  "React-Native",
-  "Tailwind",
-  "Shadcn",
+  "Next.js",
+  "React Native",
+  "Expo",
+  "Material UI",
+  "Tailwind CSS",
+  "Vite",
+  "Remix.run",
+  "Shadcn UI",
+  "Javascript",
   "Typescript",
+  "Node.js",
   "NestJS",
+  "Express",
   "Python",
   "FastAPI",
+  "GraphQL",
   "PostgreSQL",
+  "MongoDB",
   "Docker",
   "Git",
   "CI/CD",
-  "GitLabCI",
   "AWS",
   "GCP",
   "Azure",
-  "Jenkins",
   "CircleCI",
   "GitHubActions",
-  "BitbucketPipelines",
+  "Supabase",
+  "Hygraph CMS",
+  "Firebase",
 ];
 
 export const Skills = () => {
   return (
-    <div>
+    <div className="grid w-full pb-14">
       <h3 className={cn(title({ size: "sm" }), "select-none")}>Skills</h3>
 
       <div className="mt-5 flex flex-wrap gap-2">
