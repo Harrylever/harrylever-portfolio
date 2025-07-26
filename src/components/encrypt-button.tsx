@@ -61,10 +61,7 @@ export const EncryptButton = forwardRef((props, ref) => {
     getButtonProps({});
 
   const handleClick = () => {
-    window.open(
-      "https://drive.google.com/file/d/1w1srOLZzbwlg1m3mNrjS5eslrxo-E04-/view?usp=drive_link",
-      "_blank",
-    );
+    window.open(process.env.NEXT_PUBLIC_RESUME_URL, "_blank");
   };
 
   return (
