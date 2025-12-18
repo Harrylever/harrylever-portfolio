@@ -3,36 +3,72 @@ import { cn } from "@heroui/theme";
 import { title } from "@/components/primitives";
 
 const skills: string[] = [
+  // Frontend (Web & Mobile)
   "React",
   "Next.js",
+  "Remix.run",
+  "Vite",
+  "Gatsby",
+  "Tailwind CSS",
+  "Tamagui",
+  "Material UI",
+  "Shadcn UI",
+  "HeroUI",
+  "Bootstrap",
   "React Native",
   "Expo",
-  "Material UI",
-  "Tailwind CSS",
-  "Vite",
-  "Remix.run",
-  "Shadcn UI",
+
+  // Languages
   "Javascript",
   "Typescript",
+  "Python",
+
+  // Backend & APIs
   "Node.js",
   "NestJS",
   "Express",
-  "Python",
   "FastAPI",
   "GraphQL",
+  "REST API design",
+  "Convex",
+
+  // Databases & Caching
   "PostgreSQL",
   "MongoDB",
+  "Redis",
+
+  // Authentication & Payments
+  "Clerk",
+  "Paystack",
+  "Flutterwave",
+
+  // Cloud, DevOps & Deployment
   "Docker",
   "Git",
   "CI/CD",
+  "GitHubActions",
+  "CircleCI",
   "AWS",
   "GCP",
   "Azure",
-  "CircleCI",
-  "GitHubActions",
+  "Vercel",
+
+  // Backend Services & Platforms
   "Supabase",
-  "Hygraph CMS",
   "Firebase",
+  "Hygraph CMS",
+
+  // Testing & Code Quality
+  "Jest",
+  "ESLint",
+
+  // Architecture & Product Engineering
+  "SaaS architecture",
+  "Multitenancy in SaaS",
+  "System design",
+
+  // AI & Integrations
+  "Google AI / Gemini",
 ];
 
 export const Skills = () => {

@@ -11,6 +11,13 @@ import { Project } from "@/types";
 
 const projects: Project[] = [
   {
+    name: "Shelta: Shelta Homes & Ventures",
+    description:
+      "Built a student-focused housing platform connecting renters with verified agents to access affordable apartments. Developed a scalable full-stack web application featuring user onboarding and agent verification, apartment listings with strict validations, secure authentication, and admin moderation tools. Designed the system to improve trust, reduce housing search friction, and streamline the rental process for students—making housing discovery faster, safer, and more transparent.",
+    image: "/images/shelta.jpg",
+    link: "https://www.sheltahomes.com",
+  },
+  {
     name: "Quotura",
     description:
       "Built an AI-powered content summarization and essay generation platform for users seeking to write smarter and read faster. I developed the full-stack Next.js/FastAPI application with secure Clerk authentication, Paystack-integrated tiered subscription management, and a credit-based usage model. Integrated Google AI (Gemini) for advanced summarization and custom essay creation, enabling customizable formats and lengths. Solved challenges in user onboarding, access control, and payment tracking through robust REST APIs and background tasks. Helped users reduce reading and writing time, improve content quality, and streamline research—transforming how individuals and teams manage information and produce written work.",

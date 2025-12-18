@@ -1,14 +1,13 @@
 import { SmoothEntryContainer } from "@/components/smooth-entry-hoc";
+import { ContactMe } from "@/page-sections/app/contact-me";
 import { Hero } from "@/page-sections/app/hero";
 import { Projects } from "@/page-sections/app/projects";
 import { Skills } from "@/page-sections/app/skills";
 import { WorkExperience } from "@/page-sections/app/work-experience";
-import { PlayAudio } from "@/utils/play-audio";
 
 export default function Home() {
   return (
     <section className="relative">
-      <PlayAudio />
       <div className="relative min-h-screen flex flex-col items-center justify-center gap-4">
         <div className="fixed top-0 left-0 w-full h-screen bg-noise-start bg-contain bg-repeat opacity-30" />
 
@@ -23,6 +22,7 @@ export default function Home() {
           <WorkExperience />
           <Projects />
           <Skills />
+          <ContactMe />
         </SmoothEntryContainer>
       </div>
     </section>
