@@ -1,4 +1,5 @@
 import { cn } from "@heroui/theme";
+import Link from "next/link";
 
 import { title } from "@/components/primitives";
 
@@ -74,7 +75,7 @@ const skills: string[] = [
 
 export const Skills = () => {
   return (
-    <div className="grid w-full pb-14">
+    <div className="grid w-full">
       <h3 className={cn(title({ size: "sm" }), "select-none")}>Skills</h3>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -86,6 +87,15 @@ export const Skills = () => {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <p className="text-sm text-white transition-all hover:underline duration-300 cursor-pointer">
+          <Link href="https://medium.com/@devdean315user" target="_blank">
+            I like to get Technical on Medium. <br /> Check out my posts here.
+            <span>🤓📚</span>
+          </Link>
+        </p>
       </div>
     </div>
   );
