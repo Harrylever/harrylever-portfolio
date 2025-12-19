@@ -52,6 +52,7 @@ const skills: string[] = [
   "GCP",
   "Azure",
   "Vercel",
+  "Netlify",
 
   // Backend Services & Platforms
   "Supabase",
