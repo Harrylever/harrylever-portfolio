@@ -14,13 +14,13 @@ export const metadata: Metadata = {
   },
   authors: [
     {
-      name: "Dean Onesi Ukanah",
-      url: "https://www.harrylever.dev",
+      name: "Dean Ukanah",
+      url: "https://www.deanukanah.dev",
     },
   ],
   creator: "Dean Onesi Ukanah",
   publisher: "Dean Onesi Ukanah @ Vercel",
-  applicationName: "Harrylever Portfolio",
+  applicationName: "Dean's Portfolio",
   generator: "Next.js",
   keywords: [
     "Harrylever",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
-  metadataBase: new URL("https://www.harrylever.dev"),
+  metadataBase: new URL("https://www.deanukanah.dev"),
   description: siteConfig.description,
   icons: {
     icon: "/favicon.ico",
@@ -75,10 +75,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
-    url: "https://www.harrylever.dev",
+    url: "https://www.deanukanah.dev",
     siteName: siteConfig.name,
     images: [
-      { url: "https://www.harrylever.dev/hL.png", width: 620, height: 620 },
+      {
+        url: "https://www.deanukanah.dev/deanukanah.jpg",
+        width: 620,
+        height: 620,
+      },
     ],
     locale: "en_US",
     type: "website",
@@ -93,7 +97,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: { url: "https://www.harrylever.dev/hL.png" },
+    images: { url: "https://www.deanukanah.dev/deanukanah.jpg" },
   },
 };
 

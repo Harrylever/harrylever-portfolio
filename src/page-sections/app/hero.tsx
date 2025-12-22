@@ -12,7 +12,7 @@ export const Hero = () => {
       <div className="w-full md:w-[400px] flex flex-col gap-4">
         <div>
           <Image
-            alt="Ukanah Dean Onesi"
+            alt="Dean Ukanah"
             className="rounded-full hover:scale-105 transition-all duration-300"
             height={150}
             src="/images/deanukanah.jpg"
@@ -21,7 +21,7 @@ export const Hero = () => {
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <h1 className={title({ size: "sm" })}>Dean Onesi Ukanah</h1>
+          <h1 className={title({ size: "sm" })}>Dean Ukanah</h1>
 
           <div className="flex flex-row items-center gap-2 text-gray-500">
             <MapPin className="size-4 text-gray-400" />
