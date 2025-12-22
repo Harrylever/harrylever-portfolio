@@ -93,7 +93,7 @@ export const Skills = () => {
         <p className="text-sm text-white transition-all hover:underline duration-300 cursor-pointer">
           <Link href="https://medium.com/@devdean315user" target="_blank">
             I like to get Technical on Medium. <br /> Check out my posts here.
-            <span>🤓📚</span>
+            <span>📚</span>
           </Link>
         </p>
       </div>
