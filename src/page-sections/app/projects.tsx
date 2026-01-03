@@ -18,6 +18,12 @@ const projects: Project[] = [
     link: "https://www.sheltahomes.com",
   },
   {
+    name: "Crystalizer Fertilizer",
+    description:
+      "A corporate website for Crystalizer Nigeria Limited, a leading fertilizer production company. I developed a responsive, multi-page Next.js application featuring dynamic content management for blog posts and products, an interactive gallery, and optimized SEO performance. The site showcases their 20+ years of agricultural impact, product catalog (NPK, Kieserite), and commitment to Nigerian farmers, providing a professional digital presence to connect with stakeholders and expand their market reach.",
+    link: "https://www.crystalizer.net",
+  },
+  {
     name: "Quotura",
     description:
       "Built an AI-powered content summarization and essay generation platform for users seeking to write smarter and read faster. I developed the full-stack Next.js/FastAPI application with secure Clerk authentication, Paystack-integrated tiered subscription management, and a credit-based usage model. Integrated Google AI (Gemini) for advanced summarization and custom essay creation, enabling customizable formats and lengths. Solved challenges in user onboarding, access control, and payment tracking through robust REST APIs and background tasks. Helped users reduce reading and writing time, improve content quality, and streamline research—transforming how individuals and teams manage information and produce written work.",
