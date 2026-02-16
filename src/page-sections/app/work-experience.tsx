@@ -12,7 +12,7 @@ const workExperiences: WorkExperienceType[] = [
     description:
       "Develop and maintain web applications using Typescript, React, Vite, Material UI, NestJS, and PostgreSQL.",
     startDate: "2024-07-01T11:00:00.000Z",
-    isPresent: true,
+    endDate: "2026-01-29T11:00:00.000Z",
   },
   {
     company: "Provarex Innovations",
