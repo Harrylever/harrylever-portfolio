@@ -1,15 +1,22 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Button } from "@heroui/button";
-import { motion } from "framer-motion";
-import { ExternalLink, FolderCode } from "lucide-react";
-import { cn } from "@heroui/theme";
+import { useState } from "react"
+import { Button } from "@heroui/button"
+import { motion } from "framer-motion"
+import { ExternalLink, FolderCode } from "lucide-react"
+import { cn } from "@heroui/theme"
 
-import { subtitle, title } from "@/components/primitives";
-import { Project } from "@/types";
+import { subtitle, title } from "@/components/primitives"
+import { Project } from "@/types"
 
 const projects: Project[] = [
+  {
+    name: "PriceIt: AI Price Scanner",
+    description:
+      "Built a mobile-first AI-powered price verification platform that helps users instantly scan and compare product prices to avoid overpaying. Developed using Expo, Convex, and Clerk, the app enables real-time price submissions, intelligent price aggregation, and location-aware insights. Implemented a fast, intuitive scanning flow with a community-driven data model to ensure pricing accuracy and transparency. Solved challenges around data consistency, real-time updates, and user trust by designing a scalable backend and seamless UX. Empowering everyday consumers to make smarter purchasing decisions while promoting price transparency in local markets.",
+    link: "https://www.priceit.app",
+  },
+
   {
     name: "Shelta: Shelta Homes & Ventures",
     description:
@@ -46,13 +53,7 @@ const projects: Project[] = [
     link: "https://tcd-main.vercel.app",
     image: "/images/tcd-community.png",
   },
-  {
-    name: "Express Typescript Starter Template",
-    description:
-      "A starter template for Express.js applications with TypeScript, Jest, and ESLint. It includes a basic Express.js server with a REST API, a database (PostgreSQL), and a Redis cache. The template is designed to be a starting point for new projects and can be easily customized to fit the needs of the project.",
-    repository: "https://github.com/Harrylever/express-typescript-starter",
-  },
-];
+]
 
 export const Projects = () => {
   return (
@@ -65,11 +66,11 @@ export const Projects = () => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
 const ProjectCard = ({ project }: { project: Project }) => {
-  const [seeMoreIsActive, setSeeMoreIsActive] = useState(false);
+  const [seeMoreIsActive, setSeeMoreIsActive] = useState(false)
 
   return (
     <div className="flex flex-col gap-2">
@@ -151,5 +152,5 @@ const ProjectCard = ({ project }: { project: Project }) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
