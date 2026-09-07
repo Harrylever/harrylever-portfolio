@@ -1,17 +1,21 @@
-import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import clsx from "clsx";
+import "@/styles/globals.css"
+import { Metadata, Viewport } from "next"
+import clsx from "clsx"
+import { Inter, Outfit } from "next/font/google"
 
-import { Providers } from "./providers";
+import { Providers } from "./providers"
 
-import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
-import { Inter, Outfit } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site"
+import { fontSans } from "@/config/fonts"
+import { cn } from "@/lib/utils"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
-const outfitHeading = Outfit({subsets:['latin'],variable:'--font-heading'});
+const outfitHeading = Outfit({
+  subsets: ["latin"],
+  variable: "--font-heading",
+})
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
 export const metadata: Metadata = {
   title: {
@@ -105,22 +109,26 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     images: { url: "https://www.deanukanah.dev/deanukanah.jpg" },
   },
-};
+}
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
-};
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html suppressHydrationWarning lang="en" className={cn("font-sans", inter.variable, outfitHeading.variable)}>
+    <html
+      suppressHydrationWarning
+      className={cn("font-sans", inter.variable, outfitHeading.variable)}
+      lang="en"
+    >
       <head />
       <body
         className={clsx(
@@ -129,9 +137,9 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </Providers>
       </body>
     </html>
-  );
+  )
 }
