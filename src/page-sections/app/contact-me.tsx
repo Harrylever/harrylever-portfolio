@@ -1,4 +1,4 @@
-import { cn } from "@heroui/theme";
+import clsx from "clsx";
 import Link from "next/link";
 
 import { title } from "@/components/primitives";
@@ -7,7 +7,7 @@ export const ContactMe = () => {
   return (
     <div className="w-full flex flex-col items-center justify-center gap-2">
       <h3
-        className={cn(
+        className={clsx(
           title({ fullWidth: false, size: "sm" }),
           "select-none text-center",
         )}

@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@heroui/button"
 import { motion } from "framer-motion"
 import { ExternalLink, FolderCode } from "lucide-react"
-import { cn } from "@heroui/theme"
+import clsx from "clsx"
 
 import { subtitle, title } from "@/components/primitives"
 import { Project } from "@/types"
@@ -58,7 +57,7 @@ const projects: Project[] = [
 export const Projects = () => {
   return (
     <div className="relative">
-      <h3 className={cn(title({ size: "sm" }), "select-none")}>Projects</h3>
+      <h3 className={clsx(title({ size: "sm" }), "select-none")}>Projects</h3>
 
       <div className="mt-5 grid grid-cols-1 gap-4">
         {projects.map((project) => (
@@ -76,7 +75,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
     <div className="flex flex-col gap-2">
       <div className="w-fit group flex items-center gap-2 hover:gap-4 transition-all duration-300">
         <h4
-          className={cn(
+          className={clsx(
             "!w-fit group-hover:font-semibold transition-all duration-300 select-none",
             subtitle({ fullWidth: false }),
           )}
@@ -130,25 +129,23 @@ const ProjectCard = ({ project }: { project: Project }) => {
               )}
             </p>
           </div>
-          <Button
-            className="mt-3"
-            size="sm"
-            variant="light"
-            onPress={() => setSeeMoreIsActive(false)}
+          <button
+            className="mt-3 text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+            type="button"
+            onClick={() => setSeeMoreIsActive(false)}
           >
             See less
-          </Button>
+          </button>
         </motion.div>
 
         {!seeMoreIsActive && (
-          <Button
-            className="absolute top-1/2 -translate-y-1/2 right-0 w-fit"
-            size="sm"
-            variant="light"
-            onPress={() => setSeeMoreIsActive(true)}
+          <button
+            className="absolute top-1/2 -translate-y-1/2 right-0 w-fit text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+            type="button"
+            onClick={() => setSeeMoreIsActive(true)}
           >
             See more
-          </Button>
+          </button>
         )}
       </div>
     </div>

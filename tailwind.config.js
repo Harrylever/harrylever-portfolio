@@ -1,11 +1,6 @@
-import { heroui } from '@heroui/theme';
-
 /** @type {import('tailwindcss').Config} */
 const config = {
-  content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-    './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     screens: {
       '2xl': '1400px',
@@ -25,11 +20,7 @@ const config = {
     },
   },
   darkMode: 'class',
-  plugins: [
-    heroui({
-      addCommonColors: true,
-    }),
-  ],
+  plugins: [],
 };
 
 module.exports = config;

@@ -1,5 +1,4 @@
-import { Chip } from "@heroui/chip";
-import { cn } from "@heroui/theme";
+import clsx from "clsx";
 
 import { subtitle, title } from "@/components/primitives";
 import { prettyDate } from "@/utils/pretty-date";
@@ -45,7 +44,7 @@ const workExperiences: WorkExperienceType[] = [
 export const WorkExperience = () => {
   return (
     <div className="grid w-full">
-      <h3 className={cn(title({ size: "sm" }), "select-none")}>
+      <h3 className={clsx(title({ size: "sm" }), "select-none")}>
         Work Experience
       </h3>
 
@@ -56,14 +55,12 @@ export const WorkExperience = () => {
               <h3 className={subtitle()}>{workExperience.company}</h3>
 
               <div>
-                <Chip size="sm" variant="bordered">
-                  <span className="text-sm text-white/80 select-none">
-                    {prettyDate(workExperience.startDate)} -{" "}
-                    {workExperience.isPresent
-                      ? "Present"
-                      : prettyDate(workExperience?.endDate ?? "")}
-                  </span>
-                </Chip>
+                <span className="inline-flex items-center rounded-full border border-white/30 px-3 py-1 text-sm text-white/80 select-none">
+                  {prettyDate(workExperience.startDate)} -{" "}
+                  {workExperience.isPresent
+                    ? "Present"
+                    : prettyDate(workExperience?.endDate ?? "")}
+                </span>
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-3 md:mt-0">

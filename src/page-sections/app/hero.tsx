@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Button } from "@heroui/button";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { RiGithubLine, RiTwitterXLine, RiLinkedinLine } from "react-icons/ri";
 
@@ -39,68 +38,46 @@ export const Hero = () => {
         </div>
 
         <div className="flex flex-row items-center gap-5">
-          <Button
-            isIconOnly
-            as="a"
-            className="border-2 border-white/30 hover:border-white"
-            color="primary"
+          <a
+            className="inline-flex items-center justify-center rounded-md border-2 border-white/30 hover:border-white p-2"
             href="https://github.com/harrylever"
-            radius="md"
+            rel="noopener noreferrer"
             target="_blank"
-            variant="flat"
           >
             <RiGithubLine size={20} />
-          </Button>
+          </a>
 
-          <Button
-            isIconOnly
-            as="a"
-            className="border-2 border-white/30 hover:border-white"
-            color="primary"
+          <a
+            className="inline-flex items-center justify-center rounded-md border-2 border-white/30 hover:border-white p-2"
             href="https://www.linkedin.com/in/deanukanah/"
-            radius="md"
+            rel="noopener noreferrer"
             target="_blank"
-            variant="flat"
           >
             <RiLinkedinLine size={20} />
-          </Button>
+          </a>
 
-          <Button
-            isIconOnly
-            as="a"
-            className="border-2 border-white/30 hover:border-white"
-            color="primary"
+          <a
+            className="inline-flex items-center justify-center rounded-md border-2 border-white/30 hover:border-white p-2"
             href="https://x.com/onesiukanah"
-            radius="md"
+            rel="noopener noreferrer"
             target="_blank"
-            variant="flat"
           >
             <RiTwitterXLine size={20} />
-          </Button>
+          </a>
 
-          <Button
-            isIconOnly
-            as="a"
-            className="border-2 border-white/30 hover:border-white"
-            color="primary"
+          <a
+            className="inline-flex items-center justify-center rounded-md border-2 border-white/30 hover:border-white p-2"
             href="tel:+2348166114977"
-            radius="md"
-            variant="flat"
           >
             <Phone size={20} />
-          </Button>
+          </a>
 
-          <Button
-            isIconOnly
-            as="a"
-            className="border-2 border-white/30 hover:border-white"
-            color="primary"
+          <a
+            className="inline-flex items-center justify-center rounded-md border-2 border-white/30 hover:border-white p-2"
             href="mailto:devdean315user@gmail.com"
-            radius="md"
-            variant="flat"
           >
             <Mail size={20} />
-          </Button>
+          </a>
         </div>
       </div>
       <EncryptButton />

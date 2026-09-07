@@ -1,4 +1,4 @@
-import { cn } from "@heroui/theme";
+import clsx from "clsx";
 import Link from "next/link";
 
 import { title } from "@/components/primitives";
@@ -76,7 +76,7 @@ const skills: string[] = [
 export const Skills = () => {
   return (
     <div className="grid w-full">
-      <h3 className={cn(title({ size: "sm" }), "select-none")}>Skills</h3>
+      <h3 className={clsx(title({ size: "sm" }), "select-none")}>Skills</h3>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {skills.map((skill, index) => (
