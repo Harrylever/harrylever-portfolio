@@ -6,6 +6,12 @@ import { Providers } from "./providers";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
+import { Inter, Outfit } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const outfitHeading = Outfit({subsets:['latin'],variable:'--font-heading'});
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: {
@@ -114,7 +120,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html suppressHydrationWarning lang="en" className={cn("font-sans", inter.variable, outfitHeading.variable)}>
       <head />
       <body
         className={clsx(
