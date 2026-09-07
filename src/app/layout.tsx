@@ -1,26 +1,25 @@
-import "@/styles/globals.css"
-import { Metadata, Viewport } from "next"
-import clsx from "clsx"
-import { Inter, Outfit } from "next/font/google"
+import "@/styles/globals.css";
+import { Metadata, Viewport } from "next";
+import clsx from "clsx";
+import { Inter, Outfit } from "next/font/google";
 
-import { Providers } from "./providers"
+import { Providers } from "./providers";
 
-import { siteConfig } from "@/config/site"
-import { fontSans } from "@/config/fonts"
-import { cn } from "@/lib/utils"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
   variable: "--font-heading",
-})
+});
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    default: `${siteConfig.name} — ${siteConfig.tagline}`,
+    template: `%s — ${siteConfig.name}`,
   },
   authors: [
     {
@@ -34,40 +33,17 @@ export const metadata: Metadata = {
   generator: "Next.js",
   keywords: [
     "Harrylever",
-    "Portfolio",
-    "Dean",
-    "Onesi",
-    "Ukanah",
-    "Dean Onesi",
-    "Ukanah Dean",
-    "Onesi Ukanah",
+    "Dean Ukanah",
     "Dean Onesi Ukanah",
+    "Indie Hacker",
     "Software Engineer",
-    "Web Developer",
-    "Mobile Developer",
     "Full-Stack Engineer",
-    "Full Stack Engineer",
-    "Full-Stack Developer",
-    "Full Stack Developer",
-    "Frontend Engineer",
-    "Backend Engineer",
-    "DevOps Engineer",
-    "Cloud Engineer",
-    "Cybersecurity Engineer",
-    "AI Engineer",
-    "Machine Learning Engineer",
-    "Data Engineer",
-    "Data Scientist",
-    "Data Analyst",
-    "Data Visualization Engineer",
-    "Data Engineering",
-    "Data Science",
-    "Data Analysis",
-    "Data Visualization",
-    "Data Engineering",
-    "Data Science",
-    "Data Analysis",
-    "Data Visualization",
+    "Product Engineering",
+    "Cybersecurity",
+    "Next.js",
+    "React",
+    "Solana",
+    "Rust",
   ],
   robots: {
     index: true,
@@ -83,7 +59,7 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
   openGraph: {
-    title: siteConfig.name,
+    title: `${siteConfig.name} — ${siteConfig.tagline}`,
     description: siteConfig.description,
     url: "https://www.deanukanah.dev",
     siteName: siteConfig.name,
@@ -105,23 +81,23 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.name,
+    title: `${siteConfig.name} — ${siteConfig.tagline}`,
     description: siteConfig.description,
     images: { url: "https://www.deanukanah.dev/deanukanah.jpg" },
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html
@@ -130,16 +106,11 @@ export default function RootLayout({
       lang="en"
     >
       <head />
-      <body
-        className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
-      >
+      <body className={clsx("min-h-screen font-sans antialiased")}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <TooltipProvider>{children}</TooltipProvider>
         </Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -1,0 +1,271 @@
+/* "Long Room" design system — imported from the claude.ai/design project
+   "Long Room Design System" (376e2e33-60d3-4820-8c5f-23f76d6ee1dd). */
+
+:root {
+  /* Base — a desaturated mid-tone slate, deliberately not near-black. */
+  --room-deep: #262c2e;
+  --room: #333a3d;
+  --room-2: #3d4548;
+  --room-3: #454e51;
+
+  /* Ink — warm off-white haze, three levels only. */
+  --haze: #e9e6df;
+  --haze-dim: #c9ccc8;
+  --haze-mute: #a9aeac;
+
+  /* Two muted naturals with separate jobs — never used interchangeably. */
+  --sage: #a9c4a2; /* interactive: links, hover fills, active state */
+  --sage-deep: #7c9a76; /* pressed / on-light interactive */
+  --sand: #dcc49a; /* status + weight-only emphasis in display type */
+  --sand-deep: #b99f73;
+
+  /* Lines and veils — always derived from --haze, never a new grey. */
+  --line: rgba(233, 230, 223, 0.14);
+  --line-strong: rgba(233, 230, 223, 0.28);
+  --veil: rgba(38, 44, 46, 0.72);
+
+  /* Semantic aliases */
+  --bg-page: var(--room);
+  --bg-surface: var(--room-2);
+  --bg-surface-hover: var(--room-3);
+  --bg-sunken: var(--room-deep);
+  --text-primary: var(--haze);
+  --text-secondary: var(--haze-dim);
+  --text-meta: var(--haze-mute);
+  --text-link: var(--sage);
+  --text-status: var(--sand);
+  --border-hairline: var(--line);
+  --border-control: var(--haze-mute);
+  --focus-ring: var(--sand);
+  --on-accent: var(--room);
+
+  /* Type */
+  --font-display: var(--font-heading), "Outfit", system-ui, sans-serif;
+  --font-body: var(--font-sans), "Inter", system-ui, -apple-system, sans-serif;
+
+  --fs-display: clamp(2.5rem, 7.4vw, 6rem);
+  --fs-section: clamp(1.5rem, 3.4vw, 2.5rem);
+  --fs-title: 1.6875rem;
+  --fs-subtitle: 1.375rem;
+  --fs-lede: 1.125rem;
+  --fs-body: 1rem;
+  --fs-sm: 0.9375rem;
+  --fs-meta: 0.875rem;
+  --fs-micro: 0.8125rem;
+
+  --fw-display-light: 200;
+  --fw-display-regular: 300;
+  --fw-display-emph: 500;
+  --fw-body: 400;
+  --fw-body-medium: 500;
+
+  --lh-display: 1.02;
+  --lh-section: 1.1;
+  --lh-title: 1.2;
+  --lh-body: 1.65;
+
+  --tr-display: -0.02em;
+  --tr-section: -0.01em;
+  --tr-title: -0.015em;
+  --tr-body: 0;
+
+  --measure-display: 22ch;
+  --measure-lede: 58ch;
+  --measure-body: 70ch;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 28px;
+  --s-8: 32px;
+  --s-9: 44px;
+  --s-10: 64px;
+  --s-11: 88px;
+  --s-12: 120px;
+
+  --gutter: 48px;
+  --gutter-sm: 20px;
+  --page-max: 1200px;
+  --section-y: var(--s-11);
+  --card-pad: 30px 28px 34px;
+  --gallery-gap: 28px;
+  --card-w: 340px;
+
+  /* Radii + elevation */
+  --r-inline: 2px;
+  --r-card: 4px;
+  --r-pill: 999px;
+  --elev-none: none;
+  --elev-lift: 0 18px 40px -24px rgba(20, 24, 25, 0.65);
+
+  /* Motion */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --dur-instant: 120ms;
+  --dur-fast: 180ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --dur-reveal: 850ms;
+
+  --stagger-word: 55ms;
+  --stagger-row: 80ms;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --gutter: 20px;
+    --section-y: 64px;
+  }
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--sand);
+  color: var(--room);
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--r-inline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip-to-content link, shared across every page. */
+.skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 40;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: var(--haze);
+  color: var(--room);
+  font-size: var(--fs-meta);
+  transform: translateY(-200%);
+  transition: transform var(--dur-base) var(--ease-settle);
+}
+.skip:focus {
+  transform: translateY(0);
+  color: var(--room);
+}
+
+/* Per-section responsive grids used across the personal/blog/projects kits. */
+.in-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+  gap: var(--s-10);
+  align-items: end;
+}
+.bt-item {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+.px-row {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+@media (max-width: 900px) {
+  .in-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-9);
+  }
+  .in-portrait {
+    max-width: 320px;
+  }
+  .bt-item {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-6) !important;
+  }
+  .bt-item .bt-shot,
+  .bt-item .bt-copy {
+    order: unset !important;
+  }
+  .now-item {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-2) !important;
+  }
+  .lp-item {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-4) !important;
+  }
+  .wk-row {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-1) !important;
+  }
+  .wk-stack {
+    display: none;
+  }
+  .bi-year {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-3) !important;
+  }
+  .bi-year-label {
+    position: static !important;
+  }
+  .px-row {
+    grid-template-columns: 1fr !important;
+    gap: var(--s-6) !important;
+  }
+}
+
+/* GitHub contribution calendar (react-activity-calendar) — restyled to match
+   the room palette instead of the library's default grey/white tooltip. */
+.react-activity-calendar__tooltip {
+  padding: 4px 8px;
+  border-radius: var(--r-inline);
+  background: var(--haze);
+  color: var(--room);
+  font-family: var(--font-body);
+  font-size: var(--fs-micro);
+}
+.react-activity-calendar__tooltip-arrow {
+  fill: var(--haze);
+}
+.react-activity-calendar__legend-colors {
+  color: var(--text-meta);
+}
+
+/* Custom cursor: native cursor is hidden only once the JS cursor has
+   actually mounted (fine pointer, motion allowed), so it never disappears
+   for touch devices or with JS disabled. */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* "Off the screen" horizontal carousel. Native overflow-x scroll is the
+   fallback (no JS, reduced motion, or nothing to pin); the JS effect swaps
+   `.fr-viewport` to overflow:hidden once it takes over via GSAP. */
+.fr-viewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.fr-track {
+  display: flex;
+  width: max-content;
+  gap: var(--s-6);
+  padding: 0 var(--gutter) var(--s-2);
+}

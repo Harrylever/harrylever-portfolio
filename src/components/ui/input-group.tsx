@@ -47,6 +47,7 @@ function InputGroupAddon({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- mouse-only convenience that focuses the sibling input; the input itself remains directly keyboard-accessible
     <div
       role="group"
       data-slot="input-group-addon"
