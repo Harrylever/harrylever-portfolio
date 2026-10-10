@@ -1,10 +1,6 @@
-"use client";
-
 import * as React from "react";
 
 import { Button } from "@/components/design-system/button";
-import { useMagnetic } from "@/hooks/use-magnetic";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 const LINE =
@@ -13,43 +9,8 @@ const LINE =
   );
 
 export function Say() {
-  const root = React.useRef<HTMLElement>(null);
-  const cta = React.useRef<HTMLSpanElement>(null);
-
-  useMagnetic(cta, 8);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".sy-word", {
-          yPercent: 110,
-          scaleY: 1.06,
-          duration: 0.85,
-          ease: "expo.out",
-          stagger: 0.05,
-          scrollTrigger: { trigger: root.current, start: "top 70%" },
-        });
-        gsap.from(".sy-act", {
-          opacity: 0,
-          y: 18,
-          duration: 0.7,
-          ease: "expo.out",
-          scrollTrigger: { trigger: root.current, start: "top 64%" },
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="say"
       style={{
         background: "var(--bg-sunken)",
@@ -110,7 +71,7 @@ export function Say() {
             alignItems: "center",
           }}
         >
-          <span ref={cta} style={{ display: "inline-flex" }}>
+          <span style={{ display: "inline-flex" }}>
             <Button
               href="https://wa.link/hemaxw"
               target="_blank"

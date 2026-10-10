@@ -2,22 +2,30 @@
 
 import * as React from "react";
 
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { calculateScrollProgress } from "@/lib/scroll-progress";
 
 export function ReadingProgress() {
   const bar = React.useRef<HTMLSpanElement>(null);
 
   React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const el = bar.current;
-    const st = ScrollTrigger.create({
-      trigger: document.body,
-      start: "top top",
-      end: "bottom bottom",
-      onUpdate: (self) => gsap.set(el, { scaleX: self.progress }),
-    });
+    const update = () => {
+      const progress = calculateScrollProgress(
+        window.scrollY,
+        document.documentElement.scrollHeight,
+        window.innerHeight,
+      );
 
-    return () => st.kill();
+      if (bar.current) bar.current.style.transform = `scaleX(${progress})`;
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   return (

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 
@@ -8,7 +6,6 @@ import { Figure } from "@/components/design-system/figure";
 import { Prose } from "@/components/design-system/prose";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 import { PROJECTS } from "@/data/projects";
 import { PostBlock, ProjectDetail as ProjectDetailData } from "@/types";
@@ -39,55 +36,6 @@ function node(b: PostBlock, i: number) {
 }
 
 export function ProjectDetail({ project }: { project: ProjectDetailData }) {
-  const root = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      tl.from(".pd-back", { opacity: 0, duration: 0.4 })
-        .from(
-          ".pd-word",
-          { yPercent: 110, scaleY: 1.06, duration: 0.85, stagger: 0.05 },
-          0.05,
-        )
-        .from(".pd-hook-inner", { yPercent: 110, duration: 0.8 }, "-=0.5")
-        .from(
-          ".pd-facts > div",
-          { opacity: 0, y: 14, duration: 0.6, stagger: 0.05 },
-          "-=0.45",
-        )
-        .from(
-          ".pd-lead",
-          { clipPath: "inset(0 0 100% 0)", duration: 1, ease: "power3.out" },
-          "-=0.5",
-        );
-
-      gsap.from(".pd-body > div > *", {
-        yPercent: 30,
-        opacity: 0,
-        duration: 0.6,
-        ease: "expo.out",
-        stagger: 0.03,
-        scrollTrigger: { trigger: ".pd-body", start: "top 82%" },
-      });
-      gsap.utils.toArray<HTMLElement>(".pd-gal > div").forEach((g, i) => {
-        gsap.from(g, {
-          y: 28,
-          opacity: 0,
-          duration: 0.8,
-          ease: "expo.out",
-          delay: i * 0.08,
-          scrollTrigger: { trigger: ".pd-gal", start: "top 84%" },
-        });
-      });
-    }, root);
-
-    return () => ctx.revert();
-  }, [project.slug]);
-
   const words = project.name.split(" ");
   const next =
     PROJECTS[
@@ -103,7 +51,7 @@ export function ProjectDetail({ project }: { project: ProjectDetailData }) {
   return (
     <React.Fragment>
       <SiteNav contactHref="/#say" current="projects" socials={ME.links} />
-      <div ref={root}>
+      <div>
         <article
           id="top"
           style={{

@@ -1,10 +1,8 @@
 "use client";
 
-import * as React from "react";
 import dynamic from "next/dynamic";
 
 import { SectionHeading } from "@/components/design-system/section-heading";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 const GITHUB_USERNAME = "harrylever";
 
@@ -35,32 +33,8 @@ const CALENDAR_THEME = {
 };
 
 export function Commits() {
-  const root = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".cm-cal", {
-          y: 24,
-          opacity: 0,
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: { trigger: root.current, start: "top 82%" },
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="ship"
       style={{
         borderTop: "1px solid var(--line)",

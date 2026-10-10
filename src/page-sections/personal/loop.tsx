@@ -1,9 +1,4 @@
-"use client";
-
-import * as React from "react";
-
 import { SectionHeading } from "@/components/design-system/section-heading";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 /* "AI in the loop" — a frequency-ordered list of the tools genuinely in the
@@ -16,48 +11,8 @@ const FREQ: Record<string, number> = {
 };
 
 export function Loop() {
-  const root = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".lp-note-inner", {
-          yPercent: 110,
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: { trigger: ".lp-note", start: "top 88%" },
-        });
-        gsap.utils.toArray<HTMLElement>(".lp-item").forEach((item) => {
-          gsap.from(item.querySelectorAll(".lp-copy > *"), {
-            yPercent: 40,
-            opacity: 0,
-            duration: 0.65,
-            ease: "expo.out",
-            stagger: 0.05,
-            scrollTrigger: { trigger: item, start: "top 88%" },
-          });
-          gsap.from(item.querySelector(".lp-bar-fill"), {
-            scaleX: 0,
-            transformOrigin: "left center",
-            duration: 0.9,
-            ease: "expo.out",
-            scrollTrigger: { trigger: item, start: "top 88%" },
-          });
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="loop"
       style={{
         borderTop: "1px solid var(--line)",

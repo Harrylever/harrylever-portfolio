@@ -6,7 +6,6 @@ import { Commits } from "@/page-sections/personal/commits";
 import { Frames, Reach } from "@/page-sections/personal/frames";
 import { Loop } from "@/page-sections/personal/loop";
 import { Say } from "@/page-sections/personal/say";
-import { ScrollRefresh } from "@/page-sections/personal/scroll-refresh";
 
 export default function Home() {
   return (
@@ -14,7 +13,6 @@ export default function Home() {
       <a className="skip" href="#top">
         Skip to content
       </a>
-      <ScrollRefresh />
       <PersonalNav />
       <Intro />
       <Now />

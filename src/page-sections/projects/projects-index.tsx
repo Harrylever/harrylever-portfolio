@@ -1,68 +1,19 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 import { PROJECTS } from "@/data/projects";
 
 const TITLE = "Everything I've built, and why.".split(" ");
 
 export function ProjectsIndex() {
-  const root = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      tl.from(".px-rule", {
-        scaleX: 0,
-        transformOrigin: "left center",
-        duration: 0.7,
-      })
-        .from(
-          ".px-word",
-          { yPercent: 110, scaleY: 1.06, duration: 0.85, stagger: 0.05 },
-          0.1,
-        )
-        .from(".px-lede-inner", { yPercent: 110, duration: 0.8 }, "-=0.55");
-
-      gsap.utils.toArray<HTMLElement>(".px-row").forEach((row) => {
-        gsap.from(row.querySelector(".px-name"), {
-          yPercent: 110,
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: { trigger: row, start: "top 88%" },
-        });
-        gsap.from(row.querySelectorAll(".px-side > *"), {
-          opacity: 0,
-          y: 14,
-          duration: 0.6,
-          ease: "expo.out",
-          stagger: 0.05,
-          scrollTrigger: { trigger: row, start: "top 86%" },
-        });
-        gsap.from(row.querySelector(".px-thumb"), {
-          clipPath: "inset(0 0 100% 0)",
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: { trigger: row, start: "top 84%" },
-        });
-      });
-    }, root);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <React.Fragment>
       <SiteNav contactHref="/#say" current="projects" socials={ME.links} />
-      <div ref={root}>
+      <div>
         <header
           id="top"
           style={{

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 
@@ -8,7 +6,6 @@ import { Prose } from "@/components/design-system/prose";
 import { Button } from "@/components/design-system/button";
 import { PostRow } from "@/components/design-system/post-row";
 import { ReadingProgress } from "@/components/design-system/reading-progress";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 import { POSTS } from "@/data/posts";
 import { Post, PostBlock } from "@/types";
@@ -39,35 +36,6 @@ function node(b: PostBlock, i: number) {
 }
 
 export function BlogPostView({ post }: { post: Post }) {
-  const root = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      tl.from(".bp-meta", { opacity: 0, duration: 0.5 })
-        .from(
-          ".bp-word",
-          { yPercent: 110, scaleY: 1.06, duration: 0.85, stagger: 0.04 },
-          0.05,
-        )
-        .from(
-          ".bp-rule",
-          { scaleX: 0, transformOrigin: "left center", duration: 0.7 },
-          "-=0.5",
-        )
-        .from(
-          ".bp-body > div > *",
-          { yPercent: 30, opacity: 0, duration: 0.6, stagger: 0.03 },
-          "-=0.45",
-        );
-    }, root);
-
-    return () => ctx.revert();
-  }, [post.slug]);
-
   const words = post.title.split(" ");
   const more = POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
 
@@ -75,7 +43,7 @@ export function BlogPostView({ post }: { post: Post }) {
     <React.Fragment>
       <ReadingProgress />
       <SiteNav contactHref="/#say" current="blog" socials={ME.links} />
-      <div ref={root}>
+      <div>
         <article
           id="top"
           style={{

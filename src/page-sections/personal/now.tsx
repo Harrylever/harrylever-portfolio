@@ -1,50 +1,9 @@
-"use client";
-
-import * as React from "react";
-
 import { SectionHeading } from "@/components/design-system/section-heading";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 export function Now() {
-  const root = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.utils.toArray<HTMLElement>(".now-item").forEach((item) => {
-          gsap.from(item.querySelector(".now-label"), {
-            opacity: 0,
-            x: -10,
-            duration: 0.5,
-            ease: "power2.out",
-            scrollTrigger: { trigger: item, start: "top 88%" },
-          });
-          gsap.fromTo(
-            item.querySelector(".now-body"),
-            { clipPath: "inset(0 0 100% 0)" },
-            {
-              clipPath: "inset(0 0 0% 0)",
-              duration: 0.7,
-              ease: "expo.out",
-              scrollTrigger: { trigger: item, start: "top 86%" },
-            },
-          );
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="now"
       style={{
         borderTop: "1px solid var(--line)",

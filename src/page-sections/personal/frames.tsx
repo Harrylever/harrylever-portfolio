@@ -1,67 +1,11 @@
-"use client";
-
-import * as React from "react";
-
 import { SectionHeading } from "@/components/design-system/section-heading";
 import { Figure } from "@/components/design-system/figure";
 import { SkillGroup } from "@/components/design-system/skill-group";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 export function Frames() {
-  const root = React.useRef<HTMLElement>(null);
-  const viewport = React.useRef<HTMLDivElement>(null);
-  const track = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".fr-item", {
-          y: 24,
-          opacity: 0,
-          duration: 0.8,
-          ease: "expo.out",
-          stagger: 0.08,
-          scrollTrigger: { trigger: root.current, start: "top 82%" },
-        });
-
-        const trackEl = track.current;
-        const viewportEl = viewport.current;
-
-        if (!trackEl || !viewportEl) return;
-
-        const initialDistance = trackEl.scrollWidth - viewportEl.clientWidth;
-
-        if (initialDistance <= 0) return;
-
-        viewportEl.style.overflow = "hidden";
-
-        gsap.to(trackEl, {
-          x: () => -(trackEl.scrollWidth - viewportEl.clientWidth),
-          ease: "none",
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => "+=" + (trackEl.scrollWidth - viewportEl.clientWidth),
-            scrub: true,
-            pin: true,
-            invalidateOnRefresh: true,
-          },
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="frames"
       style={{
         borderTop: "1px solid var(--line)",
@@ -80,8 +24,8 @@ export function Frames() {
           Off the screen
         </SectionHeading>
       </div>
-      <div ref={viewport} className="fr-viewport">
-        <div ref={track} className="fr-track">
+      <div className="fr-viewport">
+        <div className="fr-track">
           {ME.frames.map((f, i) => (
             <div
               key={f.slot}
@@ -107,41 +51,8 @@ export function Frames() {
 }
 
 export function Reach() {
-  const root = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".rc-cell", {
-          yPercent: 60,
-          opacity: 0,
-          duration: 0.8,
-          ease: "expo.out",
-          stagger: 0.08,
-          scrollTrigger: { trigger: ".rc-grid", start: "top 80%" },
-        });
-        gsap.from(".wk-row", {
-          x: -18,
-          opacity: 0,
-          duration: 0.7,
-          ease: "expo.out",
-          stagger: 0.06,
-          scrollTrigger: { trigger: ".wk-list", start: "top 84%" },
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="reach"
       style={{
         borderTop: "1px solid var(--line)",

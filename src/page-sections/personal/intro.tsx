@@ -1,53 +1,12 @@
-"use client";
-
 import * as React from "react";
 
 import { Button } from "@/components/design-system/button";
 import { Figure } from "@/components/design-system/figure";
-import { useMagnetic } from "@/hooks/use-magnetic";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 export function Intro() {
-  const root = React.useRef<HTMLElement>(null);
-  const cta = React.useRef<HTMLSpanElement>(null);
-
-  useMagnetic(cta);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      tl.from(".in-rule", {
-        scaleX: 0,
-        transformOrigin: "left center",
-        duration: 0.7,
-      })
-        .from(
-          ".in-word",
-          { yPercent: 110, scaleY: 1.06, duration: 0.85, stagger: 0.05 },
-          0.1,
-        )
-        .from(
-          ".in-portrait",
-          { yPercent: 8, opacity: 0, duration: 1, ease: "power3.out" },
-          0.35,
-        )
-        .from(".in-lede-inner", { yPercent: 110, duration: 0.8 }, "-=0.6")
-        .from(
-          ".in-act > *",
-          { yPercent: 120, opacity: 0, duration: 0.7, stagger: 0.06 },
-          "-=0.5",
-        );
-    }, root);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <header
-      ref={root}
       id="top"
       style={{
         maxWidth: "var(--page-max)",
@@ -146,7 +105,7 @@ export function Intro() {
               alignItems: "center",
             }}
           >
-            <span ref={cta} style={{ display: "inline-flex" }}>
+            <span style={{ display: "inline-flex" }}>
               <Button href="#say" variant="solid">
                 Say hello
               </Button>

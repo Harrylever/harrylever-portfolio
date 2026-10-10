@@ -1,53 +1,12 @@
-"use client";
-
-import * as React from "react";
-
 import { SectionHeading } from "@/components/design-system/section-heading";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 
 export function Built() {
-  const root = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.utils.toArray<HTMLElement>(".bt-item").forEach((item) => {
-          const flip = item.classList.contains("bt-flip");
-
-          gsap.from(item.querySelector(".bt-shot"), {
-            x: flip ? 40 : -40,
-            opacity: 0,
-            duration: 0.9,
-            ease: "expo.out",
-            scrollTrigger: { trigger: item, start: "top 82%" },
-          });
-          gsap.from(item.querySelectorAll(".bt-copy > *"), {
-            yPercent: 40,
-            opacity: 0,
-            duration: 0.7,
-            ease: "expo.out",
-            stagger: 0.06,
-            scrollTrigger: { trigger: item, start: "top 80%" },
-          });
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       id="built"
       style={{
         borderTop: "1px solid var(--line)",

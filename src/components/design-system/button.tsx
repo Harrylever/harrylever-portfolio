@@ -15,7 +15,6 @@ export function Button({
   href,
   variant = "outline",
   size = "md",
-  magnetic = false,
   disabled = false,
   onClick,
   ariaLabel,
@@ -26,7 +25,6 @@ export function Button({
   href?: string;
   variant?: "solid" | "outline" | "quiet";
   size?: keyof typeof SIZES;
-  magnetic?: boolean;
   disabled?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
@@ -34,26 +32,6 @@ export function Button({
   target?: string;
 }) {
   const [hover, setHover] = React.useState(false);
-  const [pull, setPull] = React.useState({ x: 0, y: 0 });
-  const ref = React.useRef<HTMLElement | null>(null);
-
-  const reduced =
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const onMove = (e: React.MouseEvent) => {
-    if (!magnetic || reduced || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    const max = 6;
-    const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-    const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-
-    setPull({
-      x: Math.max(-1, Math.min(1, dx)) * max,
-      y: Math.max(-1, Math.min(1, dy)) * max,
-    });
-  };
 
   const base: React.CSSProperties = {
     display: "inline-flex",
@@ -70,7 +48,7 @@ export function Button({
     opacity: disabled ? 0.45 : 1,
     textDecoration: "none",
     transition:
-      "background var(--dur-base) var(--ease-inout), border-color var(--dur-base) var(--ease-inout), color var(--dur-base) var(--ease-inout), transform var(--dur-slow) var(--ease-settle)",
+      "background var(--dur-base) var(--ease-inout), border-color var(--dur-base) var(--ease-inout), color var(--dur-base) var(--ease-inout)",
     ...SIZES[size],
   };
 
@@ -94,31 +72,19 @@ export function Button({
     },
   };
 
-  const lift = magnetic
-    ? `translate(${pull.x}px, ${pull.y}px)`
-    : hover && !disabled && variant !== "quiet"
-      ? "translateY(-2px)"
-      : "none";
-
   const style = {
     ...base,
     ...variants[variant],
-    transform: reduced ? "none" : lift,
   };
   const handlers = {
     onMouseEnter: () => setHover(true),
-    onMouseLeave: () => {
-      setHover(false);
-      setPull({ x: 0, y: 0 });
-    },
-    onMouseMove: onMove,
+    onMouseLeave: () => setHover(false),
   };
 
   if (href && !disabled) {
     if (isInternalHref(href)) {
       return (
         <Link
-          ref={ref as React.Ref<HTMLAnchorElement>}
           aria-label={ariaLabel}
           className={className}
           href={href}
@@ -132,7 +98,6 @@ export function Button({
 
     return (
       <a
-        ref={ref as React.Ref<HTMLAnchorElement>}
         aria-label={ariaLabel}
         className={className}
         href={href}
@@ -148,7 +113,6 @@ export function Button({
 
   return (
     <button
-      ref={ref as React.Ref<HTMLButtonElement>}
       aria-label={ariaLabel}
       className={className}
       disabled={disabled}

@@ -1,60 +1,13 @@
-"use client";
-
 import * as React from "react";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { PostRow } from "@/components/design-system/post-row";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { ME } from "@/data/me";
 import { POSTS } from "@/data/posts";
 
 const TITLE = "Notes on building things that have to work.".split(" ");
 
 export function BlogIndex() {
-  const root = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const ctx = gsap.context(() => {
-        gsap.from(".bi-word", {
-          yPercent: 110,
-          scaleY: 1.06,
-          duration: 0.85,
-          ease: "expo.out",
-          stagger: 0.055,
-        });
-        gsap.from(".bi-lede", {
-          yPercent: 110,
-          duration: 0.8,
-          ease: "expo.out",
-          delay: 0.25,
-        });
-        gsap.utils.toArray<HTMLElement>(".bi-year").forEach((y) => {
-          gsap.from(y.querySelector(".bi-year-label"), {
-            opacity: 0,
-            duration: 0.5,
-            scrollTrigger: { trigger: y, start: "top 88%" },
-          });
-          gsap.from(y.querySelectorAll(".bi-row"), {
-            yPercent: 40,
-            opacity: 0,
-            duration: 0.7,
-            ease: "expo.out",
-            stagger: 0.07,
-            scrollTrigger: { trigger: y, start: "top 84%" },
-          });
-        });
-      }, root);
-
-      return () => ctx.revert();
-    });
-
-    return () => mm.revert();
-  }, []);
-
   const years: { year: string; posts: typeof POSTS }[] = [];
 
   POSTS.forEach((p) => {
@@ -67,7 +20,7 @@ export function BlogIndex() {
   return (
     <React.Fragment>
       <SiteNav contactHref="/#say" current="blog" socials={ME.links} />
-      <div ref={root}>
+      <div>
         <header
           id="top"
           style={{

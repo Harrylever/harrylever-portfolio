@@ -246,17 +246,7 @@ body {
   color: var(--text-meta);
 }
 
-/* Custom cursor: native cursor is hidden only once the JS cursor has
-   actually mounted (fine pointer, motion allowed), so it never disappears
-   for touch devices or with JS disabled. */
-.has-custom-cursor,
-.has-custom-cursor * {
-  cursor: none !important;
-}
-
-/* "Off the screen" horizontal carousel. Native overflow-x scroll is the
-   fallback (no JS, reduced motion, or nothing to pin); the JS effect swaps
-   `.fr-viewport` to overflow:hidden once it takes over via GSAP. */
+/* "Off the screen" remains a native horizontally scrollable gallery. */
 .fr-viewport {
   width: 100%;
   overflow-x: auto;
