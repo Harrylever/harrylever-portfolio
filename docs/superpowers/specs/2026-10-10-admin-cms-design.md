@@ -8,8 +8,9 @@
 Add a private, single-owner admin panel to the existing Next.js portfolio so
 the homepage, projects, and blog posts can be created, edited, previewed,
 published, unpublished, and removed without editing source files. The public
-site must keep its current visual language, routes, animation behavior, and SEO
-surface while its content moves from TypeScript constants to PostgreSQL.
+site must keep its current visual language, routes, native no-motion interaction
+model, and SEO surface while its content moves from TypeScript constants to
+PostgreSQL.
 
 Success means the owner can manage the complete content lifecycle from
 `/admin`, upload and reuse images through Cloudinary, preview drafts on the real
@@ -62,9 +63,9 @@ Admin UI ---> protected server actions and route handlers
 ```
 
 Public routes are server-rendered data consumers. Server components query only
-published snapshots and pass serializable content to the existing animated
-client components. Database access is isolated behind domain repositories so
-UI components do not contain query logic.
+published snapshots and pass serializable content to the existing presentation
+components. Database access is isolated behind domain repositories so UI
+components do not contain query logic.
 
 Admin forms use server actions for ordinary mutations. Route handlers are used
 for Better Auth, Cloudinary upload signatures, and endpoints that do not fit a
