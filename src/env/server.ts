@@ -3,6 +3,8 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url().startsWith("postgresql://"),
   DATABASE_URL_UNPOOLED: z.url().startsWith("postgresql://"),
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  BETTER_AUTH_URL: z.url().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -27,5 +29,11 @@ export const serverEnv: ServerEnv = Object.freeze({
   },
   get DATABASE_URL_UNPOOLED() {
     return readServerEnv().DATABASE_URL_UNPOOLED;
+  },
+  get BETTER_AUTH_SECRET() {
+    return readServerEnv().BETTER_AUTH_SECRET;
+  },
+  get BETTER_AUTH_URL() {
+    return readServerEnv().BETTER_AUTH_URL;
   },
 });
