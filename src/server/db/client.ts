@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
 import { serverEnv } from "@/env/server";
+import * as schema from "@/server/db/schema";
 
 const pool = new Pool({
   connectionString: serverEnv.DATABASE_URL,
@@ -11,7 +12,7 @@ const pool = new Pool({
 
 attachDatabasePool(pool);
 
-export const db = drizzle(pool);
+export const db = drizzle(pool, { schema });
 
 export type AppDatabase = typeof db;
 export type DbTransaction = Parameters<
