@@ -42,3 +42,10 @@ export function invalidateContentCache<T>(
 
   for (const tag of cacheTagsFor(mutation)) invalidate(tag);
 }
+
+export function invalidateCacheTags(
+  tags: string[],
+  invalidate: CacheInvalidator = nextCacheInvalidator,
+): void {
+  for (const tag of tags) invalidate(tag);
+}
