@@ -8,6 +8,7 @@ import { invalidateCacheTags } from "@/server/content/cache";
 import { recordContentEvent } from "@/server/content/events";
 import {
   collectMediaReferences,
+  findUnpublishableMedia,
   refreshMediaUsage,
 } from "@/server/content/media/usage";
 import {
@@ -126,6 +127,14 @@ export async function publishSiteProfile(input: {
       if (!draft.success) {
         return failure("VALIDATION_ERROR", "Site profile draft is invalid");
       }
+      const mediaReferences = collectMediaReferences(draft.data);
+
+      if ((await findUnpublishableMedia(transaction, mediaReferences)).length) {
+        return failure(
+          "VALIDATION_ERROR",
+          "Every attached image must exist and have useful alt text",
+        );
+      }
       const now = new Date();
       const updated = await updateSiteProfileVersioned(
         transaction,
@@ -144,7 +153,7 @@ export async function publishSiteProfile(input: {
       await refreshMediaUsage(
         transaction,
         { type: "site_profile", id: current.id, snapshot: "published" },
-        collectMediaReferences(draft.data),
+        mediaReferences,
       );
       await recordContentEvent(
         transaction,

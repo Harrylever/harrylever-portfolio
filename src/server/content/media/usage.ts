@@ -1,9 +1,9 @@
 import type { DbTransaction } from "@/server/db/client";
 import type { ContentOwner } from "@/server/content/events";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
-import { mediaUsage } from "@/server/db/schema/content";
+import { mediaAssets, mediaUsage } from "@/server/db/schema/content";
 
 export type MediaReference = { assetId: string; field: string };
 export type MediaUsageOwner = ContentOwner & {
@@ -79,4 +79,24 @@ export async function refreshMediaUsage(
       })),
     );
   }
+}
+
+export async function findUnpublishableMedia(
+  transaction: DbTransaction,
+  references: MediaReference[],
+): Promise<string[]> {
+  const ids = Array.from(new Set(references.map(({ assetId }) => assetId)));
+
+  if (ids.length === 0) return [];
+  const assets = await transaction
+    .select({ id: mediaAssets.id, altText: mediaAssets.altText })
+    .from(mediaAssets)
+    .where(inArray(mediaAssets.id, ids));
+  const publishable = new Set(
+    assets
+      .filter(({ altText }) => altText.trim().length > 0)
+      .map(({ id }) => id),
+  );
+
+  return ids.filter((id) => !publishable.has(id));
 }

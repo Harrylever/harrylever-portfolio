@@ -12,6 +12,7 @@ import { invalidateContentCache } from "@/server/content/cache";
 import { recordContentEvent } from "@/server/content/events";
 import {
   collectMediaReferences,
+  findUnpublishableMedia,
   refreshMediaUsage,
 } from "@/server/content/media/usage";
 import {
@@ -184,6 +185,13 @@ export async function publishPost(
       const draft = postContentSchema.safeParse(current.draftContent);
 
       if (!draft.success) return validationFailure("Post draft is invalid");
+      const mediaReferences = collectMediaReferences(draft.data);
+
+      if ((await findUnpublishableMedia(transaction, mediaReferences)).length) {
+        return validationFailure(
+          "Every attached image must exist and have useful alt text",
+        );
+      }
       const now = new Date();
       const updated = await updatePostVersioned(
         transaction,
@@ -202,7 +210,7 @@ export async function publishPost(
       await refreshMediaUsage(
         transaction,
         { type: "post", id: current.id, snapshot: "published" },
-        collectMediaReferences(draft.data),
+        mediaReferences,
       );
       await recordContentEvent(
         transaction,

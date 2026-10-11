@@ -250,7 +250,7 @@ describe.serial("post lifecycle", () => {
         expectedUpdatedAt: before.updatedAt.toISOString(),
         actor,
       }),
-    ).toMatchObject({ ok: false, error: { code: "INFRASTRUCTURE_ERROR" } });
+    ).toMatchObject({ ok: false, error: { code: "VALIDATION_ERROR" } });
     expect(
       await db
         .select()

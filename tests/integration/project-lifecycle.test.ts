@@ -257,7 +257,7 @@ describe.serial("project lifecycle", () => {
         expectedUpdatedAt: before.updatedAt.toISOString(),
         actor,
       }),
-    ).toMatchObject({ ok: false, error: { code: "INFRASTRUCTURE_ERROR" } });
+    ).toMatchObject({ ok: false, error: { code: "VALIDATION_ERROR" } });
     const after = await db.query.projects.findFirst({
       where: (table, { eq }) => eq(table.id, first.id),
     });

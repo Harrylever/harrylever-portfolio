@@ -18,6 +18,7 @@ import {
 } from "@/server/content/home/repository";
 import {
   collectMediaReferences,
+  findUnpublishableMedia,
   refreshMediaUsage,
 } from "@/server/content/media/usage";
 import {
@@ -238,6 +239,23 @@ export async function publishHomepage(
           "VALIDATION_ERROR",
           "A homepage section draft is invalid",
         );
+      }
+
+      for (const item of validated) {
+        if (!item.draft.success) continue;
+        if (
+          (
+            await findUnpublishableMedia(
+              transaction,
+              collectMediaReferences(item.draft.data),
+            )
+          ).length
+        ) {
+          return failure(
+            "VALIDATION_ERROR",
+            "Every attached image must exist and have useful alt text",
+          );
+        }
       }
 
       const now = new Date();
