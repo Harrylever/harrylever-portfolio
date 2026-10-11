@@ -32,6 +32,7 @@ export function createAuthOptions({ allowSignUp }: { allowSignUp: boolean }) {
     emailAndPassword: {
       enabled: true,
       disableSignUp: !allowSignUp,
+      revokeSessionsOnPasswordReset: true,
     },
     user: {
       additionalFields: {
