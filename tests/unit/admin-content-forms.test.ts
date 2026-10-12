@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { postContentSchema } from "@/domain/content/post";
 import { projectContentSchema } from "@/domain/content/project";
 import {
+  duplicateName,
   emptyPostForm,
   emptyProjectForm,
   fieldErrorsFromIssues,
@@ -157,6 +158,39 @@ describe("snapshots, slugs and filters", () => {
         "atlas-copy-copy-2",
       ]),
     ).toBe("atlas-copy-copy-3");
+  });
+
+  test("keeps duplicate slugs valid, bounded and distinct", () => {
+    const long = `${"a".repeat(114)}-b-cde`; // 120 chars
+    const copy = suggestDuplicateSlug(long, []);
+
+    expect(copy.length).toBeLessThanOrEqual(120);
+    expect(copy).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    expect(copy.endsWith("-copy")).toBe(true);
+    expect(copy).not.toBe(long);
+
+    // A cut that lands on a hyphen never leaves "--".
+    const hyphenated = `${"a".repeat(114)}-bbbbb`;
+
+    expect(suggestDuplicateSlug(hyphenated, [])).toBe(
+      `${"a".repeat(114)}-copy`,
+    );
+
+    // A max-length source already ending in -copy can't map onto itself.
+    const selfCopy = `${"a".repeat(115)}-copy`;
+    const next = suggestDuplicateSlug(selfCopy, []);
+
+    expect(next).not.toBe(selfCopy);
+    expect(next.length).toBeLessThanOrEqual(120);
+    expect(next).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+  });
+
+  test("names duplicates with a bounded (copy) suffix", () => {
+    expect(duplicateName("Atlas", 140)).toBe("Atlas (copy)");
+    const long = duplicateName("x".repeat(140), 140);
+
+    expect(long.length).toBe(140);
+    expect(long.endsWith(" (copy)")).toBe(true);
   });
 
   test("parses list filters defensively", () => {

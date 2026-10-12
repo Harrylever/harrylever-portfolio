@@ -4,8 +4,9 @@ import { signInAsAdmin } from "./helpers/admin";
 import {
   cleanupE2EContent,
   confirmNamedDialog,
+  type SiteProfileSnapshot,
   ensurePublishedSiteProfile,
-  removeTestSiteProfile,
+  restoreSiteProfile,
   createPostDraft,
   expectHostilePasteNeutralised,
   expectPublicStatus,
@@ -19,15 +20,17 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-let createdProfile = false;
+let profileSnapshot: SiteProfileSnapshot = { touched: false };
 
-test.beforeAll(async ({ browser }) => {
-  createdProfile = await ensurePublishedSiteProfile(browser);
+test.beforeAll(async ({ browser, baseURL }) => {
+  // Refuses non-local targets and an implicit/production test database.
+  profileSnapshot = await ensurePublishedSiteProfile(browser, baseURL);
 });
 
-test.afterAll(async () => {
-  await cleanupE2EContent();
-  await removeTestSiteProfile(createdProfile);
+test.afterAll(async ({ baseURL }) => {
+  // Both re-check the target, so a refused run never cleans another DB.
+  await cleanupE2EContent(baseURL);
+  await restoreSiteProfile(profileSnapshot, baseURL);
 });
 
 test.describe("blog administration", () => {

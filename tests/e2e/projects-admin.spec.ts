@@ -4,8 +4,9 @@ import { signInAsAdmin } from "./helpers/admin";
 import {
   cleanupE2EContent,
   confirmNamedDialog,
+  type SiteProfileSnapshot,
   ensurePublishedSiteProfile,
-  removeTestSiteProfile,
+  restoreSiteProfile,
   createProjectDraft,
   expectHostilePasteNeutralised,
   expectPublicStatus,
@@ -19,15 +20,17 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-let createdProfile = false;
+let profileSnapshot: SiteProfileSnapshot = { touched: false };
 
-test.beforeAll(async ({ browser }) => {
-  createdProfile = await ensurePublishedSiteProfile(browser);
+test.beforeAll(async ({ browser, baseURL }) => {
+  // Refuses non-local targets and an implicit/production test database.
+  profileSnapshot = await ensurePublishedSiteProfile(browser, baseURL);
 });
 
-test.afterAll(async () => {
-  await cleanupE2EContent();
-  await removeTestSiteProfile(createdProfile);
+test.afterAll(async ({ baseURL }) => {
+  // Both re-check the target, so a refused run never cleans another DB.
+  await cleanupE2EContent(baseURL);
+  await restoreSiteProfile(profileSnapshot, baseURL);
 });
 
 test.describe("project administration", () => {
@@ -156,6 +159,10 @@ test.describe("project administration", () => {
     await expect(
       second.getByRole("button", { name: "Reload latest" }),
     ).toBeVisible();
+    // No retry path that could resend the stale version.
+    await expect(
+      second.getByRole("button", { name: "Save draft" }),
+    ).toBeDisabled();
 
     // Reloading discards the stale edits explicitly (no unload prompt).
     await second.getByRole("button", { name: "Reload latest" }).click();
@@ -171,6 +178,13 @@ test.describe("project administration", () => {
     });
 
     await page.getByLabel("Hook").fill("not saved yet");
+    // Duplicating would navigate away, so it waits for a save (like Publish).
+    await expect(
+      page.getByRole("button", { name: "Duplicate" }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Publish changes" }),
+    ).toBeDisabled();
     const messages: string[] = [];
 
     page.once("dialog", async (dialog) => {
@@ -233,6 +247,9 @@ test.describe("project administration", () => {
     await page.goto(`/admin/projects?q=${encodeURIComponent(String(stamp))}`);
     await page.getByRole("button", { name: `Duplicate ${name}` }).click();
     await expect(page.getByText(`/projects/${slug}-copy`)).toBeVisible();
+    await expect(
+      page.getByRole("row", { name: new RegExp(`${name} \\(copy\\)`) }),
+    ).toBeVisible();
 
     // Trash from the editor with a named confirmation.
     await page.goto(`/admin/projects/${id}`);
@@ -242,6 +259,9 @@ test.describe("project administration", () => {
     await expect(
       page.getByRole("row", { name: new RegExp(name) }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("row", { name: new RegExp(name) }),
+    ).toContainText("In trash");
 
     await page.goto(`/admin/projects?q=${encodeURIComponent(String(stamp))}`);
     await expect(

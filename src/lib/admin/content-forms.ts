@@ -237,19 +237,35 @@ export function formSnapshot(value: unknown): string {
   return JSON.stringify(canonical(value));
 }
 
+const maxSlugLength = 120;
+
 export function suggestDuplicateSlug(
   slug: string,
   takenSlugs: Iterable<string>,
 ): string {
-  const taken = new Set(takenSlugs);
-  const base = `${slug}-copy`.slice(0, 112);
+  // The source is active, so its own slug is never a valid answer.
+  const taken = new Set(Array.from(takenSlugs));
 
-  if (!taken.has(base)) return base;
-  for (let suffix = 2; ; suffix += 1) {
-    const candidate = `${base}-${suffix}`;
+  taken.add(slug);
+
+  for (let n = 1; ; n += 1) {
+    const suffix = n === 1 ? "-copy" : `-copy-${n}`;
+    // Trim the source so the result fits the 120-character slug limit, and
+    // never leave a trailing hyphen before the suffix.
+    const stem = slug
+      .slice(0, maxSlugLength - suffix.length)
+      .replace(/-+$/, "");
+    const candidate = `${stem || "item"}${suffix}`;
 
     if (!taken.has(candidate)) return candidate;
   }
+}
+
+/** "Name (copy)", shortened so it still fits the field's limit. */
+export function duplicateName(name: string, max: number): string {
+  const suffix = " (copy)";
+
+  return `${name.slice(0, max - suffix.length).trimEnd()}${suffix}`;
 }
 
 export const listStatusFilters = [

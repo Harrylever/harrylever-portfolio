@@ -6,6 +6,7 @@ import { desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { type PostContent, postContentSchema } from "@/domain/content/post";
 import { postSlugSchema } from "@/domain/content/shared";
 import {
+  duplicateName,
   fieldErrorsFromIssues,
   formSnapshot,
   suggestDuplicateSlug,
@@ -281,6 +282,10 @@ export async function runDuplicatePost(
 
       return duplicatePost({
         id,
+        transformDraft: (draft) => ({
+          ...draft,
+          title: duplicateName(draft.title, 180),
+        }),
         slug: suggestDuplicateSlug(
           source.slug,
           taken.map((row) => row.slug),

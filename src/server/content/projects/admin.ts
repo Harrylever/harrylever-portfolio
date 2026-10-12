@@ -9,6 +9,7 @@ import {
 } from "@/domain/content/project";
 import { projectSlugSchema } from "@/domain/content/shared";
 import {
+  duplicateName,
   fieldErrorsFromIssues,
   formSnapshot,
   suggestDuplicateSlug,
@@ -290,6 +291,10 @@ export async function runDuplicateProject(
 
       return duplicateProject({
         id,
+        transformDraft: (draft) => ({
+          ...draft,
+          name: duplicateName(draft.name, 140),
+        }),
         slug: suggestDuplicateSlug(
           source.slug,
           taken.map((row) => row.slug),

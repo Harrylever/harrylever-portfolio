@@ -211,7 +211,7 @@ export function SaveBar({
       <button
         className="adm-btn"
         data-variant="solid"
-        disabled={busy || !canSave}
+        disabled={busy || conflict || !canSave}
         type="submit"
       >
         {saving ? "Saving…" : label}

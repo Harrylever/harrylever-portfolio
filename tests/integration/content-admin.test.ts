@@ -265,6 +265,7 @@ describe.serial("project admin", () => {
     );
 
     expect(copy.slug).toBe("shared-copy");
+    expect(copy.draft.name).toBe("Second (copy)");
     expect(copy.status).toBe("draft");
 
     const again = unwrap(

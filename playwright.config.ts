@@ -1,7 +1,8 @@
 import { loadEnvConfig } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
 
-// Same env files as the app (ADMIN_* credentials for the sign-in helper).
+// Same env files as the app (ADMIN_* credentials for the sign-in helper,
+// and TEST_DATABASE_URL_UNPOOLED, which database-writing specs require).
 loadEnvConfig(process.cwd());
 
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3100);
@@ -28,7 +29,9 @@ export default defineConfig({
     : {
         command: `bun run dev --port ${port}`,
         url: `${baseURL}/admin/sign-in`,
-        reuseExistingServer: !process.env.CI,
+        // A server that is already running may have been started with a
+        // different env (another database). Only reuse one on request.
+        reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === "1",
         timeout: 180_000,
       },
 });

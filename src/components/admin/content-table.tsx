@@ -295,6 +295,7 @@ export function ContentTable({
                       <LifecycleState
                         hasUnpublishedChanges={row.hasUnpublishedChanges}
                         status={row.status}
+                        trashed={view === "trash"}
                       />
                       {row.featured && view === "active" ? (
                         <span className="adm-state-note">

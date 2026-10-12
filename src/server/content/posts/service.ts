@@ -360,6 +360,8 @@ export async function duplicatePost(input: {
   id: string;
   slug: string;
   actor: AdminSession;
+  /** Optional edit to the copied draft (e.g. a "(copy)" name). */
+  transformDraft?: (draft: PostContent) => PostContent;
 }): Promise<ActionResult<PostRecord>> {
   const slug = postSlugSchema.safeParse(input.slug);
 
@@ -374,9 +376,17 @@ export async function duplicatePost(input: {
       if (await findActivePostBySlug(transaction, slug.data)) {
         return validationFailure("An active post already uses this slug");
       }
+      const transformed = input.transformDraft
+        ? postContentSchema.safeParse(input.transformDraft(source.draftContent))
+        : undefined;
+
+      if (transformed && !transformed.success) {
+        return validationFailure("Post content is invalid");
+      }
+      const draftContent = transformed?.data ?? source.draftContent;
       const record = await insertPost(transaction, {
         slug: slug.data,
-        draftContent: source.draftContent,
+        draftContent,
       });
 
       await refreshMediaUsage(

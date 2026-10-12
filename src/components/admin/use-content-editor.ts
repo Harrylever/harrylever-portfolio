@@ -219,7 +219,8 @@ export function useContentEditor<
   }
 
   async function duplicate() {
-    if (!state || busy) return;
+    // Duplicating navigates away; never drop unsaved edits silently.
+    if (!state || busy || dirty) return;
     setStatus({ kind: "duplicating" });
     try {
       const result = await config.actions.duplicate({ id: state.id });

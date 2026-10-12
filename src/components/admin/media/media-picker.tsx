@@ -92,6 +92,7 @@ export function MediaPicker({
   const ref = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const headingId = useId();
+  const radioName = useId();
   const [choice, setChoice] = useState<string | null>(selectedId ?? null);
   const { refresh } = library;
 
@@ -151,7 +152,7 @@ export function MediaPicker({
             <label key={asset.id} className="adm-media-option">
               <input
                 checked={choice === asset.id}
-                name="media-choice"
+                name={radioName}
                 type="radio"
                 value={asset.id}
                 onChange={() => setChoice(asset.id)}

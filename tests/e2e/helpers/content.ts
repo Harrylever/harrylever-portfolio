@@ -20,8 +20,39 @@ export function uniqueSlug(label: string) {
     .slice(2, 6)}`;
 }
 
+const localHosts = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+
+/**
+ * Guards every database-writing E2E helper and spec:
+ * - TEST_DATABASE_URL_UNPOOLED must be set explicitly (no fallback), and
+ *   assertSafeTestDatabase checks it is a non-production branch on the same
+ *   endpoint as DATABASE_URL;
+ * - the app under test must be local (the server Playwright starts from the
+ *   same .env files), unless E2E_ALLOW_REMOTE=1 is set deliberately.
+ * A remote PLAYWRIGHT_BASE_URL would write to that deployment's database
+ * while cleanup ran against this one, so it is refused by default.
+ */
+export function assertSafeE2ETarget(baseURL: string | undefined) {
+  if (!process.env.TEST_DATABASE_URL_UNPOOLED) {
+    throw new Error(
+      "TEST_DATABASE_URL_UNPOOLED must be set explicitly (e.g. in .env.local) for admin E2E tests",
+    );
+  }
+  assertSafeTestDatabase();
+  if (!baseURL) throw new Error("Admin E2E tests need a baseURL");
+  const host = new URL(baseURL).hostname;
+
+  if (!localHosts.has(host) && process.env.E2E_ALLOW_REMOTE !== "1") {
+    throw new Error(
+      `Refusing to run database-writing E2E tests against ${host}; only localhost is allowed unless E2E_ALLOW_REMOTE=1`,
+    );
+  }
+}
+
 function testPool() {
-  process.env.TEST_DATABASE_URL_UNPOOLED ??= process.env.DATABASE_URL_UNPOOLED;
+  if (!process.env.TEST_DATABASE_URL_UNPOOLED) {
+    throw new Error("TEST_DATABASE_URL_UNPOOLED must be set explicitly");
+  }
   assertSafeTestDatabase();
 
   return new Pool({
@@ -30,28 +61,55 @@ function testPool() {
   });
 }
 
+type SiteProfileRow = {
+  id: string;
+  draft_content: unknown;
+  published_content: unknown;
+  first_published_at: Date | null;
+  published_at: Date | null;
+  updated_at: Date;
+};
+
+/** What the suite changed, so teardown can put back exactly what was there. */
+export type SiteProfileSnapshot =
+  | { touched: false }
+  | { touched: true; row: SiteProfileRow | null; eventIds: string[] };
+
 /**
- * Public project/post pages 404 without a published site profile. When the
- * dev branch has none, publish a test profile through the real settings
- * form (which also invalidates the cached profile). Returns whether one was
- * created so `removeTestSiteProfile` can clean it up.
+ * Public project/post pages 404 without a published site profile.
+ * - A published profile already exists: it is left alone.
+ * - Otherwise the existing row (if any) and the site-profile events are
+ *   snapshotted, then a test profile is published through the real settings
+ *   form (which also invalidates the cached profile).
  */
-export async function ensurePublishedSiteProfile(browser: Browser) {
+export async function ensurePublishedSiteProfile(
+  browser: Browser,
+  baseURL: string | undefined,
+): Promise<SiteProfileSnapshot> {
+  assertSafeE2ETarget(baseURL);
   const pool = testPool();
-  let published = false;
+  let row: SiteProfileRow | null = null;
+  let eventIds: string[] = [];
 
   try {
-    const { rows } = await pool.query<{ published: boolean }>(
-      "select published_content is not null as published from site_profile limit 1",
+    const profiles = await pool.query<SiteProfileRow>(
+      `select id, draft_content, published_content, first_published_at,
+              published_at, updated_at
+         from site_profile limit 1`,
     );
 
-    published = rows[0]?.published ?? false;
+    row = profiles.rows[0] ?? null;
+    if (row?.published_content) return { touched: false };
+    const events = await pool.query<{ id: string }>(
+      "select id from content_events where content_type = 'site_profile'",
+    );
+
+    eventIds = events.rows.map((event) => event.id);
   } finally {
     await pool.end();
   }
-  if (published) return false;
 
-  const page = await browser.newPage();
+  const page = await browser.newPage({ baseURL });
 
   try {
     await signInAsAdmin(page, "/admin/settings");
@@ -73,18 +131,54 @@ export async function ensurePublishedSiteProfile(browser: Browser) {
     await page.close();
   }
 
-  return true;
+  return { touched: true, row, eventIds };
 }
 
-export async function removeTestSiteProfile(created: boolean) {
-  if (!created) return;
+/**
+ * Restores the snapshot: removes the profile if none existed, otherwise
+ * writes the original row back; deletes only the site-profile events
+ * created during the run.
+ */
+export async function restoreSiteProfile(
+  snapshot: SiteProfileSnapshot,
+  baseURL: string | undefined,
+) {
+  if (!snapshot.touched) return;
+  assertSafeE2ETarget(baseURL);
   const pool = testPool();
 
   try {
     await pool.query(
-      "delete from content_events where content_type = 'site_profile'",
+      `delete from content_events
+        where content_type = 'site_profile' and not (id = any($1))`,
+      [snapshot.eventIds],
     );
-    await pool.query("delete from site_profile");
+    if (!snapshot.row) {
+      await pool.query("delete from site_profile");
+
+      return;
+    }
+    const row = snapshot.row;
+
+    await pool.query(
+      `update site_profile
+          set draft_content = $2::jsonb,
+              published_content = $3::jsonb,
+              first_published_at = $4,
+              published_at = $5,
+              updated_at = $6
+        where id = $1`,
+      [
+        row.id,
+        JSON.stringify(row.draft_content),
+        row.published_content === null
+          ? null
+          : JSON.stringify(row.published_content),
+        row.first_published_at,
+        row.published_at,
+        row.updated_at,
+      ],
+    );
   } finally {
     await pool.end();
   }
@@ -95,7 +189,8 @@ export async function removeTestSiteProfile(created: boolean) {
  * starts with the E2E prefix. Refuses to run unless the database guard
  * confirms a non-production Neon branch.
  */
-export async function cleanupE2EContent() {
+export async function cleanupE2EContent(baseURL: string | undefined) {
+  assertSafeE2ETarget(baseURL);
   const pool = testPool();
 
   try {

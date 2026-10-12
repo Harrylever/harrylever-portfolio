@@ -189,8 +189,9 @@ export function PublishControls(props: PublishControlsProps) {
   let hint = "Publishing makes the saved draft public.";
 
   if (!saved) hint = "Create the draft first. It stays private.";
-  else if (dirty) hint = "Save your changes before publishing.";
-  else if (!canPublish) hint = "The public page matches the saved draft.";
+  else if (dirty) {
+    hint = "Save your changes before publishing or duplicating.";
+  } else if (!canPublish) hint = "The public page matches the saved draft.";
 
   return (
     <section aria-label="Publication" className="adm-publish">
@@ -239,8 +240,10 @@ export function PublishControls(props: PublishControlsProps) {
           ) : null}
           {props.onDuplicate ? (
             <button
+              aria-describedby={dirty ? hintId : undefined}
               className="adm-btn"
-              disabled={busy}
+              disabled={busy || dirty}
+              title={dirty ? "Save your changes before duplicating" : undefined}
               type="button"
               onClick={props.onDuplicate}
             >

@@ -373,6 +373,8 @@ export async function duplicateProject(input: {
   id: string;
   slug: string;
   actor: AdminSession;
+  /** Optional edit to the copied draft (e.g. a "(copy)" name). */
+  transformDraft?: (draft: ProjectContent) => ProjectContent;
 }): Promise<ActionResult<ProjectRecord>> {
   const slug = projectSlugSchema.safeParse(input.slug);
 
@@ -387,9 +389,19 @@ export async function duplicateProject(input: {
       if (await findActiveProjectBySlug(transaction, slug.data)) {
         return validationFailure("An active project already uses this slug");
       }
+      const transformed = input.transformDraft
+        ? projectContentSchema.safeParse(
+            input.transformDraft(source.draftContent),
+          )
+        : undefined;
+
+      if (transformed && !transformed.success) {
+        return validationFailure("Project content is invalid");
+      }
+      const draftContent = transformed?.data ?? source.draftContent;
       const record = await insertProject(transaction, {
         slug: slug.data,
-        draftContent: source.draftContent,
+        draftContent,
         displayOrder: source.displayOrder + 1,
         featured: false,
       });
