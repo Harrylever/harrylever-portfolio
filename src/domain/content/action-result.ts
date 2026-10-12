@@ -12,6 +12,8 @@ export type ActionFailure = {
     code: ActionErrorCode;
     message: string;
     fieldErrors?: Record<string, string[]>;
+    /** The same request may succeed if repeated (e.g. a re-upload). */
+    retryable?: boolean;
   };
 };
 

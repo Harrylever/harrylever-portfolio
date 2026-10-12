@@ -15,3 +15,13 @@ export const mediaAssetInputSchema = z.strictObject({
 });
 
 export type MediaAssetInput = z.infer<typeof mediaAssetInputSchema>;
+
+/** Shared by the signature route, server verification and the browser. */
+export const allowedImageFormats = [
+  "avif",
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+] as const;
+export const maximumImageBytes = 10 * 1024 * 1024;

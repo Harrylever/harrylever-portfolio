@@ -49,7 +49,7 @@ export function assertSafeE2ETarget(baseURL: string | undefined) {
   }
 }
 
-function testPool() {
+export function testPool() {
   if (!process.env.TEST_DATABASE_URL_UNPOOLED) {
     throw new Error("TEST_DATABASE_URL_UNPOOLED must be set explicitly");
   }

@@ -3,14 +3,9 @@ import type { AdminSession } from "@/server/auth/require-admin";
 import { v2 as cloudinary } from "cloudinary";
 import { z } from "zod";
 
-export const allowedImageFormats = [
-  "avif",
-  "jpeg",
-  "jpg",
-  "png",
-  "webp",
-] as const;
-export const maximumImageBytes = 10 * 1024 * 1024;
+import { allowedImageFormats, maximumImageBytes } from "@/domain/content/media";
+
+export { allowedImageFormats, maximumImageBytes };
 const signatureLifetimeSeconds = 60;
 
 export type CloudinaryMediaConfig = {

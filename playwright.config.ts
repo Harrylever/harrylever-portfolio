@@ -1,6 +1,8 @@
 import { loadEnvConfig } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
 
+import { fakeCloudinaryServerEnv } from "./tests/e2e/helpers/cloudinary-fake";
+
 // Same env files as the app (ADMIN_* credentials for the sign-in helper,
 // and TEST_DATABASE_URL_UNPOOLED, which database-writing specs require).
 loadEnvConfig(process.cwd());
@@ -33,5 +35,8 @@ export default defineConfig({
         // different env (another database). Only reuse one on request.
         reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === "1",
         timeout: 180_000,
+        // Media E2E never talks to a real Cloudinary account: these fake
+        // values override any CLOUDINARY_* in .env.local for the test server.
+        env: fakeCloudinaryServerEnv(),
       },
 });

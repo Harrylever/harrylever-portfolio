@@ -13,12 +13,14 @@ import {
 } from "react";
 
 import { listMediaForPickerAction } from "@/app/admin/_actions/media";
+import { MediaUploader } from "@/components/admin/media/media-uploader";
 
 export type { MediaPickerAsset };
 
 /**
- * Upload slot for Task 14: render an uploader and call `onUploaded` with the
- * newly registered asset; the picker adds and selects it.
+ * Upload slot: render an uploader and call `onUploaded` with the newly
+ * registered asset; the picker adds and selects it. Defaults to the signed
+ * direct-to-Cloudinary uploader.
  */
 export type MediaUploadSlot = (
   onUploaded: (asset: MediaPickerAsset) => void,
@@ -68,9 +70,20 @@ export function useMediaLibrary(initial: MediaPickerAsset[]) {
 
 export type MediaLibrary = ReturnType<typeof useMediaLibrary>;
 
+export const defaultUploadSlot: MediaUploadSlot = (onUploaded) => (
+  <details className="adm-upload-details">
+    <summary>Upload a new image</summary>
+    <MediaUploader
+      onUploaded={({ id, secureUrl, altText, caption, width, height }) =>
+        onUploaded({ id, secureUrl, altText, caption, width, height })
+      }
+    />
+  </details>
+);
+
 /**
- * Modal chooser over existing registered images. Selection only: uploading
- * plugs in through `renderUpload`.
+ * Modal chooser over registered images, with an upload slot (by default
+ * the signed uploader) so a new image can be added and picked in one go.
  */
 export function MediaPicker({
   open,
@@ -79,7 +92,7 @@ export function MediaPicker({
   selectedId,
   onSelect,
   onClose,
-  renderUpload,
+  renderUpload = defaultUploadSlot,
 }: {
   open: boolean;
   title: string;
@@ -129,12 +142,10 @@ export function MediaPicker({
       <h2 className="adm-dialog-title" id={headingId}>
         {title}
       </h2>
-      {renderUpload
-        ? renderUpload((asset) => {
-            library.add(asset);
-            setChoice(asset.id);
-          })
-        : null}
+      {renderUpload((asset) => {
+        library.add(asset);
+        setChoice(asset.id);
+      })}
       {library.error ? (
         <p className="adm-alert" role="alert">
           {library.error}
@@ -142,8 +153,7 @@ export function MediaPicker({
       ) : null}
       {library.assets.length === 0 && !library.loading ? (
         <p className="adm-empty">
-          No images yet. Upload images in the media library, then pick them
-          here.
+          No images yet. Upload one above, or in the media library.
         </p>
       ) : (
         <fieldset aria-busy={library.loading} className="adm-media-grid">

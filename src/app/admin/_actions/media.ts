@@ -1,37 +1,47 @@
 "use server";
 
 import type { ActionResult } from "@/domain/content/action-result";
-import type { UploadedAssetResponse } from "@/server/media/cloudinary";
 
 import { requireAdmin } from "@/server/auth/require-admin";
 import { authorizeOrFail, guarded } from "@/server/content/admin-actions";
 import {
-  deleteMediaAsset,
-  listMedia,
-  registerUploadedAsset,
-  updateAssetText,
-} from "@/server/content/media/service";
+  runDeleteMedia,
+  runRegisterMediaUpload,
+  runUpdateMediaText,
+} from "@/server/content/media/admin";
+import { listMedia } from "@/server/content/media/service";
 import { success } from "@/server/content/result";
+import { e2eMediaDependencies } from "@/server/media/e2e-fake";
+
+/*
+ * Every action authorizes itself before parsing input. Uploads go from the
+ * browser straight to Cloudinary with server-signed parameters; only the
+ * response, verified again server-side, is registered here.
+ */
+const deps = () => ({
+  authorize: () => requireAdmin(),
+  media: e2eMediaDependencies(),
+});
 
 export async function registerMediaUploadAction(
-  input: UploadedAssetResponse & {
-    altText?: string;
-    caption?: string | null;
-  },
+  input: Record<string, unknown>,
 ) {
-  return registerUploadedAsset(input, await requireAdmin());
+  return runRegisterMediaUpload(input ?? {}, deps());
 }
 
 export async function updateMediaTextAction(input: {
-  id: string;
-  altText: string;
-  caption?: string | null;
+  id: unknown;
+  altText: unknown;
+  caption?: unknown;
 }) {
-  return updateAssetText(input, await requireAdmin());
+  return runUpdateMediaText(
+    { id: input?.id, altText: input?.altText, caption: input?.caption },
+    deps(),
+  );
 }
 
-export async function deleteMediaAssetAction(id: string) {
-  return deleteMediaAsset(id, await requireAdmin());
+export async function deleteMediaAssetAction(input: { id: unknown }) {
+  return runDeleteMedia({ id: input?.id }, deps());
 }
 
 /** What the media picker needs; no Cloudinary internals reach the client. */
