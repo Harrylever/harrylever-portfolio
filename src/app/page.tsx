@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { Fragment } from "react";
 import { notFound } from "next/navigation";
 
@@ -9,6 +11,13 @@ import { Commits } from "@/page-sections/personal/commits";
 import { Frames, Reach } from "@/page-sections/personal/frames";
 import { Loop } from "@/page-sections/personal/loop";
 import { Say } from "@/page-sections/personal/say";
+import { requireAdmin } from "@/server/auth/require-admin";
+import {
+  getPreviewHomepage,
+  getPreviewSiteProfile,
+  previewRobots,
+  resolveContentReadMode,
+} from "@/server/content/preview";
 import {
   getPublishedHomepage,
   getPublishedSiteProfile,
@@ -41,11 +50,27 @@ function renderSection(
   }
 }
 
+async function loadMode() {
+  try {
+    return await resolveContentReadMode();
+  } catch {
+    notFound();
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return (await loadMode()) === "draft" ? { robots: previewRobots } : {};
+}
+
 export default async function Home() {
-  const [profile, homepage] = await Promise.all([
-    getPublishedSiteProfile(),
-    getPublishedHomepage(),
-  ]);
+  const mode = await loadMode();
+  const admin = mode === "draft" ? await requireAdmin() : null;
+  const [profile, homepage] = admin
+    ? await Promise.all([
+        getPreviewSiteProfile(admin),
+        getPreviewHomepage(admin),
+      ])
+    : await Promise.all([getPublishedSiteProfile(), getPublishedHomepage()]);
 
   if (!profile || !homepage) notFound();
 

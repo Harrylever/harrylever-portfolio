@@ -100,7 +100,7 @@ export type PublicHomepage = {
   say: Extract<HomeSectionContent, { type: "say" }>;
 };
 
-type ProjectRow = {
+export type ProjectRow = {
   id: string;
   slug: string;
   content: ProjectContent;
@@ -110,7 +110,7 @@ type ProjectRow = {
   publishedAt: Date;
 };
 
-type PostRow = {
+export type PostRow = {
   id: string;
   slug: string;
   content: PostContent;
@@ -127,7 +127,7 @@ function referencedIds(contents: unknown[]): string[] {
   );
 }
 
-async function resolveMedia(contents: unknown[]) {
+export async function resolveMedia(contents: unknown[]) {
   const ids = referencedIds(contents);
 
   if (ids.length === 0) return new Map<string, PublicMediaAsset>();
@@ -158,7 +158,7 @@ function richTextMedia(
   );
 }
 
-async function projectRowsToPublic(
+export async function projectRowsToPublic(
   rows: ProjectRow[],
 ): Promise<PublicProject[]> {
   const parsed = rows.map((row) => ({
@@ -191,7 +191,7 @@ function displayDate(date: Date): string {
   }).format(date);
 }
 
-async function postRowsToPublic(rows: PostRow[]): Promise<PublicPost[]> {
+export async function postRowsToPublic(rows: PostRow[]): Promise<PublicPost[]> {
   const parsed = rows.map((row) => ({
     ...row,
     content: postContentSchema.parse(row.content),
@@ -380,6 +380,21 @@ async function queryPublishedHomepage(): Promise<PublicHomepage | null> {
       .orderBy(asc(projects.featuredOrder), asc(projects.displayOrder)),
   ]);
 
+  return assembleHomepage(sectionRows, featuredRows as ProjectRow[]);
+}
+
+export type HomepageSectionRow = {
+  type: HomeSectionType;
+  content: unknown;
+  visible: boolean;
+  position: number | null;
+  publishedAt: Date | null;
+};
+
+export async function assembleHomepage(
+  sectionRows: HomepageSectionRow[],
+  featuredRows: ProjectRow[],
+): Promise<PublicHomepage | null> {
   if (sectionRows.length !== homeSectionTypes.length) return null;
   const contentByType = new Map<HomeSectionType, HomeSectionContent>();
 
@@ -401,9 +416,7 @@ async function queryPublishedHomepage(): Promise<PublicHomepage | null> {
     { type: "frames" }
   >;
   const assets = await resolveMedia([intro, frames]);
-  const featuredProjects = await projectRowsToPublic(
-    featuredRows as ProjectRow[],
-  );
+  const featuredProjects = await projectRowsToPublic(featuredRows);
 
   return {
     publishedAt: new Date(
