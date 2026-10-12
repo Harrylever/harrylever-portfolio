@@ -195,6 +195,113 @@ describe("performAdminSignIn", () => {
     });
   });
 
+  test("parallel attempts cannot slip past the limit before failures are recorded", async () => {
+    const calls: string[] = [];
+    // Resolve on a later tick so every request is in flight at once.
+    const slowSignIn = async (
+      email: string,
+      password: string,
+    ): Promise<SignInAdminResult> => {
+      calls.push(password);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+
+      return { ok: false, error: "invalid_credentials" };
+    };
+    const bucket = limiter(3);
+    const results = await Promise.all(
+      Array.from({ length: 20 }, (_, index) =>
+        performAdminSignIn(
+          {
+            email: goodEmail,
+            password: `wrong-${index}`,
+            next: null,
+            headers: fromIp("6.6.6.6"),
+          },
+          { limiter: bucket, signIn: slowSignIn },
+        ),
+      ),
+    );
+
+    expect(calls).toHaveLength(3);
+    expect(
+      results.filter((r) => !r.ok && r.error.code === "TOO_MANY_ATTEMPTS"),
+    ).toHaveLength(17);
+  });
+
+  test("parallel attempts from many clients respect the global bucket", async () => {
+    let calls = 0;
+    const bucket = createLoginRateLimiter({
+      maxFailuresPerKey: 5,
+      maxFailuresGlobal: 4,
+      windowMs: 15 * 60_000,
+      now: () => 0,
+    });
+
+    await Promise.all(
+      Array.from({ length: 12 }, (_, index) =>
+        performAdminSignIn(
+          {
+            email: goodEmail,
+            password: "wrong-password",
+            next: null,
+            headers: fromIp(`10.1.0.${index}`),
+          },
+          {
+            limiter: bucket,
+            signIn: async () => {
+              calls += 1;
+              await new Promise((resolve) => setTimeout(resolve, 5));
+
+              return { ok: false, error: "invalid_credentials" };
+            },
+          },
+        ),
+      ),
+    );
+
+    expect(calls).toBe(4);
+  });
+
+  test("a successful or unavailable attempt gives its reservation back", async () => {
+    const auth = fakeSignIn();
+    const bucket = createLoginRateLimiter({
+      maxFailuresPerKey: 2,
+      maxFailuresGlobal: 2,
+      windowMs: 15 * 60_000,
+      now: () => 0,
+    });
+    const attempt = (password: string, ip: string) =>
+      performAdminSignIn(
+        { email: goodEmail, password, next: null, headers: fromIp(ip) },
+        { limiter: bucket, signIn: auth.signIn },
+      );
+
+    for (let index = 0; index < 5; index += 1) {
+      expect(await attempt(goodPassword, `5.5.5.${index}`)).toMatchObject({
+        ok: true,
+      });
+    }
+    for (let index = 0; index < 5; index += 1) {
+      await performAdminSignIn(
+        {
+          email: goodEmail,
+          password: goodPassword,
+          next: null,
+          headers: fromIp("4.4.4.4"),
+        },
+        {
+          limiter: bucket,
+          signIn: async () => {
+            throw new Error("misconfigured");
+          },
+        },
+      );
+    }
+    // Neither successes nor outages consumed the global budget.
+    expect(bucket.check("3.3.3.3").allowed).toBe(true);
+    expect(bucket.check("4.4.4.4").allowed).toBe(true);
+  });
+
   test("a successful sign-in clears that client's failure history", async () => {
     const auth = fakeSignIn();
     const bucket = limiter(2);

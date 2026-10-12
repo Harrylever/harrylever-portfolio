@@ -9,7 +9,11 @@ import {
 import { AdminAuthorizationError } from "@/server/auth/require-admin";
 import { db } from "@/server/db/client";
 import { siteProfile } from "@/server/db/schema/content";
-import { failure, success } from "@/server/content/result";
+import {
+  failure,
+  infrastructureFailure,
+  success,
+} from "@/server/content/result";
 import {
   publishSiteProfile,
   saveSiteProfileDraft,
@@ -64,7 +68,21 @@ async function authorizeOrFail(authorize: Authorize) {
         failure: failure("UNAUTHORIZED", "Sign in again to save changes."),
       };
     }
-    throw error;
+
+    // E.g. missing ADMIN_* configuration: report it as a typed server
+    // failure instead of letting the client mistake it for a network error.
+    return { failure: infrastructureFailure() };
+  }
+}
+
+/** Services return typed failures for expected cases; this catches the rest. */
+async function guarded<T>(
+  operation: () => Promise<ActionResult<T>>,
+): Promise<ActionResult<T>> {
+  try {
+    return await operation();
+  } catch {
+    return infrastructureFailure();
   }
 }
 
@@ -114,11 +132,14 @@ export async function runSaveSiteProfile(
     return failure("VALIDATION_ERROR", "Invalid site profile version");
   }
 
-  const result = await saveSiteProfileDraft({
-    draft: parsed.data,
-    expectedUpdatedAt: input.expectedUpdatedAt,
-    actor: auth.session,
-  });
+  const session = auth.session;
+  const result = await guarded(() =>
+    saveSiteProfileDraft({
+      draft: parsed.data,
+      expectedUpdatedAt: input.expectedUpdatedAt,
+      actor: session,
+    }),
+  );
 
   return result.ok ? success(toEditorState(result.data)) : result;
 }
@@ -134,10 +155,13 @@ export async function runPublishSiteProfile(
     return failure("VALIDATION_ERROR", "Invalid site profile version");
   }
 
-  const result = await publishSiteProfile({
-    expectedUpdatedAt: input.expectedUpdatedAt,
-    actor: auth.session,
-  });
+  const session = auth.session;
+  const result = await guarded(() =>
+    publishSiteProfile({
+      expectedUpdatedAt: input.expectedUpdatedAt,
+      actor: session,
+    }),
+  );
 
   return result.ok ? success(toEditorState(result.data)) : result;
 }

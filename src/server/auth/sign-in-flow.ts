@@ -108,8 +108,11 @@ export async function performAdminSignIn(
   }
 
   const key = clientKeyFromHeaders(input.headers);
+  // Count the attempt as a failure before awaiting anything, so parallel
+  // requests cannot all pass the check; give it back if it wasn't one.
+  const reservation = limiter.reserve(key);
 
-  if (!limiter.check(key).allowed) {
+  if (!reservation.allowed) {
     return failure("TOO_MANY_ATTEMPTS", TOO_MANY_ATTEMPTS_ERROR);
   }
 
@@ -118,16 +121,17 @@ export async function performAdminSignIn(
   try {
     result = await signIn(email, password);
   } catch {
-    // Missing or invalid ADMIN_* configuration; never echo the cause.
+    // Missing or invalid ADMIN_* configuration; never echo the cause, and
+    // don't charge the client for a server-side outage.
+    reservation.release();
+
     return failure("UNAVAILABLE", UNAVAILABLE_ERROR);
   }
 
-  if (!result.ok) {
-    limiter.recordFailure(key);
+  // A wrong password keeps the reserved failure.
+  if (!result.ok) return failure("INVALID_CREDENTIALS", GENERIC_SIGN_IN_ERROR);
 
-    return failure("INVALID_CREDENTIALS", GENERIC_SIGN_IN_ERROR);
-  }
-
+  reservation.release();
   limiter.reset(key);
 
   return { ok: true, redirectTo: safeAdminRedirect(input.next) };

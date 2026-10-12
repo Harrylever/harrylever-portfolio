@@ -10,8 +10,24 @@
 
 export type RateLimitDecision = { allowed: boolean; retryAfterMs: number };
 
+export type RateLimitReservation =
+  | { allowed: false; retryAfterMs: number }
+  | {
+      allowed: true;
+      retryAfterMs: 0;
+      /** Gives the slot back (e.g. the attempt succeeded). Idempotent. */
+      release(): void;
+    };
+
 export type LoginRateLimiter = {
   check(key: string): RateLimitDecision;
+  /**
+   * Atomically checks and, when allowed, counts an attempt as a failure up
+   * front. Callers release it if the attempt turns out not to be a failure.
+   * Because nothing awaits between the check and the record, concurrent
+   * requests cannot all pass the check before any failure is counted.
+   */
+  reserve(key: string): RateLimitReservation;
   recordFailure(key: string): void;
   reset(key: string): void;
   size(): number;
@@ -57,6 +73,17 @@ export function createLoginRateLimiter({
     return stamps[stamps.length - limit] + windowMs - at;
   }
 
+  function removeStamp(key: string, at: number) {
+    const stamps = failures.get(key);
+
+    if (!stamps) return;
+    const index = stamps.indexOf(at);
+
+    if (index === -1) return;
+    stamps.splice(index, 1);
+    if (!stamps.length) failures.delete(key);
+  }
+
   function push(key: string, at: number) {
     const stamps = recent(key, at);
 
@@ -64,7 +91,9 @@ export function createLoginRateLimiter({
     failures.set(key, [...stamps, at]);
   }
 
-  return {
+  const limiter: LoginRateLimiter & {
+    recordFailureAt(key: string): number;
+  } = {
     check(key) {
       const at = now();
       const wait = Math.max(
@@ -74,7 +103,30 @@ export function createLoginRateLimiter({
 
       return { allowed: wait <= 0, retryAfterMs: Math.max(wait, 0) };
     },
+    reserve(key) {
+      const decision = this.check(key);
+
+      if (!decision.allowed) {
+        return { allowed: false, retryAfterMs: decision.retryAfterMs };
+      }
+      const at = this.recordFailureAt(key);
+      let released = false;
+
+      return {
+        allowed: true,
+        retryAfterMs: 0,
+        release() {
+          if (released) return;
+          released = true;
+          removeStamp(key, at);
+          removeStamp(GLOBAL_KEY, at);
+        },
+      };
+    },
     recordFailure(key) {
+      this.recordFailureAt(key);
+    },
+    recordFailureAt(key) {
       const at = now();
 
       push(key, at);
@@ -91,6 +143,8 @@ export function createLoginRateLimiter({
         if (stalest === undefined) break;
         failures.delete(stalest);
       }
+
+      return at;
     },
     reset(key) {
       failures.delete(key);
@@ -99,6 +153,8 @@ export function createLoginRateLimiter({
       return failures.size;
     },
   };
+
+  return limiter;
 }
 
 /** Client identity for throttling: first proxy hop, then x-real-ip. */

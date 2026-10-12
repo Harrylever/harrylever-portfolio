@@ -100,6 +100,29 @@ describe("login rate limiter", () => {
     expect(limiter.check("ip").allowed).toBe(false);
   });
 
+  test("reserve counts synchronously and release gives the slot back once", () => {
+    const limiter = createLoginRateLimiter({
+      maxFailuresPerKey: 2,
+      maxFailuresGlobal: 3,
+      windowMs: 15 * minute,
+      now: () => 0,
+    });
+    const first = limiter.reserve("ip");
+    const second = limiter.reserve("ip");
+
+    expect(first.allowed && second.allowed).toBe(true);
+    expect(limiter.reserve("ip")).toMatchObject({ allowed: false });
+
+    if (!first.allowed) return;
+    first.release();
+    first.release();
+    expect(limiter.check("ip").allowed).toBe(true);
+    // Global bucket (limit 3) now holds only `second`.
+    expect(limiter.reserve("a").allowed).toBe(true);
+    expect(limiter.reserve("b").allowed).toBe(true);
+    expect(limiter.reserve("c").allowed).toBe(false);
+  });
+
   test("bounds memory by evicting the stalest keys", () => {
     const time = clock();
     const limiter = createLoginRateLimiter({

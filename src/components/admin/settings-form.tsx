@@ -42,8 +42,38 @@ const textFields = [
   },
 ] as const;
 
+/** Key-order-independent, so server (jsonb) and local copies compare equal. */
 function snapshot(values: SiteProfileContent) {
-  return JSON.stringify(values);
+  const { socialLinks, ...rest } = values;
+
+  return JSON.stringify([
+    Object.entries(rest).sort(([a], [b]) => a.localeCompare(b)),
+    socialLinks.map(({ label, href }) => [label, href]),
+  ]);
+}
+
+const fieldLabels: Record<string, string> = {
+  name: "Name",
+  location: "Location",
+  tagline: "Tagline",
+  description: "Introduction",
+  email: "Public email",
+  githubUsername: "GitHub username",
+  socialLinks: "Social links",
+};
+
+/** Keys that have an input rendering their error inline. */
+function renderedErrorKeys(values: SiteProfileContent): Set<string> {
+  const keys = new Set(
+    Object.keys(fieldLabels).filter((key) => key !== "socialLinks"),
+  );
+
+  values.socialLinks.forEach((_, index) => {
+    keys.add(`socialLinks.${index}.label`);
+    keys.add(`socialLinks.${index}.href`);
+  });
+
+  return keys;
 }
 
 function FieldError({ id, errors }: { id: string; errors?: string[] }) {
@@ -97,8 +127,16 @@ export function SettingsForm({
     value: SiteProfileContent[K],
   ) {
     setValues((current) => ({ ...current, [key]: value }));
-    if (status.kind !== "error" || !status.conflict)
-      setStatus({ kind: "idle" });
+    // Editing never cancels an in-flight save/publish (that would re-enable
+    // the buttons and allow a second request with a stale version), and a
+    // conflict stays visible until the page is reloaded.
+    setStatus((current) =>
+      current.kind === "saving" ||
+      current.kind === "publishing" ||
+      (current.kind === "error" && current.conflict)
+        ? current
+        : { kind: "idle" },
+    );
   }
 
   function updateLink(index: number, key: "label" | "href", value: string) {
@@ -113,10 +151,17 @@ export function SettingsForm({
   function applyResult(
     result: ActionResult<SiteProfileEditorState>,
     done: Status,
+    submitted: string,
   ) {
     if (result.ok) {
-      setValues(result.data.draft);
-      setSaved(snapshot(result.data.draft));
+      const serverDraft = result.data.draft;
+
+      // Adopt the server's copy only if nothing was typed while the request
+      // was in flight; otherwise keep the newer local edits (still unsaved).
+      setValues((current) =>
+        snapshot(current) === submitted ? serverDraft : current,
+      );
+      setSaved(snapshot(serverDraft));
       setVersion(result.data.updatedAt);
       setMeta({
         publishedAt: result.data.publishedAt,
@@ -136,7 +181,9 @@ export function SettingsForm({
           ? "The profile changed in another tab or session. Reload to get the latest version; your edits here aren't saved."
           : result.error.code === "UNAUTHORIZED"
             ? "Your session has ended. Sign in again to save."
-            : result.error.message,
+            : result.error.code === "INFRASTRUCTURE_ERROR"
+              ? "The server couldn't save right now. Your changes are still here; try again shortly."
+              : result.error.message,
     });
   }
 
@@ -145,9 +192,11 @@ export function SettingsForm({
     done: Status,
     call: () => Promise<ActionResult<SiteProfileEditorState>>,
   ) {
+    const submitted = snapshot(values);
+
     setStatus(pending);
     try {
-      applyResult(await call(), done);
+      applyResult(await call(), done, submitted);
     } catch {
       setStatus({
         kind: "error",
@@ -201,6 +250,12 @@ export function SettingsForm({
   const errorId = (key: string) => `profile-${key.replace(/\./g, "-")}-error`;
   const invalid = (key: string) =>
     fieldErrors[key]?.length ? ("true" as const) : undefined;
+  const inlineKeys = renderedErrorKeys(values);
+  // Errors with no matching input (e.g. the whole socialLinks list, or a
+  // form-level message) are listed above the save bar.
+  const otherErrors = Object.entries(fieldErrors).filter(
+    ([key, messages]) => messages.length && !inlineKeys.has(key),
+  );
 
   return (
     <form noValidate aria-busy={busy} className="adm-form" onSubmit={save}>
@@ -369,6 +424,22 @@ export function SettingsForm({
           </div>
         ) : null}
       </fieldset>
+
+      {otherErrors.length ? (
+        <ul
+          aria-label="Problems to fix"
+          className="adm-alert adm-form-errors"
+          id="profile-form-errors"
+        >
+          {otherErrors.map(([key, messages]) => (
+            <li key={key}>
+              {key === "form"
+                ? messages.join(" ")
+                : `${fieldLabels[key.split(".")[0]] ?? key}: ${messages.join(" ")}`}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="adm-savebar">
         <p

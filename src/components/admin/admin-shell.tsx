@@ -35,6 +35,26 @@ export function AdminShell({
   // Close the drawer whenever navigation completes.
   useEffect(() => setOpen(false), [pathname]);
 
+  // Widening past the breakpoint hides the drawer in CSS; also close it so
+  // the scroll lock and keyboard trap are released.
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 960px)");
+    const onChange = () => {
+      if (desktop.matches) setOpen(false);
+    };
+
+    desktop.addEventListener("change", onChange);
+
+    return () => desktop.removeEventListener("change", onChange);
+  }, []);
+
+  function closeAfterNavigation() {
+    setOpen(false);
+    // The trigger is about to be irrelevant; start the next page's focus at
+    // the main region (it persists across navigations inside the shell).
+    document.getElementById("admin-content")?.focus({ preventScroll: true });
+  }
+
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
@@ -135,7 +155,7 @@ export function AdminShell({
                 Close
               </button>
             </div>
-            <AdminNav label="Admin" onNavigate={() => setOpen(false)} />
+            <AdminNav label="Admin" onNavigate={closeAfterNavigation} />
             <div className="adm-account">
               <span>Signed in as {email}</span>
               <SignOutButton />

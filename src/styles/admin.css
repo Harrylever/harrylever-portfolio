@@ -552,3 +552,10 @@
   border-radius: var(--r-inline);
   background: var(--bg-surface);
 }
+
+.adm-form-errors {
+  margin: 0;
+  padding-left: var(--s-8);
+  display: grid;
+  gap: var(--s-1);
+}

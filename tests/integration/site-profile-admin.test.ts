@@ -54,6 +54,31 @@ describe.serial("site profile settings actions", () => {
     expect(await db.select().from(siteProfile)).toHaveLength(0);
   }, 60_000);
 
+  test("maps unexpected server failures to a typed infrastructure error", async () => {
+    const broken = async () => {
+      throw new Error("ADMIN_SESSION_SECRET is required");
+    };
+
+    for (const result of [
+      await runSaveSiteProfile(
+        { draft, expectedUpdatedAt: null },
+        { authorize: broken },
+      ),
+      await runPublishSiteProfile(
+        { expectedUpdatedAt: new Date().toISOString() },
+        { authorize: broken },
+      ),
+    ]) {
+      expect(result).toMatchObject({
+        ok: false,
+        error: { code: "INFRASTRUCTURE_ERROR" },
+      });
+      if (!result.ok) {
+        expect(result.error.message).not.toContain("ADMIN_SESSION_SECRET");
+      }
+    }
+  }, 60_000);
+
   test("returns per-field errors for invalid input", async () => {
     const result = await runSaveSiteProfile(
       {

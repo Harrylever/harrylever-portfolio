@@ -155,6 +155,14 @@ test.describe("admin shell", () => {
     await drawer.getByRole("link", { name: "Settings" }).click();
     await expect(page).toHaveURL(/\/admin\/settings$/);
     await expect(drawer).toBeHidden();
+    await expect(page.locator("#admin-content")).toBeFocused();
+
+    // Resizing to desktop while open releases the drawer and scroll lock.
+    await menu.click();
+    await expect(drawer).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(drawer).toBeHidden();
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
   });
 
   test("shows the loading state while a page streams", async ({ page }) => {
@@ -201,4 +209,51 @@ test.describe("admin shell", () => {
     );
     await page.unroute("**/admin/settings");
   });
+});
+
+test("keeps edits typed while a save is in flight", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await signInAsAdmin(page, "/admin/settings");
+  const status = page.locator(".adm-savebar").getByRole("status");
+  const tagline = page.getByLabel("Tagline", { exact: true });
+  const original = await tagline.inputValue();
+
+  if (!original) {
+    // Empty dev branch: start from a valid draft (never published here).
+    await page.getByLabel("Name", { exact: true }).fill("E2E Owner");
+    await page.getByLabel("Location", { exact: true }).fill("Testville");
+    await page
+      .getByLabel("Introduction", { exact: true })
+      .fill("Profile created by E2E.");
+    await page
+      .getByLabel("Public email", { exact: true })
+      .fill("owner@example.com");
+    await page.getByLabel("GitHub username", { exact: true }).fill("e2e-owner");
+  }
+  const base = original || "E2E tagline";
+
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+
+  await page.route("**/admin/settings", async (route) => {
+    if (route.request().method() === "POST") await held;
+    await route.continue();
+  });
+
+  await tagline.fill(`${base} (first)`);
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(status).toHaveText("Saving…");
+  await tagline.fill(`${base} (typed during save)`);
+  // Typing must not re-enable saving while the first request is pending.
+  await expect(page.getByRole("button", { name: "Saving…" })).toBeDisabled();
+  release();
+
+  await expect(status).toHaveText("Unsaved changes");
+  await expect(tagline).toHaveValue(`${base} (typed during save)`);
+  await page.unroute("**/admin/settings");
+
+  // Save the final value, restoring the original tagline when there was one.
+  await tagline.fill(base);
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(status).toHaveText("Saved. Publish to update the public site.");
 });
