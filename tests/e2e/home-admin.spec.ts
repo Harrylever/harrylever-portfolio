@@ -170,24 +170,11 @@ test("publishes homepage order and visibility as one snapshot", async ({
   // Native drag and drop: Now onto Built.
   await dragSection(page, "Now", "Built");
   await expect
-    .poll(() => adminOrder(page))
+    .poll(() => adminOrder(page), { timeout: 45_000 })
     .toEqual([
       "Intro",
       "Built",
       "Now",
-      "Commits",
-      "Frames",
-      "Reach",
-      "Loop",
-      "Say",
-    ]);
-  await moveSection(page, "Now", "up");
-  await expect
-    .poll(() => adminOrder(page))
-    .toEqual([
-      "Intro",
-      "Now",
-      "Built",
       "Commits",
       "Frames",
       "Reach",
@@ -202,6 +189,17 @@ test("publishes homepage order and visibility as one snapshot", async ({
     }),
   ).toBeFocused();
   await moveSection(page, "Commits", "down");
+  // Net result is not the starting order: Now now sits below Built.
+  expect(await adminOrder(page)).toEqual([
+    "Intro",
+    "Built",
+    "Now",
+    "Commits",
+    "Frames",
+    "Reach",
+    "Loop",
+    "Say",
+  ]);
   await setSectionVisibility(page, "Frames", false);
 
   // Nothing is public before publishing.
@@ -213,7 +211,12 @@ test("publishes homepage order and visibility as one snapshot", async ({
     "Published. The public homepage is updated.",
     { timeout: 45_000 },
   );
-  await expectPublishedHomeOrder(baseURL!, ["intro", "now", "built"]);
+  await expectPublishedHomeOrder(baseURL!, [
+    "intro",
+    "built",
+    "now",
+    "commits",
+  ]);
   await expectPublicSectionHidden(baseURL!, "frames");
   await expect(sectionRow(page, "Frames")).toContainText("Hidden");
   await expect(

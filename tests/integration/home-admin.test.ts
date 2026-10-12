@@ -4,6 +4,7 @@ import type {
 } from "@/domain/content/home";
 
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
+import { asc, eq } from "drizzle-orm";
 
 import { adminActor } from "../helpers/content";
 import { assertSafeTestDatabase } from "../helpers/safe-database";
@@ -25,6 +26,12 @@ import {
   runSaveHomeSection,
   runSetHomeSectionVisibility,
 } from "@/server/content/home/admin";
+import { getHomepageSnapshot } from "@/server/content/home/repository";
+import {
+  type HomeWriteHook,
+  publishHomepage,
+  reorderHomeDraft,
+} from "@/server/content/home/service";
 
 assertSafeTestDatabase();
 
@@ -317,7 +324,10 @@ describe.serial("homepage admin", () => {
       (await readHomeForAdmin()).sections.every((row) => !row.published),
     ).toBe(true);
 
-    await db.update(mediaAssets).set({ altText: "A desk" });
+    await db
+      .update(mediaAssets)
+      .set({ altText: "A desk" })
+      .where(eq(mediaAssets.id, asset.id));
     expect(
       await runPublishHomepage({ expected: versions(overview).slice(1) }, deps),
     ).toMatchObject({ ok: false, error: { code: "VALIDATION_ERROR" } });
@@ -342,5 +352,110 @@ describe.serial("homepage admin", () => {
     expect(
       await runPublishHomepage({ expected: versions(published) }, deny),
     ).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+  }, 240_000);
+
+  /**
+   * Inside the transaction, before write `step`, makes a section that is
+   * written later stale.
+   */
+  function staleSectionAt(step: number, type: HomeSectionType): HomeWriteHook {
+    return async (transaction, index) => {
+      if (index !== step) return;
+      const [target] = await transaction
+        .select({ id: homeSections.id })
+        .from(homeSections)
+        .where(eq(homeSections.type, type));
+
+      await transaction
+        .update(homeSections)
+        .set({ updatedAt: new Date(Date.now() + 60_000) })
+        .where(eq(homeSections.id, target.id));
+    };
+  }
+
+  async function rowsByType() {
+    return db.select().from(homeSections).orderBy(asc(homeSections.type));
+  }
+
+  test("a publish that conflicts mid-way publishes nothing", async () => {
+    await createAll();
+    const before = await rowsByType();
+    const result = await publishHomepage(adminActor(), {
+      beforeWrite: staleSectionAt(3, "say"),
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    const after = await rowsByType();
+
+    // Sections 0-2 were written before the conflict; all rolled back.
+    expect(after.every((row) => row.publishedAt === null)).toBe(true);
+    expect(after.map((row) => row.updatedAt.toISOString())).toEqual(
+      before.map((row) => row.updatedAt.toISOString()),
+    );
+    expect(
+      (await db.select().from(contentEvents)).filter(
+        (event) => event.eventType === "publish",
+      ),
+    ).toHaveLength(0);
+    expect((await readHomeForAdmin()).publishedAt).toBeNull();
+  }, 240_000);
+
+  test("a reorder that conflicts mid-way leaves the order unchanged", async () => {
+    const overview = await createAll();
+    const before = await rowsByType();
+    const order = versions(overview);
+    const reversed = [...order].reverse();
+    const result = await reorderHomeDraft({
+      sections: reversed.map((item) => ({
+        type: item.type,
+        expectedUpdatedAt: item.updatedAt as string,
+      })),
+      actor: adminActor(),
+      beforeWrite: staleSectionAt(3, "intro"),
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    const after = await rowsByType();
+
+    expect(
+      after.map((row) => [
+        row.type,
+        row.draftPosition,
+        row.updatedAt.toISOString(),
+      ]),
+    ).toEqual(
+      before.map((row) => [
+        row.type,
+        row.draftPosition,
+        row.updatedAt.toISOString(),
+      ]),
+    );
+  }, 240_000);
+
+  test("publishes a reordered homepage in the new order", async () => {
+    const overview = await createAll();
+    const order = versions(overview);
+    // Now below Built: intro, built, now, ...
+    const moved = [order[0], order[2], order[1], ...order.slice(3)];
+    const reordered = unwrap(
+      await runReorderHome(
+        {
+          order: moved.map((item) => ({
+            type: item.type,
+            expectedUpdatedAt: item.updatedAt,
+          })),
+        },
+        deps,
+      ),
+    );
+
+    unwrap(await runPublishHomepage({ expected: versions(reordered) }, deps));
+    const published = await getHomepageSnapshot("published");
+
+    expect(published.sections.slice(0, 3).map((row) => row.type)).toEqual([
+      "intro",
+      "built",
+      "now",
+    ]);
   }, 240_000);
 });

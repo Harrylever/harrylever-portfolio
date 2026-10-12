@@ -415,7 +415,12 @@ export async function runPublishHomepage(
         problems,
       );
     }
-    const result = await publishHomepage(actor);
+    const result = await publishHomepage(actor, {
+      expected: expected.map((item) => ({
+        type: item.type as HomeSectionType,
+        updatedAt: item.updatedAt as string | null,
+      })),
+    });
 
     if (!result.ok) {
       return failure(

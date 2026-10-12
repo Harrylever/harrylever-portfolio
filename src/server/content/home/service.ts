@@ -3,7 +3,9 @@ import type {
   HomeSectionContent,
   HomeSectionType,
 } from "@/domain/content/home";
+import type { ActionFailure } from "@/domain/content/action-result";
 import type { AdminSession } from "@/server/auth/require-admin";
+import type { DbTransaction } from "@/server/db/client";
 
 import { homeSectionSchema, homeSectionTypes } from "@/domain/content/home";
 import { db } from "@/server/db/client";
@@ -27,6 +29,26 @@ import {
   isPostgresError,
   success,
 } from "@/server/content/result";
+
+/**
+ * Drizzle commits a transaction whose callback returns normally, so a
+ * failure after the first write must throw to roll everything back.
+ */
+class TransactionAbort extends Error {
+  constructor(readonly result: ActionFailure) {
+    super(result.error.message);
+  }
+}
+
+function abort(result: ActionFailure): never {
+  throw new TransactionAbort(result);
+}
+
+/** Test seam: runs inside the transaction before each section is written. */
+export type HomeWriteHook = (
+  transaction: DbTransaction,
+  index: number,
+) => Promise<void>;
 
 function expectedDate(value: string | null): Date | undefined {
   if (value === null) return;
@@ -133,6 +155,7 @@ export async function saveHomeSectionDraft(input: {
 export async function reorderHomeDraft(input: {
   sections: Array<{ type: HomeSectionType; expectedUpdatedAt: string }>;
   actor: AdminSession;
+  beforeWrite?: HomeWriteHook;
 }): Promise<ActionResult<HomeSectionRecord[]>> {
   if (
     input.sections.length !== homeSectionTypes.length ||
@@ -170,11 +193,11 @@ export async function reorderHomeDraft(input: {
           !record ||
           record.updatedAt.getTime() !== expected.getTime()
         ) {
-          return failure(
-            "CONFLICT",
-            "Homepage sections changed before reordering",
+          abort(
+            failure("CONFLICT", "Homepage sections changed before reordering"),
           );
         }
+        await input.beforeWrite?.(transaction, position);
         const changed = await updateHomeSectionVersioned(
           transaction,
           record.id,
@@ -183,9 +206,8 @@ export async function reorderHomeDraft(input: {
         );
 
         if (!changed) {
-          return failure(
-            "CONFLICT",
-            "Homepage sections changed while reordering",
+          abort(
+            failure("CONFLICT", "Homepage sections changed while reordering"),
           );
         }
         updated.push(changed);
@@ -200,13 +222,20 @@ export async function reorderHomeDraft(input: {
 
       return success(updated);
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof TransactionAbort) return error.result;
+
     return infrastructureFailure();
   }
 }
 
 export async function publishHomepage(
   actor: AdminSession,
+  options: {
+    /** Versions the publisher reviewed; any difference is a conflict. */
+    expected?: Array<{ type: HomeSectionType; updatedAt: string | null }>;
+    beforeWrite?: HomeWriteHook;
+  } = {},
 ): Promise<ActionResult<HomeSectionRecord[]>> {
   try {
     const result = await db.transaction(async (transaction) => {
@@ -222,6 +251,17 @@ export async function publishHomepage(
           "VALIDATION_ERROR",
           "Homepage requires all eight sections",
         );
+      }
+
+      if (
+        options.expected &&
+        current.some(
+          (section) =>
+            options.expected?.find((item) => item.type === section.type)
+              ?.updatedAt !== section.updatedAt.toISOString(),
+        )
+      ) {
+        return failure("CONFLICT", "Homepage changed before publishing");
       }
 
       const validated = current.map((section) => ({
@@ -261,13 +301,15 @@ export async function publishHomepage(
       const now = new Date();
       const published: HomeSectionRecord[] = [];
 
-      for (const item of validated) {
+      for (let index = 0; index < validated.length; index += 1) {
+        const item = validated[index];
+
         if (!item.draft.success) {
-          return failure(
-            "VALIDATION_ERROR",
-            "A homepage section draft is invalid",
+          abort(
+            failure("VALIDATION_ERROR", "A homepage section draft is invalid"),
           );
         }
+        await options.beforeWrite?.(transaction, index);
         const updated = await updateHomeSectionVersioned(
           transaction,
           item.section.id,
@@ -282,8 +324,9 @@ export async function publishHomepage(
           },
         );
 
-        if (!updated)
-          return failure("CONFLICT", "Homepage changed while publishing");
+        if (!updated) {
+          abort(failure("CONFLICT", "Homepage changed while publishing"));
+        }
         await refreshMediaUsage(
           transaction,
           { type: "home_section", id: item.section.id, snapshot: "published" },
@@ -305,7 +348,9 @@ export async function publishHomepage(
     if (result.ok) invalidateCacheTags(["home"]);
 
     return result;
-  } catch {
+  } catch (error) {
+    if (error instanceof TransactionAbort) return error.result;
+
     return infrastructureFailure();
   }
 }

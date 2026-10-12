@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { listPickerMedia } from "@/app/admin/_lib/media";
 import { requireAdminPage } from "@/app/admin/_lib/require-admin-page";
@@ -40,19 +41,7 @@ export default async function HomeSectionPage({
     listPickerMedia(),
   ]);
 
-  if (!state) {
-    return (
-      <>
-        <Link className="adm-back" href="/admin/home">
-          All sections
-        </Link>
-        <h1 className="adm-title">Section not found</h1>
-        <p className="adm-lede">
-          The homepage has eight fixed sections; this isn&apos;t one of them.
-        </p>
-      </>
-    );
-  }
+  if (!state) notFound();
 
   return (
     <>
