@@ -72,4 +72,11 @@ export const seoContentSchema = z.strictObject({
   description: nonEmptyTextSchema.max(180),
 });
 
+export const mediaPlaceholderSchema = z.strictObject({
+  slotId: nonEmptyTextSchema.max(120),
+  aspectRatio: nonEmptyTextSchema.max(20),
+  caption: nonEmptyTextSchema.max(240).optional(),
+});
+
 export type SeoContent = z.infer<typeof seoContentSchema>;
+export type MediaPlaceholder = z.infer<typeof mediaPlaceholderSchema>;

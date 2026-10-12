@@ -3,6 +3,7 @@ import { z } from "zod";
 import { richTextSchema } from "@/domain/content/rich-text";
 import {
   mediaAssetIdSchema,
+  mediaPlaceholderSchema,
   nonEmptyTextSchema,
   safeExternalUrlSchema,
   seoContentSchema,
@@ -18,7 +19,10 @@ export const projectContentSchema = z.strictObject({
   externalUrl: safeExternalUrlSchema.nullable().optional(),
   stack: z.array(nonEmptyTextSchema.max(80)).min(1),
   coverAssetId: mediaAssetIdSchema.nullable().optional(),
+  coverPlaceholder: mediaPlaceholderSchema.nullable().optional(),
+  homepagePlaceholder: mediaPlaceholderSchema.nullable().optional(),
   galleryAssetIds: z.array(mediaAssetIdSchema),
+  galleryPlaceholders: z.array(mediaPlaceholderSchema).optional(),
   seo: seoContentSchema,
   caseStudy: richTextSchema,
 });

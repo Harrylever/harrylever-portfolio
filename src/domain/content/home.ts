@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   mediaAssetIdSchema,
+  mediaPlaceholderSchema,
   nonEmptyTextSchema,
   safeExternalUrlSchema,
 } from "@/domain/content/shared";
@@ -23,6 +24,7 @@ export const introSectionSchema = z.strictObject({
     .min(1),
   lede: nonEmptyTextSchema.max(600),
   portraitAssetId: mediaAssetIdSchema.nullable().optional(),
+  portraitPlaceholder: mediaPlaceholderSchema.nullable().optional(),
 });
 
 export const nowSectionSchema = z.strictObject({
@@ -54,11 +56,18 @@ export const framesSectionSchema = z.strictObject({
   type: z.literal("frames"),
   ...sectionHeadingFields,
   items: z.array(
-    z.strictObject({
-      mediaAssetId: mediaAssetIdSchema,
-      aspectRatio: nonEmptyTextSchema.max(20),
-      caption: nonEmptyTextSchema.max(240),
-    }),
+    z.union([
+      z.strictObject({
+        mediaAssetId: mediaAssetIdSchema,
+        aspectRatio: nonEmptyTextSchema.max(20),
+        caption: nonEmptyTextSchema.max(240),
+      }),
+      z.strictObject({
+        placeholderSlot: nonEmptyTextSchema.max(120),
+        aspectRatio: nonEmptyTextSchema.max(20),
+        caption: nonEmptyTextSchema.max(240),
+      }),
+    ]),
   ),
 });
 

@@ -10,6 +10,7 @@
     "lint:fix": "eslint . --fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun scripts/migrate.ts",
+    "db:seed": "bun scripts/seed-content.ts",
     "admin:bootstrap": "bun scripts/bootstrap-admin.ts",
     "admin:rotate-password": "bun scripts/rotate-admin-password.ts"
   },
