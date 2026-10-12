@@ -7,6 +7,18 @@ import { fakeCloudinaryServerEnv } from "./tests/e2e/helpers/cloudinary-fake";
 // and TEST_DATABASE_URL_UNPOOLED, which database-writing specs require).
 loadEnvConfig(process.cwd());
 
+// Admin E2E writes to the separate local test database. Point both the dev
+// server Playwright starts and the helpers in this process (and its workers,
+// which re-evaluate this file) at TEST_DATABASE_URL_UNPOOLED, so the
+// development database in .env.local is never touched. The helpers'
+// assertSafeE2ETarget/assertSafeTestDatabase refuse production targets.
+const testDatabaseUrl = process.env.TEST_DATABASE_URL_UNPOOLED?.trim();
+const testDatabaseEnv: Record<string, string> = testDatabaseUrl
+  ? { DATABASE_URL: testDatabaseUrl, DATABASE_URL_UNPOOLED: testDatabaseUrl }
+  : {};
+
+Object.assign(process.env, testDatabaseEnv);
+
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3100);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
 
@@ -37,6 +49,6 @@ export default defineConfig({
         timeout: 180_000,
         // Media E2E never talks to a real Cloudinary account: these fake
         // values override any CLOUDINARY_* in .env.local for the test server.
-        env: fakeCloudinaryServerEnv(),
+        env: { ...fakeCloudinaryServerEnv(), ...testDatabaseEnv },
       },
 });

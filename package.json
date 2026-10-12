@@ -10,7 +10,13 @@
     "lint:fix": "eslint . --fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun scripts/migrate.ts",
-    "db:seed": "bun scripts/seed-content.ts"
+    "db:migrate:test": "bun scripts/migrate.ts --test",
+    "db:seed": "bun scripts/seed-content.ts",
+    "db:local:up": "docker compose up -d --wait postgres",
+    "db:local:down": "docker compose down",
+    "test": "bun test tests/unit",
+    "test:integration": "bun test --timeout 240000 tests/integration",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.3.0",

@@ -24,9 +24,10 @@ const localHosts = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 /**
  * Guards every database-writing E2E helper and spec:
- * - TEST_DATABASE_URL_UNPOOLED must be set explicitly (no fallback), and
- *   assertSafeTestDatabase checks it is a non-production branch on the same
- *   endpoint as DATABASE_URL;
+ * - TEST_DATABASE_URL_UNPOOLED must be set explicitly (no fallback);
+ *   playwright.config.ts points DATABASE_URL (here and in the dev server it
+ *   starts) at it, and assertSafeTestDatabase refuses Neon/production and
+ *   any database whose name lacks "test";
  * - the app under test must be local (the server Playwright starts from the
  *   same .env files), unless E2E_ALLOW_REMOTE=1 is set deliberately.
  * A remote PLAYWRIGHT_BASE_URL would write to that deployment's database

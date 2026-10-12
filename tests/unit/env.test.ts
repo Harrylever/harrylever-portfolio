@@ -15,6 +15,24 @@ describe("parseServerEnv", () => {
     );
   });
 
+  test("accepts a local Postgres URL with either scheme", () => {
+    const local =
+      "postgres://postgres:postgres@localhost:5432/harrylever_portfolio";
+
+    expect(
+      parseServerEnv({
+        DATABASE_URL: local,
+        DATABASE_URL_UNPOOLED: local.replace("postgres://", "postgresql://"),
+      }).DATABASE_URL,
+    ).toBe(local);
+    expect(() =>
+      parseServerEnv({
+        DATABASE_URL: "mysql://localhost/db",
+        DATABASE_URL_UNPOOLED: local,
+      }),
+    ).toThrow("DATABASE_URL");
+  });
+
   test("keeps database credentials out of public environment keys", () => {
     const environment = parseServerEnv({
       DATABASE_URL: pooled,

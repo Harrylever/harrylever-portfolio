@@ -7,9 +7,14 @@ const optionalSecret = <T extends z.ZodType>(schema: T) =>
     schema.optional(),
   );
 
+// Any Postgres URL: a local server in development/tests, Neon in production.
+const postgresUrl = z.url().regex(/^postgres(ql)?:\/\//, {
+  message: "Expected a postgres:// or postgresql:// URL",
+});
+
 const serverEnvSchema = z.object({
-  DATABASE_URL: z.url().startsWith("postgresql://"),
-  DATABASE_URL_UNPOOLED: z.url().startsWith("postgresql://"),
+  DATABASE_URL: postgresUrl,
+  DATABASE_URL_UNPOOLED: postgresUrl,
   // Optional at parse time so builds and public pages do not need them; the
   // admin auth module requires all three before it signs or verifies anything.
   ADMIN_EMAIL: optionalSecret(z.email()),

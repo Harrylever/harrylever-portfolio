@@ -10,6 +10,8 @@ const pool = new Pool({
   max: 10,
 });
 
+// Only acts on Vercel (needs VERCEL_URL and VERCEL_REGION); a no-op with a
+// local Postgres in development and tests.
 attachDatabasePool(pool);
 
 export const db = drizzle(pool, { schema });
