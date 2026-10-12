@@ -10,6 +10,8 @@ function databaseTarget(value: string | undefined): string {
 
 async function main() {
   loadEnvConfig(process.cwd());
+  // Not inside a Next request: there is no data cache to revalidate.
+  process.env.CONTENT_CACHE_INVALIDATION = "off";
 
   // Which environment is being seeded, e.g. local-dev or production.
   const environment = (

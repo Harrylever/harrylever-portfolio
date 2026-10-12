@@ -18,33 +18,18 @@ Ground rules:
 
 ## 1. Local setup from scratch
 
-### 1.1 Start Postgres 16
+### 1.1 Local Postgres
 
-With Docker (recommended; uses `docker-compose.yml`):
-
-```bash
-bun run db:local:up      # docker compose up -d --wait postgres
-# stop later with: bun run db:local:down   (data persists in a named volume)
-```
-
-This creates two databases on `localhost:5432` (user/password
-`postgres`/`postgres`):
-
-- `harrylever_portfolio`: development (`bun run dev`)
-- `harrylever_portfolio_test`: integration and E2E tests
-
-The test database is created by `docker/postgres-init/01-create-test-database.sql`
-only when the volume is **first** created. If you started the container before
-that file existed, or you use your own Postgres, create the databases yourself:
+Use the Postgres installed on your machine (Homebrew Postgres 16 here). Make sure
+it is running (`pg_isready`), then create two databases:
 
 ```bash
-docker exec -it harrylever-portfolio-postgres \
-  psql -U postgres -c 'CREATE DATABASE harrylever_portfolio_test;'
-# Without the compose file:
-# docker run -d --name harrylever-portfolio-postgres -p 5432:5432 \
-#   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=harrylever_portfolio postgres:16-alpine
-# Homebrew Postgres: createdb harrylever_portfolio && createdb harrylever_portfolio_test
+createdb harrylever_portfolio        # development (`bun run dev`)
+createdb harrylever_portfolio_test   # integration and E2E tests
 ```
+
+URLs use your OS user with no password, e.g.
+`postgresql://<your-user>@localhost:5432/harrylever_portfolio`.
 
 ### 1.2 `.env.local`
 
@@ -53,10 +38,10 @@ these keys:
 
 | Key | Local value |
 | --- | --- |
-| `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/harrylever_portfolio` |
+| `DATABASE_URL` | `postgresql://<your-user>@localhost:5432/harrylever_portfolio` |
 | `DATABASE_URL_UNPOOLED` | same as `DATABASE_URL` |
 | `APP_ENV_LABEL` | `local-dev` (replaces `NEON_BRANCH`) |
-| `TEST_DATABASE_URL_UNPOOLED` | `postgresql://postgres:postgres@localhost:5432/harrylever_portfolio_test` |
+| `TEST_DATABASE_URL_UNPOOLED` | `postgresql://<your-user>@localhost:5432/harrylever_portfolio_test` |
 | `ADMIN_EMAIL` | your email |
 | `ADMIN_PASSWORD` | 12+ characters, e.g. `openssl rand -base64 24` |
 | `ADMIN_SESSION_SECRET` | 32+ characters: `openssl rand -base64 48` |

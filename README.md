@@ -14,7 +14,6 @@ media. Content lives in Postgres (Drizzle ORM); media in Cloudinary.
 ```bash
 bun install
 cp .env.example .env.local      # then fill ADMIN_* (see the runbook)
-bun run db:local:up             # Postgres 16 via docker compose (dev + test DBs)
 bun run db:migrate              # dev database
 bun run db:migrate:test         # test database
 bun run db:seed                 # import legacy content (idempotent)
@@ -27,7 +26,6 @@ bun run dev                     # http://localhost:3000, admin at /admin/sign-in
 | --- | --- |
 | `dev` / `build` / `start` | Next.js |
 | `lint` / `lint:fix` | ESLint |
-| `db:local:up` / `db:local:down` | Start/stop the local Postgres container |
 | `db:generate` | Generate a Drizzle migration from the schema |
 | `db:migrate` / `db:migrate:test` | Apply `drizzle/` migrations to the dev / test database |
 | `db:seed` | Import legacy `src/data` content (idempotent) |

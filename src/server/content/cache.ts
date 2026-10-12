@@ -30,7 +30,10 @@ export function cacheTagsFor(mutation: ContentMutation): string[] {
 }
 
 function nextCacheInvalidator(tag: string) {
-  if (process.env.NODE_ENV !== "test") revalidateTag(tag);
+  // CLI scripts (db:seed) run outside a Next request, where revalidateTag throws.
+  if (process.env.NODE_ENV === "test") return;
+  if (process.env.CONTENT_CACHE_INVALIDATION === "off") return;
+  revalidateTag(tag);
 }
 
 export function invalidateContentCache<T>(
