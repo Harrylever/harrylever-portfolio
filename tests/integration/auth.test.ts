@@ -7,6 +7,9 @@ import { ADMIN_SESSION_COOKIE, ADMIN_USER_ID } from "@/server/auth/session";
 import { saveSiteProfileDraft } from "@/server/content/site-profile/service";
 import { db } from "@/server/db/client";
 import { contentEvents, siteProfile } from "@/server/db/schema/content";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -14,12 +17,6 @@ function requiredEnv(name: string): string {
   if (!value) throw new Error(`${name} is required for auth integration tests`);
 
   return value;
-}
-
-const branch = process.env.NEON_BRANCH?.trim().toLowerCase();
-
-if (!branch || ["main", "master", "production", "prod"].includes(branch)) {
-  throw new Error("Auth integration tests require a non-production branch");
 }
 
 async function clean() {

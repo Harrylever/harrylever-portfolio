@@ -2,6 +2,8 @@ import type { PostContent } from "@/domain/content/post";
 import type { ProjectContent } from "@/domain/content/project";
 import type { AdminSession } from "@/server/auth/require-admin";
 
+import { assertSafeTestDatabase } from "./safe-database";
+
 import { ADMIN_USER_ID, buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
 import {
@@ -10,6 +12,8 @@ import {
   posts,
   projects,
 } from "@/server/db/schema/content";
+
+assertSafeTestDatabase();
 
 export const contentActorId = ADMIN_USER_ID;
 const contentActorEmail = "cms-content-actor@example.invalid";

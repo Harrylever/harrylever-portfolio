@@ -21,9 +21,10 @@ public templates, and publish without redeploying the application.
 - Next.js remains the application and backend, deployed on Vercel.
 - Neon supplies PostgreSQL.
 - Drizzle ORM owns the application schema and migrations.
-- Self-hosted Better Auth supplies email/password authentication and
-  database-backed sessions through its Drizzle adapter.
-- CUID2 strings are used for every primary key, including Better Auth tables.
+- A single administrator authenticates with an email and password preset in
+  environment variables; sessions are stateless signed cookies (no auth
+  tables).
+- CUID2 strings are used for every content primary key.
 - Cloudinary stores media; PostgreSQL stores asset metadata and references.
 - Tiptap provides the visual rich-text editor and saves structured JSON.
 - The panel has one administrator. Public signup and multi-user management are
@@ -57,7 +58,7 @@ Next.js server components ---> content repositories ---> Drizzle ---> Neon
     |                                  v
 Admin UI ---> protected server actions and route handlers
     |
-    +-- Better Auth sessions in Neon
+    +-- signed admin session cookie (env-preset credentials)
     +-- Tiptap structured content
     +-- signed direct uploads ---> Cloudinary
 ```
@@ -68,7 +69,7 @@ components. Database access is isolated behind domain repositories so UI
 components do not contain query logic.
 
 Admin forms use server actions for ordinary mutations. Route handlers are used
-for Better Auth, Cloudinary upload signatures, and endpoints that do not fit a
+for Cloudinary upload signatures, preview toggles, and endpoints that do not fit a
 form action. Every protected page, action, preview, and route handler calls the
 same server-only `requireAdmin()` guard; middleware may provide an early
 redirect but is not the authorization boundary.
@@ -80,28 +81,28 @@ as ad hoc SQL.
 
 ## Authentication
 
-Better Auth runs inside the Next.js application with its PostgreSQL Drizzle
-adapter. Email/password login is enabled, public signup is disabled in the
-server configuration, and the user record has an `admin` role used by
-`requireAdmin()`.
+The single administrator's credentials are preset in server environment
+variables: `ADMIN_EMAIL`, `ADMIN_PASSWORD` (at least 12 characters), and
+`ADMIN_SESSION_SECRET` (at least 32 characters). There is no user table, no
+signup surface, and no bootstrap step. These values are optional when the
+environment is parsed, so builds and public pages run without them, but every
+authentication path requires them.
 
-Initial setup is performed by an idempotent, command-line-only bootstrap
-script. The script creates a Better Auth instance that permits signup only in
-that local process, creates the initial account using Better Auth's own password
-pipeline, marks it as an administrator, and exits. It reads the initial name,
-email, and password from environment variables and refuses to create a second
-administrator. Runtime auth remains configured with signup disabled. The
-initial password variables should be removed after successful bootstrap.
+Sign-in compares the submitted email (trimmed, case-insensitive) and password
+against the preset values in constant time, hashing both sides with SHA-256
+before `timingSafeEqual` so lengths do not leak. Wrong email and wrong password
+return the same `invalid_credentials` result. Login throttling is required and
+is implemented with the sign-in action in Task 12.
 
-The panel supports sign-in, sign-out, and authenticated password changes.
-Changing the password revokes other sessions. There is no public password-reset
-mailer in the first version; a locked-out owner uses a separate command-line
-password-rotation command against the database.
-
-Better Auth's user, account, session, and verification primary keys use the
-same shared CUID2 generator as application records. Production cookies are
-HTTP-only, secure, and same-site. Auth responses do not expose whether an email
-exists, and repeated failed login attempts are rate-limited.
+A successful sign-in sets an HS256 JWT (signed with `ADMIN_SESSION_SECRET`) in
+an HTTP-only, `SameSite=Lax` cookie that is `Secure` in production and expires
+after two days. The token carries the stable admin id `admin`, the admin email,
+issuer, audience, and an HMAC fingerprint of the current credentials under a
+domain-separated key. `requireAdmin()` verifies signature, algorithm, claims,
+expiry, and fingerprint; anything else is a 401. Sessions are stateless:
+sign-out clears the cookie, and rotating the secret, email, or password revokes
+every outstanding session. Changing the password means updating the
+environment variable and redeploying.
 
 ## Content Model
 
@@ -109,11 +110,11 @@ All primary keys are CUID2 text values. All timestamps are timezone-aware.
 Mutable records have `created_at`, `updated_at`, and, where applicable,
 `deleted_at`.
 
-### Authentication tables
+### Authentication
 
-Better Auth owns `users`, `sessions`, `accounts`, and `verifications`. Drizzle
-schema definitions and migrations remain the source of truth for these tables.
-The `users` table includes the authorization role.
+There are no authentication tables. Audit records such as `content_events`
+store the administrator session's user id (`admin`) as plain text without a
+foreign key.
 
 ### Global site profile
 
@@ -232,8 +233,8 @@ Primary destinations are:
 - **Blog:** the equivalent workflow for posts.
 - **Media:** uploads, search, alt-text editing, usage display, URL copying, and
   guarded deletion.
-- **Settings:** site identity, social/contact details, admin profile, password,
-  and session management.
+- **Settings:** site identity and social/contact details. Admin credentials
+  are managed through environment variables, not the panel.
 
 Project and post editors use a main writing area plus a narrower metadata and
 publishing column. Tiptap supports paragraphs, H2/H3 headings, ordered and
@@ -329,14 +330,13 @@ folder prefix per environment.
 Required secret categories are:
 
 - pooled and unpooled Neon connection strings
-- Better Auth secret and canonical application URL
+- administrator email, password, and session-signing secret
 - Cloudinary cloud name, API key, and API secret
-- one-time bootstrap administrator values during initial setup
 
 Migrations are tested against a Neon branch before production application.
 They run as an explicit deployment step, never opportunistically during a
-serverless request. The content seed and administrator bootstrap are explicit,
-idempotent commands and are not part of normal application startup.
+serverless request. The content seed is an explicit, idempotent
+command and are not part of normal application startup.
 
 ## Testing and Acceptance Criteria
 
@@ -357,14 +357,15 @@ idempotent commands and are not part of normal application startup.
 - Featured projects drive homepage build cards without duplicate content
 - Media usage prevents deletion of referenced assets
 - Optimistic concurrency rejects stale saves
-- Content seed and administrator bootstrap are idempotent
+- Content seed is idempotent
 - Failed publication leaves the prior published snapshot intact
 
 ### End-to-end tests
 
 - Anonymous visitors cannot open admin, preview, mutation, or upload routes
-- The seeded administrator can sign in, sign out, and change the password
-- Public signup attempts fail even when sent directly to the auth endpoint
+- The preset administrator can sign in and sign out; wrong credentials and
+  tampered or expired session cookies are rejected
+- There is no signup surface or auth endpoint beyond the admin sign-in action
 - Projects and posts can be created, edited, previewed, published, unpublished,
   trashed, and restored
 - Published edits remain private until `Publish changes` is confirmed

@@ -15,6 +15,9 @@ import {
   siteProfile,
 } from "@/server/db/schema/content";
 import { seedLegacyContent } from "@/server/content/seed/legacy-content";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 async function resetSeedFixtures() {
   await db.delete(contentEvents);

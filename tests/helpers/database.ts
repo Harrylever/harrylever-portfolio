@@ -1,27 +1,14 @@
 import { loadEnvConfig } from "@next/env";
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
 
+import { assertSafeTestDatabase } from "./safe-database";
+
 loadEnvConfig(process.cwd());
 
-const unsafeBranchNames = new Set(["main", "master", "production", "prod"]);
-
 function testDatabaseUrl(): string {
-  const url = process.env.TEST_DATABASE_URL_UNPOOLED;
-  const branch = process.env.NEON_BRANCH?.trim().toLowerCase();
+  assertSafeTestDatabase();
 
-  if (!url) {
-    throw new Error(
-      "TEST_DATABASE_URL_UNPOOLED is required for database integration tests",
-    );
-  }
-
-  if (!branch || unsafeBranchNames.has(branch)) {
-    throw new Error(
-      "Database integration tests require NEON_BRANCH to name a non-production branch",
-    );
-  }
-
-  return url;
+  return process.env.TEST_DATABASE_URL_UNPOOLED!;
 }
 
 export const testPool = new Pool({

@@ -20,6 +20,9 @@ import {
   trashPost,
   unpublishPost,
 } from "@/server/content/posts/service";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 function unwrap<T>(result: { ok: true; data: T } | { ok: false }): T {
   if (!result.ok) throw new Error("Expected lifecycle operation to succeed");

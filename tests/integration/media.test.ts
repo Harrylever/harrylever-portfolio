@@ -27,6 +27,9 @@ import type {
   CloudinaryMediaConfig,
   CloudinaryResource,
 } from "@/server/media/cloudinary";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const config: CloudinaryMediaConfig = {
   cloudName: "portfolio-test",

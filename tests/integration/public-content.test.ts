@@ -27,6 +27,9 @@ import {
 } from "@/server/content/public";
 
 import { postContent, projectContent } from "../helpers/content";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const projectPublishedAt = new Date("2026-04-02T09:00:00.000Z");
 const projectSecondPublishedAt = new Date("2026-04-01T09:00:00.000Z");

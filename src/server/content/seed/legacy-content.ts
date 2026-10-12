@@ -19,7 +19,6 @@ import { normalizeSlug } from "@/domain/content/shared";
 import { ME } from "@/data/me";
 import { POSTS } from "@/data/posts";
 import { PROJECTS } from "@/data/projects";
-import { serverEnv } from "@/env/server";
 import { buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
 import {
@@ -64,10 +63,12 @@ function unwrap<T>(result: ActionResult<T>, operation: string): T {
   return result.data;
 }
 
+/** Label recorded on seed writes; the actor id is the preset admin's id. */
+const contentSeedActorLabel = "content-seed";
+
 function seedActor(): AdminSession {
-  // Seed writes are attributed to the environment-preset administrator.
   return buildAdminSession(
-    serverEnv.ADMIN_EMAIL ?? "content-seed@localhost",
+    contentSeedActorLabel,
     new Date(Date.now() + 60 * 60 * 1000),
   );
 }

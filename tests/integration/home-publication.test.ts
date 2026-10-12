@@ -25,6 +25,9 @@ import {
   reorderHomeDraft,
   saveHomeSectionDraft,
 } from "@/server/content/home/service";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const actor: AdminSession = buildAdminSession(
   "home-admin@example.invalid",

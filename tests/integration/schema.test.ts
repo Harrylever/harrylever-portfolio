@@ -21,6 +21,9 @@ import {
   timestampType,
   withRollback,
 } from "../helpers/database";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const removedAuthTables = [
   "account",

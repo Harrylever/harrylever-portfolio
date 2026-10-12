@@ -14,7 +14,13 @@ import {
 /** Stable id recorded as the actor for every administrator action. */
 export const ADMIN_USER_ID = "admin";
 export const ADMIN_SESSION_COOKIE = "portfolio_admin_session";
-export const ADMIN_SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
+/**
+ * Sessions are stateless signed cookies: sign-out only clears the browser's
+ * cookie, so a copied token stays valid until it expires. Keep the lifetime
+ * short; rotating ADMIN_SESSION_SECRET, ADMIN_EMAIL or ADMIN_PASSWORD revokes
+ * every outstanding session immediately.
+ */
+export const ADMIN_SESSION_TTL_SECONDS = 2 * 24 * 60 * 60;
 
 const issuer = "harrylever-portfolio";
 const audience = "harrylever-portfolio:admin";
@@ -60,7 +66,12 @@ function signingKey(config: AdminAuthConfig): Uint8Array {
  * email or password revokes every outstanding session.
  */
 function credentialFingerprint(config: AdminAuthConfig): string {
-  return createHmac("sha256", config.sessionSecret)
+  // Domain-separated from the JWT signing key derived from the same secret.
+  const fingerprintKey = createHmac("sha256", config.sessionSecret)
+    .update("cfp\n")
+    .digest();
+
+  return createHmac("sha256", fingerprintKey)
     .update(`${normalizeAdminEmail(config.email)}\n${config.password}`)
     .digest("base64url");
 }

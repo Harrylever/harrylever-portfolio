@@ -10,6 +10,9 @@ import {
   publishSiteProfile,
   saveSiteProfileDraft,
 } from "@/server/content/site-profile/service";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const actor: AdminSession = buildAdminSession(
   "profile-admin@example.invalid",

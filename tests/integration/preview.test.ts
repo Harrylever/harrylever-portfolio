@@ -26,6 +26,9 @@ import {
 } from "@/server/db/schema/content";
 
 import { adminActor, postContent, projectContent } from "../helpers/content";
+import { assertSafeTestDatabase } from "../helpers/safe-database";
+
+assertSafeTestDatabase();
 
 const draftCookie = "__prerender_bypass=forged-value";
 const publishedAt = new Date("2026-04-02T09:00:00.000Z");

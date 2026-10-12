@@ -1,7 +1,7 @@
 import type { AdminAuthConfig } from "@/server/auth/config";
 
 import { beforeAll, describe, expect, test } from "bun:test";
-import { SignJWT } from "jose";
+import { type JWTPayload, SignJWT, decodeJwt } from "jose";
 
 type AuthModule = typeof import("@/server/auth");
 type SessionModule = typeof import("@/server/auth/session");
@@ -223,7 +223,7 @@ describe("requireAdmin", () => {
 
   test("rejects an expired token", async () => {
     const { token } = await sessions.createSession({
-      now: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      now: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     });
 
     await expect(guard.requireAdmin(cookieHeader(token))).rejects.toMatchObject(
@@ -256,6 +256,65 @@ describe("requireAdmin", () => {
     await expect(
       guard.requireAdmin(cookieHeader(forged)),
     ).rejects.toMatchObject({ status: 401 });
+  });
+
+  async function resign(
+    payload: JWTPayload,
+    alg: "HS256" | "HS512" = "HS256",
+  ): Promise<string> {
+    return new SignJWT(payload)
+      .setProtectedHeader({ alg })
+      .sign(new TextEncoder().encode(process.env.ADMIN_SESSION_SECRET!));
+  }
+
+  test("rejects alg:none and non-HS256 tokens carrying valid claims", async () => {
+    const { token } = await sessions.createSession();
+    const payload = decodeJwt(token);
+    const unsigned = `${Buffer.from(
+      JSON.stringify({ alg: "none", typ: "JWT" }),
+    ).toString("base64url")}.${token.split(".")[1]}.`;
+
+    await expect(
+      guard.requireAdmin(cookieHeader(unsigned)),
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(
+      guard.requireAdmin(cookieHeader(await resign(payload, "HS512"))),
+    ).rejects.toMatchObject({ status: 401 });
+    // Control: the same claims re-signed with HS256 are accepted.
+    await expect(
+      guard.requireAdmin(cookieHeader(await resign(payload))),
+    ).resolves.toBeDefined();
+  });
+
+  test("rejects a correctly signed token with right iss/aud/sub but no cfp", async () => {
+    const { token } = await sessions.createSession();
+    const { cfp: _cfp, ...payload } = decodeJwt(token);
+
+    expect(payload.iss).toBeDefined();
+    expect(payload.aud).toBeDefined();
+    expect(payload.sub).toBe(sessions.ADMIN_USER_ID);
+    await expect(
+      guard.requireAdmin(cookieHeader(await resign(payload))),
+    ).rejects.toMatchObject({ status: 401 });
+  });
+
+  test("revokes sessions when the preset email changes", async () => {
+    const { token } = await sessions.createSession({ config });
+
+    await expect(
+      sessions.readSession(token, {
+        ...config,
+        email: "new-owner@example.test",
+      }),
+    ).resolves.toBeNull();
+  });
+
+  test("sessions last two days", async () => {
+    const now = new Date("2026-10-12T00:00:00.000Z");
+    const { session } = await sessions.createSession({ config, now });
+
+    expect(sessions.ADMIN_SESSION_TTL_SECONDS).toBe(2 * 24 * 60 * 60);
+    expect(session.expiresAt.toISOString()).toBe("2026-10-14T00:00:00.000Z");
   });
 
   test("revokes sessions when the preset password changes", async () => {
