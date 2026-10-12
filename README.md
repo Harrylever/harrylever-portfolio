@@ -1,53 +1,40 @@
-# Next.js & HeroUI Template
+# harrylever-portfolio
 
-This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
+Personal portfolio (Next.js 15, React 18, Tailwind CSS 4) with a single-owner
+admin CMS at `/admin` for the homepage, projects, blog posts, site profile and
+media. Content lives in Postgres (Drizzle ORM); media in Cloudinary.
 
-[Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
+- **Development and tests use a local Postgres.** Neon is production only and is
+  configured in the Vercel environment.
+- The full runbook (local setup, test commands, production rollout, rollback,
+  known limitations) is in [`docs/admin-cms-handoff.md`](docs/admin-cms-handoff.md).
 
-## Technologies Used
-
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [HeroUI v2](https://heroui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
-
-## How to Use
-
-### Use the template with create-next-app
-
-To create a new project based on this template using `create-next-app`, run the following command:
+## Quick start
 
 ```bash
-npx create-next-app -e https://github.com/heroui-inc/next-app-template
+bun install
+cp .env.example .env.local      # then fill ADMIN_* (see the runbook)
+bun run db:local:up             # Postgres 16 via docker compose (dev + test DBs)
+bun run db:migrate              # dev database
+bun run db:migrate:test         # test database
+bun run db:seed                 # import legacy content (idempotent)
+bun run dev                     # http://localhost:3000, admin at /admin/sign-in
 ```
 
-### Install dependencies
+## Scripts
 
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
-
-```bash
-npm install
-```
-
-### Run the development server
-
-```bash
-npm run dev
-```
-
-### Setup pnpm (optional)
-
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
-
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
-
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+| Script | What it does |
+| --- | --- |
+| `dev` / `build` / `start` | Next.js |
+| `lint` / `lint:fix` | ESLint |
+| `db:local:up` / `db:local:down` | Start/stop the local Postgres container |
+| `db:generate` | Generate a Drizzle migration from the schema |
+| `db:migrate` / `db:migrate:test` | Apply `drizzle/` migrations to the dev / test database |
+| `db:seed` | Import legacy `src/data` content (idempotent) |
+| `test` | Unit tests (`bun test tests/unit`) |
+| `test:integration` | Integration tests against the local test database |
+| `test:e2e` | Playwright admin E2E (starts its own dev server on the test database; Cloudinary is faked) |
 
 ## License
 
-Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
+MIT, see [LICENSE](LICENSE).
