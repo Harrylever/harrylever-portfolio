@@ -1,48 +1,34 @@
+import type { PublicPost, PublicSiteProfile } from "@/server/content/public";
+
 import * as React from "react";
 import Link from "next/link";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Prose } from "@/components/design-system/prose";
+import { RichText } from "@/components/content/rich-text";
 import { Button } from "@/components/design-system/button";
 import { PostRow } from "@/components/design-system/post-row";
 import { ReadingProgress } from "@/components/design-system/reading-progress";
-import { ME } from "@/data/me";
-import { POSTS } from "@/data/posts";
-import { Post, PostBlock } from "@/types";
 
-function node(b: PostBlock, i: number) {
-  if (b.t === "ul" || b.t === "ol") {
-    const List = b.t === "ul" ? "ul" : "ol";
-
-    return (
-      <List key={i}>
-        {b.c.map((li) => (
-          <li key={li}>{li}</li>
-        ))}
-      </List>
-    );
-  }
-  if (b.t === "pre")
-    return (
-      <pre key={i}>
-        <code>{b.c}</code>
-      </pre>
-    );
-  if (b.t === "h2") return <h2 key={i}>{b.c}</h2>;
-  if (b.t === "h3") return <h3 key={i}>{b.c}</h3>;
-  if (b.t === "blockquote") return <blockquote key={i}>{b.c}</blockquote>;
-
-  return <p key={i}>{b.c}</p>;
-}
-
-export function BlogPostView({ post }: { post: Post }) {
+export function BlogPostView({
+  morePosts,
+  post,
+  profile,
+}: {
+  morePosts: PublicPost[];
+  post: PublicPost;
+  profile: PublicSiteProfile;
+}) {
   const words = post.title.split(" ");
-  const more = POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
     <React.Fragment>
       <ReadingProgress />
-      <SiteNav contactHref="/#say" current="blog" socials={ME.links} />
+      <SiteNav
+        contactHref="/#say"
+        current="blog"
+        socials={profile.socialLinks}
+      />
       <div>
         <article
           id="top"
@@ -111,7 +97,9 @@ export function BlogPostView({ post }: { post: Post }) {
           />
 
           <div className="bp-body">
-            <Prose>{post.body?.map(node)}</Prose>
+            <Prose>
+              <RichText document={post.document} media={post.richTextMedia} />
+            </Prose>
           </div>
         </article>
 
@@ -140,11 +128,11 @@ export function BlogPostView({ post }: { post: Post }) {
             >
               Keep reading
             </h2>
-            {more.map((p) => (
+            {morePosts.map((p) => (
               <PostRow
                 key={p.slug}
                 date={p.date}
-                href={p.body ? `/blog/${p.slug}` : "/blog"}
+                href={`/blog/${p.slug}`}
                 readingTime={p.readingTime}
                 summary={p.summary}
                 tag={p.tag}

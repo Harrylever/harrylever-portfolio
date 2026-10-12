@@ -1,10 +1,11 @@
+import type { PublicHomepage } from "@/server/content/public";
+
 import { SectionHeading } from "@/components/design-system/section-heading";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
-import { ME } from "@/data/me";
 
-export function Built() {
+export function Built({ section }: { section: PublicHomepage["built"] }) {
   return (
     <section
       id="built"
@@ -20,9 +21,7 @@ export function Built() {
           padding: "0 var(--gutter)",
         }}
       >
-        <SectionHeading note="Some are live, some are half-finished. Both count.">
-          Things I&apos;ve built
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
         <div
           style={{
             display: "flex",
@@ -30,9 +29,9 @@ export function Built() {
             gap: "var(--s-11)",
           }}
         >
-          {ME.builds.map((b, i) => (
+          {section.projects.map((project, i) => (
             <article
-              key={b.name}
+              key={project.id}
               className={"bt-item" + (i % 2 ? " bt-flip" : "")}
               style={{
                 display: "grid",
@@ -45,9 +44,18 @@ export function Built() {
                 style={{ order: i % 2 ? 2 : 1, minWidth: 0 }}
               >
                 <Figure
-                  aspect={b.aspect}
-                  placeholder={"Drop a " + b.name + " screenshot"}
-                  slotId={b.slot}
+                  aspect={
+                    project.homepagePlaceholder?.aspectRatio ??
+                    project.coverPlaceholder?.aspectRatio ??
+                    "3 / 2"
+                  }
+                  asset={project.coverAsset}
+                  placeholder={`Drop a ${project.name} screenshot`}
+                  slotId={
+                    project.homepagePlaceholder?.slotId ??
+                    project.coverPlaceholder?.slotId ??
+                    `build-${project.slug}`
+                  }
                 />
               </div>
               <div
@@ -70,7 +78,7 @@ export function Built() {
                     margin: 0,
                   }}
                 >
-                  {b.name}
+                  {project.name}
                 </h3>
                 <p
                   style={{
@@ -79,7 +87,7 @@ export function Built() {
                     maxWidth: "44ch",
                   }}
                 >
-                  {b.hook}
+                  {project.hook}
                 </p>
                 <p
                   style={{
@@ -88,7 +96,7 @@ export function Built() {
                     maxWidth: "56ch",
                   }}
                 >
-                  {b.story}
+                  {project.homepageStory}
                 </p>
                 <div
                   style={{
@@ -97,7 +105,7 @@ export function Built() {
                     gap: "var(--s-2)",
                   }}
                 >
-                  {b.stack.map((s) => (
+                  {project.stack.map((s) => (
                     <Tag key={s}>{s}</Tag>
                   ))}
                 </div>
@@ -109,15 +117,17 @@ export function Built() {
                     fontSize: "var(--fs-micro)",
                   }}
                 >
-                  <span style={{ color: "var(--sand)" }}>{b.status}</span>
-                  {b.href ? (
+                  <span style={{ color: "var(--sand)" }}>
+                    {project.displayStatus}
+                  </span>
+                  {project.externalUrl ? (
                     <a
-                      href={b.href}
+                      href={project.externalUrl}
                       rel="noopener noreferrer"
                       style={{ boxShadow: "inset 0 -1px 0 0 currentColor" }}
                       target="_blank"
                     >
-                      {b.href.replace(/^https?:\/\//, "")}
+                      {project.externalUrl.replace(/^https?:\/\//, "")}
                     </a>
                   ) : null}
                 </div>
@@ -127,7 +137,7 @@ export function Built() {
         </div>
         <div style={{ marginTop: "var(--s-10)" }}>
           <Button href="/projects" variant="outline">
-            Read the full write-ups
+            {section.ctaLabel}
           </Button>
         </div>
       </div>

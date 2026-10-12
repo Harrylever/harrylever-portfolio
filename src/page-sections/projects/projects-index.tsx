@@ -1,18 +1,28 @@
+import type { PublicProject, PublicSiteProfile } from "@/server/content/public";
+
 import * as React from "react";
 import Link from "next/link";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
-import { ME } from "@/data/me";
-import { PROJECTS } from "@/data/projects";
 
 const TITLE = "Everything I've built, and why.".split(" ");
 
-export function ProjectsIndex() {
+export function ProjectsIndex({
+  profile,
+  projects,
+}: {
+  profile: PublicSiteProfile;
+  projects: PublicProject[];
+}) {
   return (
     <React.Fragment>
-      <SiteNav contactHref="/#say" current="projects" socials={ME.links} />
+      <SiteNav
+        contactHref="/#say"
+        current="projects"
+        socials={profile.socialLinks}
+      />
       <div>
         <header
           id="top"
@@ -42,7 +52,7 @@ export function ProjectsIndex() {
             <span
               style={{ fontSize: "var(--fs-meta)", color: "var(--text-meta)" }}
             >
-              {PROJECTS.length} of them
+              {projects.length} of them
             </span>
           </div>
           <h1
@@ -105,9 +115,9 @@ export function ProjectsIndex() {
             padding: "0 var(--gutter) var(--s-12)",
           }}
         >
-          {PROJECTS.map((p) => (
+          {projects.map((project) => (
             <article
-              key={p.slug}
+              key={project.id}
               className="px-row"
               style={{
                 display: "grid",
@@ -119,14 +129,18 @@ export function ProjectsIndex() {
             >
               <div className="px-thumb" style={{ minWidth: 0 }}>
                 <Link
-                  aria-label={`Read the ${p.name} write-up`}
-                  href={`/projects/${p.slug}`}
+                  aria-label={`Read the ${project.name} write-up`}
+                  href={`/projects/${project.slug}`}
                   style={{ display: "block", borderRadius: "var(--r-card)" }}
                 >
                   <Figure
-                    aspect="3 / 2"
-                    placeholder={`Drop a ${p.name} image`}
-                    slotId={p.slot}
+                    aspect={project.coverPlaceholder?.aspectRatio ?? "3 / 2"}
+                    asset={project.coverAsset}
+                    placeholder={`Drop a ${project.name} image`}
+                    slotId={
+                      project.coverPlaceholder?.slotId ??
+                      `project-${project.slug}`
+                    }
                   />
                 </Link>
               </div>
@@ -143,7 +157,7 @@ export function ProjectsIndex() {
                 <span style={{ overflow: "hidden", display: "block" }}>
                   <Link
                     className="px-name"
-                    href={`/projects/${p.slug}`}
+                    href={`/projects/${project.slug}`}
                     style={{
                       display: "inline-block",
                       fontFamily: "var(--font-display)",
@@ -154,7 +168,7 @@ export function ProjectsIndex() {
                       color: "var(--text-primary)",
                     }}
                   >
-                    {p.name}
+                    {project.name}
                   </Link>
                 </span>
                 <p
@@ -164,7 +178,7 @@ export function ProjectsIndex() {
                     maxWidth: "42ch",
                   }}
                 >
-                  {p.hook}
+                  {project.hook}
                 </p>
                 <div
                   style={{
@@ -173,7 +187,7 @@ export function ProjectsIndex() {
                     gap: "var(--s-2)",
                   }}
                 >
-                  {p.stack.slice(0, 4).map((s) => (
+                  {project.stack.slice(0, 4).map((s) => (
                     <Tag key={s}>{s}</Tag>
                   ))}
                 </div>
@@ -190,11 +204,13 @@ export function ProjectsIndex() {
                   }}
                 >
                   <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                    {p.year}
+                    {project.year}
                   </span>
-                  <span style={{ color: "var(--sand)" }}>{p.status}</span>
+                  <span style={{ color: "var(--sand)" }}>
+                    {project.displayStatus}
+                  </span>
                   <Link
-                    href={`/projects/${p.slug}`}
+                    href={`/projects/${project.slug}`}
                     style={{ boxShadow: "inset 0 -1px 0 0 currentColor" }}
                   >
                     Read the write-up

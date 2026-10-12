@@ -1,39 +1,58 @@
 import { MetadataRoute } from "next";
 
-import { POSTS } from "@/data/posts";
-import { PROJECTS } from "@/data/projects";
+import { siteConfig } from "@/config/site";
+import {
+  getPublishedHomepage,
+  getPublishedSiteProfile,
+  listPublishedPosts,
+  listPublishedProjects,
+} from "@/server/content/public";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://www.deanukanah.dev";
+function newestPublication(items: Array<{ publishedAt: Date }>) {
+  return items.reduce<Date | undefined>(
+    (latest, { publishedAt }) =>
+      !latest || publishedAt > latest ? publishedAt : latest,
+    undefined,
+  );
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [profile, homepage, projects, posts] = await Promise.all([
+    getPublishedSiteProfile(),
+    getPublishedHomepage(),
+    listPublishedProjects(),
+    listPublishedPosts(),
+  ]);
+  const baseUrl = siteConfig.url;
 
   return [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: homepage?.publishedAt ?? profile?.publishedAt,
       changeFrequency: "monthly",
       priority: 1,
     },
     {
       url: `${baseUrl}/projects`,
-      lastModified: new Date(),
+      lastModified: newestPublication(projects),
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    ...PROJECTS.map((p) => ({
-      url: `${baseUrl}/projects/${p.slug}`,
-      lastModified: new Date(),
+    ...projects.map((project) => ({
+      url: `${baseUrl}/projects/${project.slug}`,
+      lastModified: project.publishedAt,
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
     {
       url: `${baseUrl}/blog`,
-      lastModified: new Date(),
+      lastModified: newestPublication(posts),
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    ...POSTS.filter((p) => p.body).map((p) => ({
-      url: `${baseUrl}/blog/${p.slug}`,
-      lastModified: new Date(),
+    ...posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.publishedAt,
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),

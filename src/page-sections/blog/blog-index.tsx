@@ -1,25 +1,35 @@
+import type { PublicPost, PublicSiteProfile } from "@/server/content/public";
+
 import * as React from "react";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { PostRow } from "@/components/design-system/post-row";
-import { ME } from "@/data/me";
-import { POSTS } from "@/data/posts";
 
 const TITLE = "Notes on building things that have to work.".split(" ");
 
-export function BlogIndex() {
-  const years: { year: string; posts: typeof POSTS }[] = [];
+export function BlogIndex({
+  posts,
+  profile,
+}: {
+  posts: PublicPost[];
+  profile: PublicSiteProfile;
+}) {
+  const years: { year: string; posts: PublicPost[] }[] = [];
 
-  POSTS.forEach((p) => {
-    const y = years.find((x) => x.year === p.year);
+  posts.forEach((post) => {
+    const year = years.find((group) => group.year === post.year);
 
-    if (y) y.posts.push(p);
-    else years.push({ year: p.year, posts: [p] });
+    if (year) year.posts.push(post);
+    else years.push({ year: post.year, posts: [post] });
   });
 
   return (
     <React.Fragment>
-      <SiteNav contactHref="/#say" current="blog" socials={ME.links} />
+      <SiteNav
+        contactHref="/#say"
+        current="blog"
+        socials={profile.socialLinks}
+      />
       <div>
         <header
           id="top"
@@ -46,7 +56,7 @@ export function BlogIndex() {
             <span
               style={{ fontSize: "var(--fs-meta)", color: "var(--text-meta)" }}
             >
-              {POSTS.length} posts
+              {posts.length} {posts.length === 1 ? "post" : "posts"}
             </span>
           </div>
           <h1
@@ -140,7 +150,7 @@ export function BlogIndex() {
                   <div key={p.slug} className="bi-row">
                     <PostRow
                       date={p.date}
-                      href={p.body ? `/blog/${p.slug}` : "#"}
+                      href={`/blog/${p.slug}`}
                       readingTime={p.readingTime}
                       summary={p.summary}
                       tag={p.tag}
@@ -151,17 +161,6 @@ export function BlogIndex() {
               </div>
             </section>
           ))}
-          <p
-            style={{
-              marginTop: "var(--s-9)",
-              fontSize: "var(--fs-meta)",
-              color: "var(--text-meta)",
-              maxWidth: "62ch",
-            }}
-          >
-            Only the first post has a body in this prototype — open “What
-            Tree-sitter taught me…” to see the reading view.
-          </p>
         </main>
       </div>
     </React.Fragment>

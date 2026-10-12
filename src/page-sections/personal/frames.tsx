@@ -1,9 +1,10 @@
+import type { PublicHomepage } from "@/server/content/public";
+
 import { SectionHeading } from "@/components/design-system/section-heading";
 import { Figure } from "@/components/design-system/figure";
 import { SkillGroup } from "@/components/design-system/skill-group";
-import { ME } from "@/data/me";
 
-export function Frames() {
+export function Frames({ section }: { section: PublicHomepage["frames"] }) {
   return (
     <section
       id="frames"
@@ -20,15 +21,17 @@ export function Frames() {
           marginBottom: "var(--s-9)",
         }}
       >
-        <SectionHeading note="Abuja, the desk, and the occasional 3am screenshot. Scroll — it moves sideways.">
-          Off the screen
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
       </div>
       <div className="fr-viewport">
         <div className="fr-track">
-          {ME.frames.map((f, i) => (
+          {section.items.map((item, i) => (
             <div
-              key={f.slot}
+              key={
+                "mediaAssetId" in item
+                  ? item.mediaAssetId
+                  : item.placeholderSlot
+              }
               className="fr-item"
               style={{
                 flex: "0 0 auto",
@@ -37,10 +40,15 @@ export function Frames() {
               }}
             >
               <Figure
-                aspect={f.aspect}
-                caption={f.caption}
+                aspect={item.aspectRatio}
+                asset={"mediaAssetId" in item ? item.mediaAsset : null}
+                caption={item.caption}
                 placeholder="Drop a photo"
-                slotId={f.slot}
+                slotId={
+                  "placeholderSlot" in item
+                    ? item.placeholderSlot
+                    : item.mediaAssetId
+                }
               />
             </div>
           ))}
@@ -50,7 +58,7 @@ export function Frames() {
   );
 }
 
-export function Reach() {
+export function Reach({ section }: { section: PublicHomepage["reach"] }) {
   return (
     <section
       id="reach"
@@ -66,9 +74,7 @@ export function Reach() {
           padding: "0 var(--gutter)",
         }}
       >
-        <SectionHeading note="Grouped by how often I actually open it.">
-          What I reach for
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
         <div
           className="rc-grid"
           style={{
@@ -77,9 +83,9 @@ export function Reach() {
             gap: "var(--s-9) var(--s-8)",
           }}
         >
-          {ME.reach.map((g) => (
-            <div key={g.label} className="rc-cell">
-              <SkillGroup {...g} />
+          {section.groups.map((group) => (
+            <div key={group.label} className="rc-cell">
+              <SkillGroup {...group} />
             </div>
           ))}
         </div>
@@ -93,16 +99,15 @@ export function Reach() {
               maxWidth: "62ch",
             }}
           >
-            I have also done this for other people — four years of it, if the
-            résumé is the thing you came for.
+            {section.experienceIntro}
           </p>
           <div
             className="wk-list"
             style={{ display: "flex", flexDirection: "column" }}
           >
-            {ME.worked.map((w) => (
+            {section.experiences.map((experience) => (
               <div
-                key={w.company}
+                key={`${experience.company}-${experience.period}`}
                 className="wk-row"
                 style={{
                   display: "grid",
@@ -120,7 +125,7 @@ export function Reach() {
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
-                  {w.period}
+                  {experience.period}
                 </span>
                 <span style={{ minWidth: 0 }}>
                   <span
@@ -131,7 +136,7 @@ export function Reach() {
                       color: "var(--text-primary)",
                     }}
                   >
-                    {w.company}
+                    {experience.company}
                   </span>
                   <span
                     style={{
@@ -140,7 +145,7 @@ export function Reach() {
                       marginLeft: "var(--s-3)",
                     }}
                   >
-                    {w.role}
+                    {experience.role}
                   </span>
                 </span>
                 <span
@@ -150,7 +155,7 @@ export function Reach() {
                     color: "var(--text-meta)",
                   }}
                 >
-                  {w.stack.join("  ·  ")}
+                  {experience.stack.join("  ·  ")}
                 </span>
               </div>
             ))}

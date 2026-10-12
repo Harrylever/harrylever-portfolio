@@ -2,10 +2,14 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogPostView } from "@/page-sections/blog/blog-post-view";
-import { getPost, POSTS } from "@/data/posts";
+import {
+  getPublishedPost,
+  getPublishedSiteProfile,
+  listPublishedPosts,
+} from "@/server/content/public";
 
-export function generateStaticParams() {
-  return POSTS.filter((p) => p.body).map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await listPublishedPosts()).map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -14,11 +18,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPublishedPost(slug);
 
   if (!post) return {};
 
-  return { title: post.title, description: post.summary };
+  return { title: post.seo.title, description: post.seo.description };
 }
 
 export default async function BlogPostPage({
@@ -27,16 +31,24 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const [post, profile, posts] = await Promise.all([
+    getPublishedPost(slug),
+    getPublishedSiteProfile(),
+    listPublishedPosts(),
+  ]);
 
-  if (!post || !post.body) notFound();
+  if (!post || !profile) notFound();
 
   return (
     <>
       <a className="skip" href="#top">
         Skip to content
       </a>
-      <BlogPostView post={post} />
+      <BlogPostView
+        morePosts={posts.filter((item) => item.slug !== post.slug).slice(0, 2)}
+        post={post}
+        profile={profile}
+      />
     </>
   );
 }

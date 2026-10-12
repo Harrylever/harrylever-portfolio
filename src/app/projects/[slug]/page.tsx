@@ -2,10 +2,14 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProjectDetail } from "@/page-sections/projects/project-detail";
-import { getProject, PROJECTS } from "@/data/projects";
+import {
+  getPublishedProject,
+  getPublishedSiteProfile,
+  listPublishedProjects,
+} from "@/server/content/public";
 
-export function generateStaticParams() {
-  return PROJECTS.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await listPublishedProjects()).map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -14,11 +18,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getPublishedProject(slug);
 
   if (!project) return {};
 
-  return { title: project.name, description: project.hook };
+  return { title: project.seo.title, description: project.seo.description };
 }
 
 export default async function ProjectDetailPage({
@@ -27,16 +31,20 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const [project, profile, projects] = await Promise.all([
+    getPublishedProject(slug),
+    getPublishedSiteProfile(),
+    listPublishedProjects(),
+  ]);
 
-  if (!project) notFound();
+  if (!project || !profile) notFound();
 
   return (
     <>
       <a className="skip" href="#top">
         Skip to content
       </a>
-      <ProjectDetail project={project} />
+      <ProjectDetail profile={profile} project={project} projects={projects} />
     </>
   );
 }

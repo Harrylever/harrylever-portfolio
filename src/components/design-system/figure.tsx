@@ -5,6 +5,7 @@ import { ImageSlot } from "./image-slot";
    sage/sand accents. */
 export function Figure({
   slotId,
+  asset,
   caption,
   aspect = "4 / 5",
   placeholder = "Drop an image",
@@ -13,6 +14,12 @@ export function Figure({
   style,
 }: {
   slotId: string;
+  asset?: {
+    secureUrl: string;
+    altText: string;
+    width: number;
+    height: number;
+  } | null;
   caption?: string;
   aspect?: string;
   placeholder?: string;
@@ -44,7 +51,19 @@ export function Figure({
           filter: "saturate(.88) contrast(1.02)",
         }}
       >
-        <ImageSlot placeholder={placeholder} shape={shape} slotId={slotId} />
+        {asset ? (
+          // Cloudinary provides the already-transformed public URL.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            alt={asset.altText}
+            height={asset.height}
+            src={asset.secureUrl}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            width={asset.width}
+          />
+        ) : (
+          <ImageSlot placeholder={placeholder} shape={shape} slotId={slotId} />
+        )}
       </div>
       {caption ? (
         <figcaption
