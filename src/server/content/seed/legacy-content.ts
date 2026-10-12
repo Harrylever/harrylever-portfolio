@@ -19,8 +19,9 @@ import { normalizeSlug } from "@/domain/content/shared";
 import { ME } from "@/data/me";
 import { POSTS } from "@/data/posts";
 import { PROJECTS } from "@/data/projects";
+import { serverEnv } from "@/env/server";
+import { buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
-import { user } from "@/server/db/schema/auth";
 import {
   homeSections,
   posts,
@@ -63,23 +64,12 @@ function unwrap<T>(result: ActionResult<T>, operation: string): T {
   return result.data;
 }
 
-async function seedActor(): Promise<AdminSession> {
-  const administrators = await db
-    .select({ id: user.id, name: user.name, email: user.email })
-    .from(user)
-    .where(eq(user.role, "admin"));
-
-  if (administrators.length !== 1) {
-    throw new Error(
-      "Content seed requires exactly one bootstrapped administrator",
-    );
-  }
-  const [administrator] = administrators;
-
-  return {
-    user: { ...administrator, role: "admin" },
-    session: { id: "content-seed", userId: administrator.id },
-  } as AdminSession;
+function seedActor(): AdminSession {
+  // Seed writes are attributed to the environment-preset administrator.
+  return buildAdminSession(
+    serverEnv.ADMIN_EMAIL ?? "content-seed@localhost",
+    new Date(Date.now() + 60 * 60 * 1000),
+  );
 }
 
 function siteProfileContent(): SiteProfileContent {
@@ -299,7 +289,7 @@ function legacyPostDate(value: string): Date {
 }
 
 export async function seedLegacyContent(): Promise<SeedSummary> {
-  const actor = await seedActor();
+  const actor = seedActor();
   let created = 0;
   let updated = 0;
   const profileContent = siteProfileContent();

@@ -22,19 +22,22 @@ import {
   withRollback,
 } from "../helpers/database";
 
-const requiredTables = [
+const removedAuthTables = [
   "account",
+  "rate_limit",
+  "session",
+  "user",
+  "verification",
+] as const;
+
+const requiredTables = [
   "content_events",
   "home_sections",
   "media_assets",
   "media_usage",
   "posts",
   "projects",
-  "rate_limit",
-  "session",
   "site_profile",
-  "user",
-  "verification",
 ] as const;
 
 const contentTables = [
@@ -62,10 +65,11 @@ describe("CMS database schema", () => {
     await testPool.end();
   });
 
-  test("creates the complete auth and CMS schema", async () => {
-    expect(await tableNames(testPool)).toEqual(
-      expect.arrayContaining([...requiredTables]),
-    );
+  test("creates the CMS schema without database-backed auth", async () => {
+    const tables = await tableNames(testPool);
+
+    expect(tables).toEqual(expect.arrayContaining([...requiredTables]));
+    for (const table of removedAuthTables) expect(tables).not.toContain(table);
 
     for (const table of requiredTables) {
       expect(await primaryKeyType(testPool, table)).toBe("text");
@@ -80,9 +84,7 @@ describe("CMS database schema", () => {
     expect(await timestampType(testPool, "projects", "updated_at")).toBe(
       "timestamp with time zone",
     );
-    expect(await foreignKeyTargets(testPool, "content_events")).toContain(
-      "user.id",
-    );
+    expect(await foreignKeyTargets(testPool, "content_events")).toEqual([]);
     expect(await foreignKeyTargets(testPool, "media_usage")).toContain(
       "media_assets.id",
     );

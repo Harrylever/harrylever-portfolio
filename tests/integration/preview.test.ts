@@ -1,11 +1,9 @@
 import type { HomeSectionContent } from "@/domain/content/home";
 
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
-import { inArray } from "drizzle-orm";
 
 import { homeSectionTypes } from "@/domain/content/home";
-import { auth } from "@/server/auth";
-import { bootstrapAdmin } from "@/server/auth/bootstrap";
+import { ADMIN_SESSION_COOKIE, createSession } from "@/server/auth/session";
 import {
   canonicalPreviewPath,
   getPreviewHomepage,
@@ -20,7 +18,6 @@ import {
 } from "@/server/content/preview";
 import { db } from "@/server/db/client";
 import { createId } from "@/server/db/id";
-import { user } from "@/server/db/schema/auth";
 import {
   homeSections,
   posts,
@@ -30,11 +27,6 @@ import {
 
 import { adminActor, postContent, projectContent } from "../helpers/content";
 
-const adminAccount = {
-  name: "Preview Test Admin",
-  email: "cms-preview-admin@example.invalid",
-  password: "preview-test-password-2026",
-};
 const draftCookie = "__prerender_bypass=forged-value";
 const publishedAt = new Date("2026-04-02T09:00:00.000Z");
 
@@ -93,22 +85,11 @@ function section(type: (typeof homeSectionTypes)[number], tag: string) {
 }
 
 async function adminHeaders(): Promise<Headers> {
-  await bootstrapAdmin(adminAccount);
-  const response = await auth.handler(
-    new Request("http://localhost:3000/api/auth/sign-in/email", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        email: adminAccount.email,
-        password: adminAccount.password,
-      }),
-    }),
-  );
-  const cookie = response.headers.get("set-cookie")?.split(";", 1)[0];
+  const { token } = await createSession();
 
-  if (!cookie) throw new Error("Expected a session cookie");
-
-  return new Headers({ cookie: `${cookie}; ${draftCookie}` });
+  return new Headers({
+    cookie: `${ADMIN_SESSION_COOKIE}=${token}; ${draftCookie}`,
+  });
 }
 
 async function clean() {
@@ -116,7 +97,6 @@ async function clean() {
   await db.delete(siteProfile);
   await db.delete(projects);
   await db.delete(posts);
-  await db.delete(user).where(inArray(user.email, [adminAccount.email]));
 }
 
 function fakeController() {

@@ -3,16 +3,18 @@ import type { AdminSession } from "@/server/auth/require-admin";
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 
+import { buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
-import { user } from "@/server/db/schema/auth";
 import { contentEvents, siteProfile } from "@/server/db/schema/content";
 import {
   publishSiteProfile,
   saveSiteProfileDraft,
 } from "@/server/content/site-profile/service";
 
-const actorId = "k00000000000000000000002";
-const actor = { user: { id: actorId, role: "admin" } } as AdminSession;
+const actor: AdminSession = buildAdminSession(
+  "profile-admin@example.invalid",
+  new Date(Date.now() + 60 * 60 * 1000),
+);
 const firstDraft = {
   name: "Harry Lever",
   location: "Lagos, Nigeria",
@@ -26,14 +28,6 @@ const firstDraft = {
 async function reset() {
   await db.delete(contentEvents);
   await db.delete(siteProfile);
-  await db.delete(user).where(eq(user.id, actorId));
-  await db.insert(user).values({
-    id: actorId,
-    name: "Profile Admin",
-    email: "profile-admin@example.invalid",
-    emailVerified: true,
-    role: "admin",
-  });
 }
 
 describe.serial("site profile publication", () => {
@@ -41,7 +35,6 @@ describe.serial("site profile publication", () => {
   afterAll(async () => {
     await db.delete(contentEvents);
     await db.delete(siteProfile);
-    await db.delete(user).where(eq(user.id, actorId));
   }, 60_000);
 
   test("keeps one profile and publishes draft changes explicitly", async () => {

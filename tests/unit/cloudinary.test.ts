@@ -8,10 +8,10 @@ import {
   verifyUploadedAssetResponse,
 } from "@/server/media/cloudinary";
 
-const admin = {
-  user: { id: "admin-id", email: "admin@example.test", role: "admin" },
-  session: { id: "session-id", userId: "admin-id" },
-} as AdminSession;
+const admin: AdminSession = {
+  user: { id: "admin", email: "admin@example.test", role: "admin" },
+  expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+};
 
 const config: CloudinaryMediaConfig = {
   cloudName: "portfolio-test",
@@ -31,9 +31,7 @@ const authoritativeResource = {
   format: "jpg",
 };
 
-function signedUploadResponse(
-  cloudinaryResource = authoritativeResource,
-) {
+function signedUploadResponse(cloudinaryResource = authoritativeResource) {
   cloudinary.config({
     cloud_name: config.cloudName,
     api_key: config.apiKey,

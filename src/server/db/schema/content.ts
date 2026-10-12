@@ -21,7 +21,6 @@ import { sql } from "drizzle-orm";
 
 import { homeSectionTypes } from "@/domain/content/home";
 import { createId } from "@/server/db/id";
-import { user } from "@/server/db/schema/auth";
 
 const timestampColumn = (name: string) =>
   timestamp(name, { mode: "date", withTimezone: true });
@@ -227,9 +226,8 @@ export const contentEvents = pgTable(
   "content_events",
   {
     id: text("id").primaryKey().$defaultFn(createId),
-    actorId: text("actor_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "restrict" }),
+    // The environment-preset administrator's session user id (no FK).
+    actorId: text("actor_id").notNull(),
     contentType: contentTypeEnum("content_type").notNull(),
     contentId: text("content_id").notNull(),
     eventType: contentEventTypeEnum("event_type").notNull(),

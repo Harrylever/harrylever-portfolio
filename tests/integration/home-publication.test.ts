@@ -10,9 +10,9 @@ import { asc, eq } from "drizzle-orm";
 import { projectContent } from "../helpers/content";
 
 import { homeSectionTypes } from "@/domain/content/home";
+import { buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
 import { createId } from "@/server/db/id";
-import { user } from "@/server/db/schema/auth";
 import {
   contentEvents,
   homeSections,
@@ -26,8 +26,10 @@ import {
   saveHomeSectionDraft,
 } from "@/server/content/home/service";
 
-const actorId = "k00000000000000000000003";
-const actor = { user: { id: actorId, role: "admin" } } as AdminSession;
+const actor: AdminSession = buildAdminSession(
+  "home-admin@example.invalid",
+  new Date(Date.now() + 60 * 60 * 1000),
+);
 
 function section(type: HomeSectionType): HomeSectionContent {
   const shared = { heading: `${type} heading` };
@@ -67,14 +69,6 @@ async function reset() {
   await db.delete(mediaUsage);
   await db.delete(homeSections);
   await db.delete(projects);
-  await db.delete(user).where(eq(user.id, actorId));
-  await db.insert(user).values({
-    id: actorId,
-    name: "Home Admin",
-    email: "home-admin@example.invalid",
-    emailVerified: true,
-    role: "admin",
-  });
 }
 
 describe.serial("homepage publication", () => {
@@ -84,7 +78,6 @@ describe.serial("homepage publication", () => {
     await db.delete(mediaUsage);
     await db.delete(homeSections);
     await db.delete(projects);
-    await db.delete(user).where(eq(user.id, actorId));
   }, 60_000);
 
   test("publishes all eight sections atomically and keeps later drafts private", async () => {

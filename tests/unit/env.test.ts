@@ -31,4 +31,45 @@ describe("parseServerEnv", () => {
       Object.keys(environment).some((key) => key.startsWith("NEXT_PUBLIC_")),
     ).toBe(false);
   });
+
+  test("validates the preset administrator credentials lazily", () => {
+    const base = { DATABASE_URL: pooled, DATABASE_URL_UNPOOLED: direct };
+    const admin = {
+      ADMIN_EMAIL: "owner@example.com",
+      ADMIN_PASSWORD: "twelve-chars-or-more",
+      ADMIN_SESSION_SECRET: "x".repeat(32),
+    };
+
+    expect(parseServerEnv(base)).toEqual(base);
+    expect(
+      parseServerEnv({
+        ...base,
+        ADMIN_EMAIL: "",
+        ADMIN_PASSWORD: "",
+        ADMIN_SESSION_SECRET: "",
+      }),
+    ).toEqual(base);
+    expect(parseServerEnv({ ...base, ...admin })).toEqual({
+      ...base,
+      ...admin,
+    });
+    expect(() =>
+      parseServerEnv({ ...base, ...admin, ADMIN_EMAIL: "not-an-email" }),
+    ).toThrow("ADMIN_EMAIL");
+    expect(() =>
+      parseServerEnv({ ...base, ...admin, ADMIN_PASSWORD: "short" }),
+    ).toThrow("ADMIN_PASSWORD");
+    expect(() =>
+      parseServerEnv({
+        ...base,
+        ...admin,
+        ADMIN_SESSION_SECRET: "x".repeat(31),
+      }),
+    ).toThrow("ADMIN_SESSION_SECRET");
+    expect(
+      Object.keys(
+        parseServerEnv({ ...base, BETTER_AUTH_SECRET: "x".repeat(32) }),
+      ),
+    ).not.toContain("BETTER_AUTH_SECRET");
+  });
 });

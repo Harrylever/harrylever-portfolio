@@ -1,10 +1,20 @@
 import { z } from "zod";
 
+// Treat blank values (e.g. copied from .env.example) as unset.
+const optionalSecret = <T extends z.ZodType>(schema: T) =>
+  z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    schema.optional(),
+  );
+
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url().startsWith("postgresql://"),
   DATABASE_URL_UNPOOLED: z.url().startsWith("postgresql://"),
-  BETTER_AUTH_SECRET: z.string().min(32).optional(),
-  BETTER_AUTH_URL: z.url().optional(),
+  // Optional at parse time so builds and public pages do not need them; the
+  // admin auth module requires all three before it signs or verifies anything.
+  ADMIN_EMAIL: optionalSecret(z.email()),
+  ADMIN_PASSWORD: optionalSecret(z.string().min(12)),
+  ADMIN_SESSION_SECRET: optionalSecret(z.string().min(32)),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -30,10 +40,13 @@ export const serverEnv: ServerEnv = Object.freeze({
   get DATABASE_URL_UNPOOLED() {
     return readServerEnv().DATABASE_URL_UNPOOLED;
   },
-  get BETTER_AUTH_SECRET() {
-    return readServerEnv().BETTER_AUTH_SECRET;
+  get ADMIN_EMAIL() {
+    return readServerEnv().ADMIN_EMAIL;
   },
-  get BETTER_AUTH_URL() {
-    return readServerEnv().BETTER_AUTH_URL;
+  get ADMIN_PASSWORD() {
+    return readServerEnv().ADMIN_PASSWORD;
+  },
+  get ADMIN_SESSION_SECRET() {
+    return readServerEnv().ADMIN_SESSION_SECRET;
   },
 });

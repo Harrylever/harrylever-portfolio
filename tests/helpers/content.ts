@@ -2,11 +2,8 @@ import type { PostContent } from "@/domain/content/post";
 import type { ProjectContent } from "@/domain/content/project";
 import type { AdminSession } from "@/server/auth/require-admin";
 
-import { eq } from "drizzle-orm";
-
+import { ADMIN_USER_ID, buildAdminSession } from "@/server/auth/session";
 import { db } from "@/server/db/client";
-import { createId } from "@/server/db/id";
-import { user } from "@/server/db/schema/auth";
 import {
   contentEvents,
   mediaUsage,
@@ -14,7 +11,7 @@ import {
   projects,
 } from "@/server/db/schema/content";
 
-export const contentActorId = "k00000000000000000000001";
+export const contentActorId = ADMIN_USER_ID;
 const contentActorEmail = "cms-content-actor@example.invalid";
 
 export function projectContent(name = "Project One"): ProjectContent {
@@ -54,10 +51,10 @@ export function postContent(title = "Post One"): PostContent {
 }
 
 export function adminActor(): AdminSession {
-  return {
-    user: { id: contentActorId, email: contentActorEmail, role: "admin" },
-    session: { id: createId(), userId: contentActorId },
-  } as AdminSession;
+  return buildAdminSession(
+    contentActorEmail,
+    new Date(Date.now() + 60 * 60 * 1000),
+  );
 }
 
 export async function resetContentFixtures() {
@@ -65,14 +62,6 @@ export async function resetContentFixtures() {
   await db.delete(mediaUsage);
   await db.delete(projects);
   await db.delete(posts);
-  await db.delete(user).where(eq(user.email, contentActorEmail));
-  await db.insert(user).values({
-    id: contentActorId,
-    name: "Content Test Admin",
-    email: contentActorEmail,
-    emailVerified: true,
-    role: "admin",
-  });
 }
 
 export async function removeContentFixtures() {
@@ -80,5 +69,4 @@ export async function removeContentFixtures() {
   await db.delete(mediaUsage);
   await db.delete(projects);
   await db.delete(posts);
-  await db.delete(user).where(eq(user.email, contentActorEmail));
 }

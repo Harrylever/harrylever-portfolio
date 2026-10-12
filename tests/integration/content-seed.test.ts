@@ -1,12 +1,10 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count } from "drizzle-orm";
 
-import { contentActorId } from "@/../tests/helpers/content";
 import { ME } from "@/data/me";
 import { POSTS } from "@/data/posts";
 import { PROJECTS } from "@/data/projects";
 import { db } from "@/server/db/client";
-import { user } from "@/server/db/schema/auth";
 import {
   contentEvents,
   homeSections,
@@ -18,8 +16,6 @@ import {
 } from "@/server/db/schema/content";
 import { seedLegacyContent } from "@/server/content/seed/legacy-content";
 
-const seedAdminEmail = "cms-content-actor@example.invalid";
-
 async function resetSeedFixtures() {
   await db.delete(contentEvents);
   await db.delete(mediaUsage);
@@ -28,14 +24,6 @@ async function resetSeedFixtures() {
   await db.delete(projects);
   await db.delete(posts);
   await db.delete(mediaAssets);
-  await db.delete(user).where(eq(user.email, seedAdminEmail));
-  await db.insert(user).values({
-    id: contentActorId,
-    name: "Content Seed Admin",
-    email: seedAdminEmail,
-    emailVerified: true,
-    role: "admin",
-  });
 }
 
 async function removeSeedFixtures() {
@@ -46,7 +34,6 @@ async function removeSeedFixtures() {
   await db.delete(projects);
   await db.delete(posts);
   await db.delete(mediaAssets);
-  await db.delete(user).where(eq(user.email, seedAdminEmail));
 }
 
 async function recordIds() {

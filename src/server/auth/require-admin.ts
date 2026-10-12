@@ -1,12 +1,10 @@
+import type { AdminSession } from "@/server/auth/session";
+
 import { headers as nextHeaders } from "next/headers";
 
-import { auth } from "@/server/auth";
+import { readSession, sessionTokenFromHeaders } from "@/server/auth/session";
 
-type AuthSession = typeof auth.$Infer.Session;
-
-export type AdminSession = AuthSession & {
-  user: AuthSession["user"] & { role: "admin" };
-};
+export type { AdminSession } from "@/server/auth/session";
 
 export class AdminAuthorizationError extends Error {
   readonly status: 401 | 403;
@@ -23,12 +21,16 @@ export class AdminAuthorizationError extends Error {
 export async function requireAdmin(
   requestHeaders?: Headers,
 ): Promise<AdminSession> {
-  const session = await auth.api.getSession({
-    headers: requestHeaders ?? (await nextHeaders()),
-  });
+  const token = sessionTokenFromHeaders(
+    requestHeaders ?? (await nextHeaders()),
+  );
+
+  // No cookie means no session; avoid touching auth config for anonymous
+  // requests so public pages work without admin secrets.
+  if (!token) throw new AdminAuthorizationError(401);
+  const session = await readSession(token);
 
   if (!session) throw new AdminAuthorizationError(401);
-  if (session.user.role !== "admin") throw new AdminAuthorizationError(403);
 
-  return session as AdminSession;
+  return session;
 }
