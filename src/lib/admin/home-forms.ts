@@ -128,6 +128,8 @@ export type SayForm = {
   whatsappUrl: string;
   email: string;
   resumeUrl: string;
+  availability: string;
+  investorNote: string;
 };
 
 export type HomeFormValues =
@@ -200,6 +202,8 @@ export function emptyHomeForm<T extends HomeSectionType>(
       whatsappUrl: "",
       email: "",
       resumeUrl: "",
+      availability: "",
+      investorNote: "",
     },
   };
 
@@ -295,6 +299,8 @@ export function homeFormFromContent(
         whatsappUrl: content.whatsappUrl ?? "",
         email: content.email,
         resumeUrl: content.resumeUrl ?? "",
+        availability: content.availability ?? "",
+        investorNote: content.investorNote ?? "",
       };
   }
 }
@@ -422,6 +428,8 @@ export function homeDraftFromForm(values: HomeFormValues): unknown {
         ...optional("whatsappUrl", values.whatsappUrl),
         email: text(values.email),
         ...optional("resumeUrl", values.resumeUrl),
+        ...optional("availability", values.availability),
+        ...optional("investorNote", values.investorNote),
       };
   }
 }

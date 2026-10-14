@@ -278,3 +278,29 @@ describe("reorder helpers", () => {
     );
   });
 });
+
+describe("Say availability fields", () => {
+  test("availability and investorNote round-trip and blanks are omitted", () => {
+    const say = homeFormFromContent({
+      type: "say",
+      heading: "Talk",
+      email: "hi@example.com",
+      availability: "Open to remote contracts.",
+      investorNote: "Happy to talk about Shelta.",
+    });
+
+    if (say.type !== "say") throw new Error("unexpected");
+    expect(say.availability).toBe("Open to remote contracts.");
+    expect(say.investorNote).toBe("Happy to talk about Shelta.");
+    expect(homeDraftFromForm(say)).toEqual({
+      type: "say",
+      heading: "Talk",
+      email: "hi@example.com",
+      availability: "Open to remote contracts.",
+      investorNote: "Happy to talk about Shelta.",
+    });
+    expect(
+      homeDraftFromForm({ ...say, availability: " ", investorNote: "" }),
+    ).toEqual({ type: "say", heading: "Talk", email: "hi@example.com" });
+  });
+});

@@ -1,6 +1,12 @@
 import type { PostContent } from "@/domain/content/post";
-import type { ProjectContent } from "@/domain/content/project";
+import type {
+  ProjectContent,
+  ProjectKind,
+  StatusTone,
+} from "@/domain/content/project";
 import type { RichTextDocument } from "@/domain/content/rich-text";
+
+import { projectKindOf } from "@/domain/content/project";
 
 /* Pure helpers shared by the project/post forms and their server actions. */
 
@@ -12,6 +18,9 @@ export type ProjectFormValues = {
   year: string;
   role: string;
   displayStatus: string;
+  kind: ProjectKind;
+  statusTone: StatusTone | "";
+  metrics: { label: string; value: string; asOf: string }[];
   externalUrl: string;
   /** One technology per line (commas also split). */
   stack: string;
@@ -44,6 +53,9 @@ export function emptyProjectForm(): ProjectFormValues {
     year: String(new Date().getFullYear()),
     role: "",
     displayStatus: "",
+    kind: "product",
+    statusTone: "",
+    metrics: [],
     externalUrl: "",
     stack: "",
     coverAssetId: null,
@@ -79,6 +91,9 @@ export function projectFormFromContent(
     year: content.year,
     role: content.role,
     displayStatus: content.displayStatus,
+    kind: projectKindOf(content),
+    statusTone: content.statusTone ?? "",
+    metrics: (content.metrics ?? []).map((metric) => ({ ...metric })),
     externalUrl: content.externalUrl ?? "",
     stack: content.stack.join("\n"),
     coverAssetId: content.coverAssetId ?? null,
@@ -131,6 +146,14 @@ export function projectDraftFromForm(
     preserved.galleryPlaceholders = base.galleryPlaceholders;
   }
 
+  const metrics = values.metrics
+    .map(({ label, value, asOf }) => ({
+      label: label.trim(),
+      value: value.trim(),
+      asOf: asOf.trim(),
+    }))
+    .filter(({ label, value, asOf }) => label || value || asOf);
+
   return {
     name: values.name.trim(),
     hook: values.hook.trim(),
@@ -138,6 +161,11 @@ export function projectDraftFromForm(
     year: values.year.trim(),
     role: values.role.trim(),
     displayStatus: values.displayStatus.trim(),
+    // The default kind is only written when the row already carried one, so
+    // a legacy row saves without gaining keys.
+    ...(values.kind !== "product" || base?.kind ? { kind: values.kind } : {}),
+    ...(values.statusTone ? { statusTone: values.statusTone } : {}),
+    ...(metrics.length ? { metrics } : {}),
     externalUrl: values.externalUrl.trim() || null,
     stack: splitList(values.stack),
     coverAssetId: values.coverAssetId,
@@ -168,6 +196,7 @@ export function postDraftFromForm(values: PostFormValues): unknown {
 /** Content paths whose errors belong to one form control. */
 const collapsedRoots = new Set([
   "stack",
+  "metrics",
   "galleryAssetIds",
   "galleryPlaceholders",
   "caseStudy",
