@@ -41,8 +41,6 @@ Success means a visitor can, within 30 seconds, see:
 
 ## Content brief
 
-Items marked **[confirm]** need the owner's answer before publishing.
-
 ### Site profile and intro
 
 - Name: Dean Ukanah. Location: Abuja, Nigeria.
@@ -50,8 +48,7 @@ Items marked **[confirm]** need the owner's answer before publishing.
 - Headline: "I build software that makes student and Nigerian life easier."
 - Lede: co-founder of Shelta (verified off-campus housing for students), owning
   product and engineering end to end; final-year Cybersecurity student at
-  FUTMinna. Title wording **[confirm]**: "Co-founder, Head of Product and
-  Engineering".
+  FUTMinna. Title (confirmed): "Co-founder, Head of Product and Engineering".
 
 ### Shelta (lead project, `kind: product`)
 
@@ -84,12 +81,14 @@ Items marked **[confirm]** need the owner's answer before publishing.
 
 ### Contract work (`kind: client`)
 
-- **Karrigo:** food and groceries delivery in Makurdi. Owner built the backend
-  (NestJS) and both mobile apps (customer and partner). Live status and
-  permission to name the client **[confirm]**.
+- **Karrigo:** food and groceries delivery in Makurdi, live at karrigo.app.
+  Owner built the backend (NestJS) and both mobile apps (customer and
+  partner). Displayed as Live, linking to karrigo.app.
 - **Libra Cleaning:** owner built the backend (Go modular monolith with
-  separate API and worker processes). Live status and permission to name the
-  client **[confirm]**.
+  separate API and worker processes). Displayed as "In development, nearly
+  live", with no link until it launches.
+- Permission to name the clients is assumed from the owner listing both by name
+  and linking karrigo.app; the owner confirms again at publish time.
 
 ### Other products
 
@@ -109,8 +108,7 @@ Items marked **[confirm]** need the owner's answer before publishing.
 - **SakzPredict:** deleted. Trashed in the admin; not shown. Solana and Rust
   appear only as a line under "Currently exploring", presented as evidence the
   owner tries unfamiliar technology.
-- **Crystalizer** (existing client entry): kept unless the owner says otherwise
-  **[confirm]**.
+- **Crystalizer** (existing client entry, `kind: client`): kept.
 
 ### Experience (Reach section)
 
@@ -154,11 +152,29 @@ and facts come from the owner.
    inspections and key handover follow from it.
 4. What I got wrong: assuming agents would be eager; one embedded agent broke
    the deadlock.
-5. The numbers, only real ones.
+5. The numbers, only real ones (Shelta traction plus the survey below).
 6. What's next: tracking every flat per lodge.
 
-The survey PDF in the Shelta folder could not be read in this environment. The
-post stays without survey statistics until the owner provides results.
+### Survey evidence for the post
+
+Source: the owner's Google Forms survey, 24 responses, 62% from FUT Minna and
+mostly 300L students. The post must say it is a small, directional sample and
+quote counts rather than implying a representative study.
+
+- 8 of 24 (33%) had been scammed or hit a fraudulent listing.
+- Searches ran one to two weeks for 8 respondents; 5 spent over a month.
+- 22 of 24 (92%) would probably or definitely use a student housing platform.
+- 17 of 24 (71%) would probably or definitely pay ₦1,000–₦3,000 for verified
+  listings; none said no.
+- Top worries about a new platform: payment security (16), fake listings (14).
+- Most valued features: safety and security information (14), student reviews
+  (11), verified listings with photos (9).
+- WhatsApp was the preferred channel for 23 of 24.
+- Unprompted write-ins asked for steady power, which is a listing attribute
+  worth mentioning.
+- Mobile app: 8 prefer an app, 9 say an app or web is fine, 2 prefer web. This
+  supports "an app is welcome" but not "students reject the web", so the post
+  does not claim the survey proved the mobile decision.
 
 ## What needs code
 
@@ -216,7 +232,5 @@ against an environment he chooses.
 
 ## Open questions
 
-- Title wording at Shelta.
-- Karrigo and Libra: live status, and permission to name the clients.
-- Whether Crystalizer stays.
-- Survey results for the article, if the owner wants numbers in it.
+- None blocking. At publish time the owner re-confirms client naming for
+  Karrigo and Libra and reviews every number's "as of" date.
