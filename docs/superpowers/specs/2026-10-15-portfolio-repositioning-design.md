@@ -1,7 +1,7 @@
 # Portfolio Repositioning Design
 
 **Date:** 2026-10-15
-**Status:** Draft for owner review
+**Status:** Updated with owner answers, awaiting approval
 
 ## Purpose
 
