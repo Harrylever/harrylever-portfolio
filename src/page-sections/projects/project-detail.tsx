@@ -1,56 +1,42 @@
+import type { PublicProject, PublicSiteProfile } from "@/server/content/public";
+
 import * as React from "react";
 import Link from "next/link";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Prose } from "@/components/design-system/prose";
+import { RichText } from "@/components/content/rich-text";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
-import { ME } from "@/data/me";
-import { PROJECTS } from "@/data/projects";
-import { PostBlock, ProjectDetail as ProjectDetailData } from "@/types";
 
-function node(b: PostBlock, i: number) {
-  if (b.t === "ul" || b.t === "ol") {
-    const List = b.t === "ul" ? "ul" : "ol";
-
-    return (
-      <List key={i}>
-        {b.c.map((li) => (
-          <li key={li}>{li}</li>
-        ))}
-      </List>
-    );
-  }
-  if (b.t === "h2") return <h2 key={i}>{b.c}</h2>;
-  if (b.t === "h3") return <h3 key={i}>{b.c}</h3>;
-  if (b.t === "blockquote") return <blockquote key={i}>{b.c}</blockquote>;
-  if (b.t === "pre")
-    return (
-      <pre key={i}>
-        <code>{b.c}</code>
-      </pre>
-    );
-
-  return <p key={i}>{b.c}</p>;
-}
-
-export function ProjectDetail({ project }: { project: ProjectDetailData }) {
+export function ProjectDetail({
+  profile,
+  project,
+  projects,
+}: {
+  profile: PublicSiteProfile;
+  project: PublicProject;
+  projects: PublicProject[];
+}) {
   const words = project.name.split(" ");
+  const currentIndex = projects.findIndex(({ slug }) => slug === project.slug);
   const next =
-    PROJECTS[
-      (PROJECTS.findIndex((p) => p.slug === project.slug) + 1) % PROJECTS.length
-    ];
+    projects[(Math.max(0, currentIndex) + 1) % projects.length] ?? project;
 
   const facts: [string, string][] = [
     ["Year", project.year],
     ["Role", project.role],
-    ["State", project.status],
+    ["State", project.displayStatus],
   ];
 
   return (
     <React.Fragment>
-      <SiteNav contactHref="/#say" current="projects" socials={ME.links} />
+      <SiteNav
+        contactHref="/#say"
+        current="projects"
+        socials={profile.socialLinks}
+      />
       <div>
         <article
           id="top"
@@ -166,14 +152,14 @@ export function ProjectDetail({ project }: { project: ProjectDetailData }) {
               >
                 Live at
               </span>
-              {project.href ? (
+              {project.externalUrl ? (
                 <a
-                  href={project.href}
+                  href={project.externalUrl}
                   rel="noopener noreferrer"
                   style={{ fontSize: "var(--fs-sm)" }}
                   target="_blank"
                 >
-                  {project.href.replace(/^https?:\/\//, "")}
+                  {project.externalUrl.replace(/^https?:\/\//, "")}
                 </a>
               ) : (
                 <span
@@ -214,17 +200,26 @@ export function ProjectDetail({ project }: { project: ProjectDetailData }) {
 
           <div className="pd-lead" style={{ marginBottom: "var(--s-11)" }}>
             <Figure
-              aspect="16 / 9"
+              aspect={project.coverPlaceholder?.aspectRatio ?? "16 / 9"}
+              asset={project.coverAsset}
               placeholder={`Drop the main ${project.name} image`}
-              slotId={project.slot}
+              slotId={
+                project.coverPlaceholder?.slotId ?? `project-${project.slug}`
+              }
             />
           </div>
 
           <div className="pd-body">
-            <Prose>{project.body.map(node)}</Prose>
+            <Prose>
+              <RichText
+                document={project.caseStudy}
+                media={project.richTextMedia}
+              />
+            </Prose>
           </div>
 
-          {project.gallery?.length ? (
+          {project.galleryAssets.length ||
+          project.galleryPlaceholders?.length ? (
             <div
               className="pd-gal"
               style={{
@@ -234,15 +229,33 @@ export function ProjectDetail({ project }: { project: ProjectDetailData }) {
                 marginTop: "var(--s-11)",
               }}
             >
-              {project.gallery.map((slot) => (
-                <div key={slot}>
+              {project.galleryAssets.map((asset, index) => (
+                <div key={asset.id}>
                   <Figure
-                    aspect="4 / 3"
+                    aspect={
+                      project.galleryPlaceholders?.[index]?.aspectRatio ??
+                      "4 / 3"
+                    }
+                    asset={asset}
                     placeholder="Drop a screen"
-                    slotId={slot}
+                    slotId={
+                      project.galleryPlaceholders?.[index]?.slotId ?? asset.id
+                    }
                   />
                 </div>
               ))}
+              {project.galleryAssets.length === 0
+                ? project.galleryPlaceholders?.map((placeholder) => (
+                    <div key={placeholder.slotId}>
+                      <Figure
+                        aspect={placeholder.aspectRatio}
+                        caption={placeholder.caption}
+                        placeholder="Drop a screen"
+                        slotId={placeholder.slotId}
+                      />
+                    </div>
+                  ))
+                : null}
             </div>
           ) : null}
 

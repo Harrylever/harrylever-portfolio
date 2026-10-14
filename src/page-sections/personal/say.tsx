@@ -1,14 +1,21 @@
+import type {
+  PublicHomepage,
+  PublicSiteProfile,
+} from "@/server/content/public";
+
 import * as React from "react";
 
 import { Button } from "@/components/design-system/button";
-import { ME } from "@/data/me";
 
-const LINE =
-  "If you're building something odd, or you just want to compare notes — I'd like to hear about it.".split(
-    " ",
-  );
+export function Say({
+  profile,
+  section,
+}: {
+  profile: PublicSiteProfile;
+  section: PublicHomepage["say"];
+}) {
+  const words = section.heading.split(" ");
 
-export function Say() {
   return (
     <section
       id="say"
@@ -36,7 +43,7 @@ export function Say() {
             margin: "0 0 var(--s-8)",
           }}
         >
-          {LINE.map((w, i) => (
+          {words.map((word, i) => (
             <React.Fragment key={i}>
               <span
                 style={{
@@ -50,13 +57,13 @@ export function Say() {
                   style={{
                     display: "inline-block",
                     fontWeight:
-                      i >= LINE.length - 5
+                      i >= words.length - 5
                         ? "var(--fw-display-emph)"
                         : "inherit",
-                    color: i >= LINE.length - 5 ? "var(--sand)" : "inherit",
+                    color: i >= words.length - 5 ? "var(--sand)" : "inherit",
                   }}
                 >
-                  {w}
+                  {word}
                 </span>
               </span>{" "}
             </React.Fragment>
@@ -71,24 +78,22 @@ export function Say() {
             alignItems: "center",
           }}
         >
-          <span style={{ display: "inline-flex" }}>
-            <Button
-              href="https://wa.link/hemaxw"
-              target="_blank"
-              variant="solid"
-            >
-              Message me on WhatsApp
-            </Button>
-          </span>
-          <Button href="mailto:devdean315user@gmail.com" variant="quiet">
-            devdean315user@gmail.com
+          {section.whatsappUrl ? (
+            <span style={{ display: "inline-flex" }}>
+              <Button
+                href={section.whatsappUrl}
+                target="_blank"
+                variant="solid"
+              >
+                Message me on WhatsApp
+              </Button>
+            </span>
+          ) : null}
+          <Button href={`mailto:${section.email}`} variant="quiet">
+            {section.email}
           </Button>
-          {process.env.NEXT_PUBLIC_RESUME_URL ? (
-            <Button
-              href={process.env.NEXT_PUBLIC_RESUME_URL}
-              target="_blank"
-              variant="quiet"
-            >
+          {section.resumeUrl ? (
+            <Button href={section.resumeUrl} target="_blank" variant="quiet">
               Résumé, if you need it
             </Button>
           ) : null}
@@ -100,7 +105,7 @@ export function Say() {
             color: "var(--text-meta)",
           }}
         >
-          {ME.name} · {ME.location}
+          {profile.name} · {profile.location}
         </p>
       </div>
     </section>

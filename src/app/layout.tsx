@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
+
 import clsx from "clsx";
 import { Inter, Outfit } from "next/font/google";
 
@@ -8,6 +9,7 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getPublishedSiteProfile } from "@/server/content/public";
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
@@ -16,76 +18,71 @@ const outfitHeading = Outfit({
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${siteConfig.name} — ${siteConfig.tagline}`,
-    template: `%s — ${siteConfig.name}`,
-  },
-  authors: [
-    {
-      name: "Dean Ukanah",
-      url: "https://www.deanukanah.dev",
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await getPublishedSiteProfile();
+  const name = profile?.name ?? siteConfig.name;
+  const tagline = profile?.tagline ?? siteConfig.tagline;
+  const description = profile?.description ?? siteConfig.description;
+
+  return {
+    title: {
+      default: `${name} — ${tagline}`,
+      template: `%s — ${name}`,
     },
-  ],
-  creator: "Dean Onesi Ukanah",
-  publisher: "Dean Onesi Ukanah @ Vercel",
-  applicationName: "Dean's Portfolio",
-  generator: "Next.js",
-  keywords: [
-    "Harrylever",
-    "Dean Ukanah",
-    "Dean Onesi Ukanah",
-    "Indie Hacker",
-    "Software Engineer",
-    "Full-Stack Engineer",
-    "Product Engineering",
-    "Cybersecurity",
-    "Next.js",
-    "React",
-    "Solana",
-    "Rust",
-  ],
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name, url: siteConfig.url }],
+    creator: name,
+    publisher: `${name} @ Vercel`,
+    applicationName: `${name}'s Portfolio`,
+    generator: "Next.js",
+    keywords: [
+      "Harrylever",
+      "Dean Ukanah",
+      "Dean Onesi Ukanah",
+      "Indie Hacker",
+      "Software Engineer",
+      "Full-Stack Engineer",
+      "Product Engineering",
+      "Cybersecurity",
+      "Next.js",
+      "React",
+      "Solana",
+      "Rust",
+    ],
+    robots: {
       index: true,
       follow: true,
+      googleBot: { index: true, follow: true },
     },
-  },
-  metadataBase: new URL("https://www.deanukanah.dev"),
-  description: siteConfig.description,
-  icons: {
-    icon: "/favicon.ico",
-  },
-  openGraph: {
-    title: `${siteConfig.name} — ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    url: "https://www.deanukanah.dev",
-    siteName: siteConfig.name,
-    images: [
-      {
-        url: "https://www.deanukanah.dev/deanukanah.jpg",
-        width: 620,
-        height: 620,
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  alternates: {
-    canonical: "/",
-    languages: {
-      "en-US": "/en-US",
+    metadataBase: new URL(siteConfig.url),
+    description,
+    icons: { icon: "/favicon.ico" },
+    openGraph: {
+      title: `${name} — ${tagline}`,
+      description,
+      url: siteConfig.url,
+      siteName: name,
+      images: [
+        {
+          url: `${siteConfig.url}/deanukanah.jpg`,
+          width: 620,
+          height: 620,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
     },
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${siteConfig.name} — ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    images: { url: "https://www.deanukanah.dev/deanukanah.jpg" },
-  },
-};
+    alternates: {
+      canonical: "/",
+      languages: { "en-US": "/en-US" },
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} — ${tagline}`,
+      description,
+      images: { url: `${siteConfig.url}/deanukanah.jpg` },
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

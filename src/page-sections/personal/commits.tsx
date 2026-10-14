@@ -1,10 +1,10 @@
 "use client";
 
+import type { PublicHomepage } from "@/server/content/public";
+
 import dynamic from "next/dynamic";
 
 import { SectionHeading } from "@/components/design-system/section-heading";
-
-const GITHUB_USERNAME = "harrylever";
 
 /* The calendar fetches contribution data client-side and has no SSR mode
    (see the library's own README) — rendering it during SSR produces a
@@ -32,7 +32,7 @@ const CALENDAR_THEME = {
   dark: ["var(--bg-surface)", "#4b5c4f", "#6b8567", "#8fb187", "var(--sage)"],
 };
 
-export function Commits() {
+export function Commits({ section }: { section: PublicHomepage["commits"] }) {
   return (
     <section
       id="ship"
@@ -48,9 +48,7 @@ export function Commits() {
           padding: "0 var(--gutter)",
         }}
       >
-        <SectionHeading note="Pulled live from GitHub — a rolling year, not a highlight reel.">
-          Commits
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
         <div className="cm-cal" style={{ overflowX: "auto" }}>
           <GitHubCalendar
             blockMargin={4}
@@ -60,7 +58,7 @@ export function Commits() {
             fontSize={13}
             labels={{ totalCount: "{{count}} contributions in the last year" }}
             theme={CALENDAR_THEME}
-            username={GITHUB_USERNAME}
+            username={section.githubUsername}
           />
         </div>
       </div>

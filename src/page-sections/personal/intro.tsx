@@ -1,10 +1,20 @@
+import type {
+  PublicHomepage,
+  PublicSiteProfile,
+} from "@/server/content/public";
+
 import * as React from "react";
 
 import { Button } from "@/components/design-system/button";
 import { Figure } from "@/components/design-system/figure";
-import { ME } from "@/data/me";
 
-export function Intro() {
+export function Intro({
+  profile,
+  section,
+}: {
+  profile: PublicSiteProfile;
+  section: PublicHomepage["intro"];
+}) {
   return (
     <header
       id="top"
@@ -29,7 +39,7 @@ export function Intro() {
             whiteSpace: "nowrap",
           }}
         >
-          {ME.name}
+          {profile.name}
         </span>
         <span
           className="in-rule"
@@ -42,7 +52,7 @@ export function Intro() {
             whiteSpace: "nowrap",
           }}
         >
-          {ME.location}
+          {profile.location}
         </span>
       </div>
 
@@ -59,7 +69,7 @@ export function Intro() {
               margin: "0 0 var(--s-8)",
             }}
           >
-            {ME.intro.map((t, i) => (
+            {section.statement.map((part, i) => (
               <React.Fragment key={i}>
                 <span
                   style={{
@@ -72,11 +82,13 @@ export function Intro() {
                     className="in-word"
                     style={{
                       display: "inline-block",
-                      fontWeight: t.e ? "var(--fw-display-emph)" : "inherit",
-                      color: t.e ? "var(--sand)" : "inherit",
+                      fontWeight: part.emphasis
+                        ? "var(--fw-display-emph)"
+                        : "inherit",
+                      color: part.emphasis ? "var(--sand)" : "inherit",
                     }}
                   >
-                    {t.w}
+                    {part.text}
                   </span>
                 </span>{" "}
               </React.Fragment>
@@ -92,7 +104,7 @@ export function Intro() {
                 maxWidth: "var(--measure-lede)",
               }}
             >
-              {ME.lede}
+              {section.lede}
             </p>
           </div>
 
@@ -110,14 +122,14 @@ export function Intro() {
                 Say hello
               </Button>
             </span>
-            {ME.links.map((l) => (
+            {profile.socialLinks.map((link) => (
               <Button
-                key={l.label}
-                href={l.href}
+                key={link.label}
+                href={link.href}
                 target="_blank"
                 variant="outline"
               >
-                {l.label}
+                {link.label}
               </Button>
             ))}
           </div>
@@ -125,10 +137,14 @@ export function Intro() {
 
         <div className="in-portrait">
           <Figure
-            aspect="4 / 5"
-            caption="A photo of you goes here — drag one in."
+            aspect={section.portraitPlaceholder?.aspectRatio ?? "4 / 5"}
+            asset={section.portraitAsset}
+            caption={
+              section.portraitAsset?.caption ??
+              section.portraitPlaceholder?.caption
+            }
             placeholder="Drop a portrait"
-            slotId="intro-portrait"
+            slotId={section.portraitPlaceholder?.slotId ?? "intro-portrait"}
           />
         </div>
       </div>

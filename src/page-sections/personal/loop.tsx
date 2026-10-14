@@ -1,5 +1,6 @@
+import type { PublicHomepage } from "@/server/content/public";
+
 import { SectionHeading } from "@/components/design-system/section-heading";
-import { ME } from "@/data/me";
 
 /* "AI in the loop" — a frequency-ordered list of the tools genuinely in the
    daily loop. The bar is a real signal (every day / sometimes / rarely), not
@@ -10,7 +11,7 @@ const FREQ: Record<string, number> = {
   Rarely: 0.18,
 };
 
-export function Loop() {
+export function Loop({ section }: { section: PublicHomepage["loop"] }) {
   return (
     <section
       id="loop"
@@ -26,9 +27,7 @@ export function Loop() {
           padding: "0 var(--gutter)",
         }}
       >
-        <SectionHeading note="Ordered by how often it is actually open, not by how impressive it sounds.">
-          AI in the loop
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
 
         <div
           className="lp-note"
@@ -46,14 +45,14 @@ export function Loop() {
               maxWidth: "34ch",
             }}
           >
-            {ME.aiNote}
+            {section.intro}
           </p>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {ME.ai.map((a) => (
+          {section.items.map((item) => (
             <div
-              key={a.tool}
+              key={item.tool}
               className="lp-item"
               style={{
                 display: "grid",
@@ -83,7 +82,7 @@ export function Loop() {
                     margin: 0,
                   }}
                 >
-                  {a.tool}
+                  {item.tool}
                 </h3>
                 <p
                   style={{
@@ -92,7 +91,7 @@ export function Loop() {
                     maxWidth: "62ch",
                   }}
                 >
-                  {a.use}
+                  {item.use}
                 </p>
               </div>
 
@@ -120,9 +119,9 @@ export function Loop() {
                     style={{
                       display: "block",
                       height: "100%",
-                      width: (FREQ[a.freq] || 0.2) * 100 + "%",
+                      width: (FREQ[item.frequency] || 0.2) * 100 + "%",
                       background:
-                        a.freq === "Every day"
+                        item.frequency === "Every day"
                           ? "var(--sage)"
                           : "var(--haze-mute)",
                     }}
@@ -132,12 +131,12 @@ export function Loop() {
                   style={{
                     fontSize: "var(--fs-micro)",
                     color:
-                      a.freq === "Every day"
+                      item.frequency === "Every day"
                         ? "var(--sage)"
                         : "var(--text-meta)",
                   }}
                 >
-                  {a.freq}
+                  {item.frequency}
                 </span>
               </div>
             </div>
@@ -152,8 +151,7 @@ export function Loop() {
             maxWidth: "66ch",
           }}
         >
-          The security work cuts the other way: AIZEN exists because a model
-          will happily write you something that runs and is quietly exploitable.
+          {section.footer}
         </p>
       </div>
     </section>

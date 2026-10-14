@@ -1,7 +1,8 @@
-import { SectionHeading } from "@/components/design-system/section-heading";
-import { ME } from "@/data/me";
+import type { PublicHomepage } from "@/server/content/public";
 
-export function Now() {
+import { SectionHeading } from "@/components/design-system/section-heading";
+
+export function Now({ section }: { section: PublicHomepage["now"] }) {
   return (
     <section
       id="now"
@@ -17,13 +18,11 @@ export function Now() {
           padding: "0 var(--gutter)",
         }}
       >
-        <SectionHeading note="Updated whenever it stops being true.">
-          Right now
-        </SectionHeading>
+        <SectionHeading note={section.note}>{section.heading}</SectionHeading>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {ME.now.map((n) => (
+          {section.items.map((item) => (
             <div
-              key={n.label}
+              key={item.label}
               className="now-item"
               style={{
                 display: "grid",
@@ -43,7 +42,7 @@ export function Now() {
                   color: "var(--sand)",
                 }}
               >
-                {n.label}
+                {item.label}
               </span>
               <p
                 className="now-body"
@@ -53,7 +52,7 @@ export function Now() {
                   maxWidth: "66ch",
                 }}
               >
-                {n.body}
+                {item.body}
               </p>
             </div>
           ))}
