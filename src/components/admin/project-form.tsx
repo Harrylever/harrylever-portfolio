@@ -10,6 +10,7 @@ import {
   createProjectAction,
   duplicateProjectAction,
   saveProjectAction,
+  setProjectFeaturedAction,
   transitionProjectAction,
 } from "@/app/admin/_actions/projects";
 import {
@@ -105,6 +106,66 @@ const toneOptions = [
   { value: "", label: "Not set" },
   ...statusTones.map((value) => ({ value, label: toneLabels[value] })),
 ];
+
+function FeaturedToggle({ state }: { state: ProjectEditorState }) {
+  const [featured, setFeatured] = useState(state.featured);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{
+    tone: "ok" | "error";
+    text: string;
+  } | null>(null);
+
+  async function change(next: boolean) {
+    setBusy(true);
+    setMessage(null);
+    const result = await setProjectFeaturedAction({
+      id: state.id,
+      featured: next,
+    });
+
+    setBusy(false);
+    if (result.ok) {
+      setFeatured(result.data.featured);
+      setMessage({
+        tone: "ok",
+        text: result.data.featured
+          ? "Featured. It appears on the homepage right away (once published)."
+          : "Removed from the homepage.",
+      });
+    } else {
+      setMessage({ tone: "error", text: result.error.message });
+    }
+  }
+
+  return (
+    <fieldset className="adm-fieldset">
+      <legend className="adm-h2">Homepage</legend>
+      <label className="adm-check" htmlFor="project-featured">
+        <input
+          checked={featured}
+          disabled={busy}
+          id="project-featured"
+          type="checkbox"
+          onChange={(event) => void change(event.target.checked)}
+        />
+        Feature on the homepage
+      </label>
+      <p className="adm-hint">
+        Applies immediately and does not need Save. A featured project is added
+        to the end of the list and only shows once it is published.
+      </p>
+      {message ? (
+        <p
+          className="adm-hint"
+          data-tone={message.tone}
+          role={message.tone === "error" ? "alert" : "status"}
+        >
+          {message.text}
+        </p>
+      ) : null}
+    </fieldset>
+  );
+}
 
 const fromState = (state: ProjectEditorState) =>
   projectFormFromContent(state.slug, state.draft);
@@ -367,6 +428,8 @@ export function ProjectForm({
             )}
           </RepeatList>
         </fieldset>
+
+        {state ? <FeaturedToggle key={state.id} state={state} /> : null}
 
         <fieldset className="adm-fieldset">
           <legend className="adm-h2">Images</legend>

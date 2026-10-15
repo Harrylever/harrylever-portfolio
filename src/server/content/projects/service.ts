@@ -505,3 +505,68 @@ export async function reorderProjects(input: {
     return infrastructureFailure();
   }
 }
+
+/**
+ * Turns the homepage feature on or off. `featured` and `featuredOrder` are
+ * live columns (not part of the draft), so this takes effect immediately.
+ * Featuring appends the project to the end of the featured list. The row's
+ * `updatedAt` is kept, so an open editor does not hit a false conflict.
+ */
+export async function setProjectFeatured(input: {
+  id: string;
+  featured: boolean;
+  actor: AdminSession;
+}): Promise<ActionResult<ProjectRecord>> {
+  try {
+    const result = await db.transaction(async (transaction) => {
+      const record = await findProject(transaction, input.id);
+
+      if (!record || record.deletedAt) {
+        return failure("NOT_FOUND", "Project not found");
+      }
+      if (record.featured === input.featured) return success(record);
+
+      const active = await listActiveProjects(transaction);
+      const featuredOrder = input.featured
+        ? active.reduce(
+            (max, row) =>
+              row.featured && row.featuredOrder !== null
+                ? Math.max(max, row.featuredOrder)
+                : max,
+            -1,
+          ) + 1
+        : null;
+      const [updated] = await transaction
+        .update(projects)
+        .set({
+          featured: input.featured,
+          featuredOrder,
+          updatedAt: record.updatedAt,
+        })
+        .where(eq(projects.id, input.id))
+        .returning();
+
+      await recordContentEvent(
+        transaction,
+        input.actor,
+        { type: "project", id: input.id },
+        "update",
+        { featured: input.featured },
+      );
+
+      return success(updated);
+    });
+
+    if (result.ok) {
+      invalidateContentCache(result, {
+        type: "project",
+        slug: result.data.slug,
+        event: "reorder",
+      });
+    }
+
+    return result;
+  } catch {
+    return infrastructureFailure();
+  }
+}

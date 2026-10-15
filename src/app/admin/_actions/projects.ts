@@ -10,6 +10,7 @@ import {
   runProjectTransition,
   runReorderProjects,
   runSaveProject,
+  runSetProjectFeatured,
 } from "@/server/content/projects/admin";
 
 /*
@@ -69,4 +70,14 @@ export async function duplicateProjectAction(input: { id: unknown }) {
 
 export async function reorderProjectsAction(input: { orderedIds: unknown }) {
   return runReorderProjects({ orderedIds: input?.orderedIds }, deps);
+}
+
+export async function setProjectFeaturedAction(input: {
+  id: unknown;
+  featured: unknown;
+}) {
+  return runSetProjectFeatured(
+    { id: input?.id, featured: input?.featured },
+    deps,
+  );
 }

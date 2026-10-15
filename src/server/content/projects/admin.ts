@@ -33,6 +33,7 @@ import {
   duplicateProject,
   publishProject,
   reorderProjects,
+  setProjectFeatured,
   restoreProject,
   saveProjectDraft,
   trashProject,
@@ -50,6 +51,8 @@ export type ProjectEditorState = {
   status: LifecycleStatus;
   /** Once first published, the public URL is permanent. */
   slugLocked: boolean;
+  /** Shown on the homepage (a live setting, not part of the draft). */
+  featured: boolean;
   hasUnpublishedChanges: boolean;
   updatedAt: string;
   publishedAt: string | null;
@@ -73,6 +76,7 @@ export function toProjectEditorState(
     draft: record.draftContent,
     status: record.status,
     slugLocked: record.firstPublishedAt !== null,
+    featured: record.featured,
     hasUnpublishedChanges: hasChanges(record),
     updatedAt: record.updatedAt.toISOString(),
     publishedAt: record.publishedAt?.toISOString() ?? null,
@@ -323,4 +327,23 @@ export async function runReorderProjects(
   return result.ok
     ? success({ ids: result.data.map((row) => row.id) })
     : result;
+}
+
+export async function runSetProjectFeatured(
+  input: { id: unknown; featured: unknown },
+  { authorize }: AdminDependencies,
+): Promise<ActionResult<{ featured: boolean }>> {
+  const auth = await authorizeOrFail(authorize);
+
+  if (auth.failure) return auth.failure;
+  if (!isId(input?.id) || typeof input.featured !== "boolean") {
+    return invalidRequest();
+  }
+  const { id, featured } = input;
+  const actor = auth.session;
+  const result = await guarded(() =>
+    setProjectFeatured({ id, featured, actor }),
+  );
+
+  return result.ok ? success({ featured: result.data.featured }) : result;
 }
