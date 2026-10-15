@@ -216,6 +216,7 @@ export function ProjectDetail({
           <div className="pd-lead" style={{ marginBottom: "var(--s-11)" }}>
             <ProjectVisual
               link
+              sizes="(min-width: 1280px) 1180px, 100vw"
               aspect={project.coverPlaceholder?.aspectRatio ?? "16 / 9"}
               asset={project.coverAsset}
               placeholder={`Drop the main ${project.name} image`}
