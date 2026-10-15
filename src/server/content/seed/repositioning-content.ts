@@ -18,9 +18,6 @@ import type { SiteProfileContent } from "@/domain/content/site-profile";
 /** The date the traction numbers below were read from their sources. */
 export const REPOSITIONING_AS_OF = "2026-10-15";
 
-const resumeUrl =
-  "https://drive.google.com/file/d/1Xh5BoB1kaIKxF1XBQCxICG71zV4MXJz5/view?usp=sharing";
-
 export function repositioningSiteProfile(
   base: SiteProfileContent,
 ): SiteProfileContent {
@@ -178,7 +175,8 @@ export function repositioningHomeSections(
       availability:
         "Open to remote contract product-engineering work, Abuja also fine, and to a cybersecurity internship.",
       investorNote: "Investors: I'm happy to talk about Shelta.",
-      resumeUrl: say.resumeUrl ?? resumeUrl,
+      // The résumé link comes from the RESUME_URL environment variable.
+      resumeUrl: undefined,
     },
   ];
 }

@@ -64,7 +64,7 @@ export function SayForm({
       />
       <HomeText
         errors={errors}
-        hint="Optional."
+        hint="Optional. Only used when the RESUME_URL environment variable is not set."
         label="Résumé link"
         name="resumeUrl"
         placeholder="https://"

@@ -40,6 +40,26 @@ describe("public rendering of the repositioning fields", () => {
     expect(html).toContain("Happy to talk about Shelta");
   });
 
+  test("the resumeUrl prop overrides the content field, which is the fallback", () => {
+    const withField = { ...base, resumeUrl: "https://cms.example/cv" };
+    const fromEnv = renderToStaticMarkup(
+      <Say
+        profile={profile}
+        resumeUrl="https://env.example/cv"
+        section={withField}
+      />,
+    );
+    const fallback = renderToStaticMarkup(
+      <Say profile={profile} section={withField} />,
+    );
+    const none = renderToStaticMarkup(<Say profile={profile} section={base} />);
+
+    expect(fromEnv).toContain('href="https://env.example/cv"');
+    expect(fromEnv).not.toContain("cms.example");
+    expect(fallback).toContain('href="https://cms.example/cv"');
+    expect(none).not.toContain("sumé");
+  });
+
   test("Say renders neither line when both are absent", () => {
     const html = renderToStaticMarkup(<Say profile={profile} section={base} />);
 

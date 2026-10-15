@@ -349,3 +349,11 @@ the write-up). Everywhere else the image or placeholder shows.
   server and the E2E runs. If `/` returns 404 after seeding or running E2E,
   stop the dev server, delete that folder and start it again.
 
+### Résumé link
+
+The homepage résumé button reads the `RESUME_URL` environment variable
+(`.env.local` locally, the Vercel project environment in production). Set it
+there; the draft script no longer copies a link into the content. The "Résumé
+link" field in the Say section is only a fallback for when `RESUME_URL` is not
+set. After changing the variable in Vercel, redeploy so the page picks it up.
+

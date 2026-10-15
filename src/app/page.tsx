@@ -11,6 +11,7 @@ import { Commits } from "@/page-sections/personal/commits";
 import { Frames, Reach } from "@/page-sections/personal/frames";
 import { Loop } from "@/page-sections/personal/loop";
 import { Say } from "@/page-sections/personal/say";
+import { serverEnv } from "@/env/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import {
   getPreviewHomepage,
@@ -46,7 +47,13 @@ function renderSection(
     case "loop":
       return <Loop section={homepage.loop} />;
     case "say":
-      return <Say profile={profile} section={homepage.say} />;
+      return (
+        <Say
+          profile={profile}
+          resumeUrl={serverEnv.RESUME_URL}
+          section={homepage.say}
+        />
+      );
   }
 }
 

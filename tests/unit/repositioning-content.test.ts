@@ -65,7 +65,12 @@ const baseSections: HomeSectionContent[] = [
     items: [{ tool: "Claude", use: "x", frequency: "Every day" }],
     footer: "old footer",
   },
-  { type: "say", heading: "Hi", email: "hi@example.com" },
+  {
+    type: "say",
+    heading: "Hi",
+    email: "hi@example.com",
+    resumeUrl: "https://old.example/cv",
+  },
 ];
 const baseMap = new Map<HomeSectionType, HomeSectionContent>(
   baseSections.map((s) => [s.type, s]),
@@ -136,6 +141,15 @@ describe("repositioning content", () => {
     expect(bySlug("karrigo").content.livePreview).toBe(true);
     expect(bySlug("crystalizer").content.livePreview).toBe(true);
     expect(bySlug("shelta").content.livePreview).toBeUndefined();
+  });
+
+  test("the résumé link is not copied into content; it comes from RESUME_URL", () => {
+    const say = repositioningHomeSections(baseMap).find(
+      (x) => x.type === "say",
+    );
+
+    if (say?.type !== "say") throw new Error("missing say");
+    expect(say.resumeUrl).toBeUndefined();
   });
 
   test("AIZEN is an experiment", () => {
