@@ -361,7 +361,7 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     homepageStory:
       "Users could practise the Cardtonic upskill assessment for free, or pay ₦1,000. I kept it running for the length of the challenge.",
     year: "2026",
-    role: "Solo",
+    role: "Product and engineering",
     displayStatus: "Closed after the challenge",
     kind: "product",
     statusTone: "ended",
@@ -384,7 +384,7 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     homepageStory:
       "Users photograph a receipt or shelf tag, Gemini Vision reads the price, and a trust-weighted consensus engine turns submissions into a verified price. It began as a scraper of Jumia, Konga and Jiji; I dropped that on 27 August 2026 over legal risk and no real moat, and rebuilt it around crowdsourced data. Paused.",
     year: "2025",
-    role: "Solo",
+    role: "Product and engineering",
     displayStatus: "Paused",
     kind: "product",
     statusTone: "paused",
