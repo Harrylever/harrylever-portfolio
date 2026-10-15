@@ -1,20 +1,24 @@
-import * as React from "react"
-import { cn } from "cn"
+import * as React from "react";
+import { cn } from "cn";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  MoreHorizontalCircle01Icon,
+} from "@hugeicons/core-free-icons";
 
-import { Button } from "@/components/ui/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeft01Icon, ArrowRight01Icon, MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons"
+import { Button } from "@/components/ui/button";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
-      role="navigation"
       aria-label="pagination"
-      data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
+      data-slot="pagination"
+      role="navigation"
       {...props}
     />
-  )
+  );
 }
 
 function PaginationContent({
@@ -23,21 +27,21 @@ function PaginationContent({
 }: React.ComponentProps<"ul">) {
   return (
     <ul
-      data-slot="pagination-content"
       className={cn("flex items-center gap-1", className)}
+      data-slot="pagination-content"
       {...props}
     />
-  )
+  );
 }
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />
+  return <li data-slot="pagination-item" {...props} />;
 }
 
 type PaginationLinkProps = {
-  isActive?: boolean
+  isActive?: boolean;
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  React.ComponentProps<"a">;
 
 function PaginationLink({
   className,
@@ -48,19 +52,19 @@ function PaginationLink({
   return (
     <Button
       asChild
-      variant={isActive ? "outline" : "ghost"}
-      size={size}
       className={cn(className)}
+      size={size}
+      variant={isActive ? "outline" : "ghost"}
     >
       {/* eslint-disable-next-line jsx-a11y/anchor-has-content -- content is spread in via `props.children` by callers (PaginationPrevious/Next/Link) */}
       <a
         aria-current={isActive ? "page" : undefined}
-        data-slot="pagination-link"
         data-active={isActive}
+        data-slot="pagination-link"
         {...props}
       />
     </Button>
-  )
+  );
 }
 
 function PaginationPrevious({
@@ -71,14 +75,19 @@ function PaginationPrevious({
   return (
     <PaginationLink
       aria-label="Go to previous page"
-      size="default"
       className={cn("ps-2!", className)}
+      size="default"
       {...props}
     >
-      <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} data-icon="inline-start" className="rtl:rotate-180" />
+      <HugeiconsIcon
+        className="rtl:rotate-180"
+        data-icon="inline-start"
+        icon={ArrowLeft01Icon}
+        strokeWidth={2}
+      />
       <span className="hidden sm:block">{text}</span>
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationNext({
@@ -89,14 +98,19 @@ function PaginationNext({
   return (
     <PaginationLink
       aria-label="Go to next page"
-      size="default"
       className={cn("pe-2!", className)}
+      size="default"
       {...props}
     >
       <span className="hidden sm:block">{text}</span>
-      <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} data-icon="inline-end" className="rtl:rotate-180" />
+      <HugeiconsIcon
+        className="rtl:rotate-180"
+        data-icon="inline-end"
+        icon={ArrowRight01Icon}
+        strokeWidth={2}
+      />
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationEllipsis({
@@ -106,17 +120,17 @@ function PaginationEllipsis({
   return (
     <span
       aria-hidden
-      data-slot="pagination-ellipsis"
       className={cn(
         "flex size-9 items-center justify-center [&_svg:not([class*='size-'])]:size-4",
-        className
+        className,
       )}
+      data-slot="pagination-ellipsis"
       {...props}
     >
       <HugeiconsIcon icon={MoreHorizontalCircle01Icon} strokeWidth={2} />
       <span className="sr-only">More pages</span>
     </span>
-  )
+  );
 }
 
 export {
@@ -127,4 +141,4 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-}
+};

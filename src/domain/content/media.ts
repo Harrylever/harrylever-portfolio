@@ -25,3 +25,8 @@ export const allowedImageFormats = [
   "webp",
 ] as const;
 export const maximumImageBytes = 10 * 1024 * 1024;
+/**
+ * The largest file the admin accepts from a visitor's disk. It is compressed in
+ * the browser before upload, and the stored image must fit maximumImageBytes.
+ */
+export const maximumSourceBytes = 30 * 1024 * 1024;

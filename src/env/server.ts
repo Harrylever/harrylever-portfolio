@@ -12,6 +12,11 @@ const postgresUrl = z.url().regex(/^postgres(ql)?:\/\//, {
   message: "Expected a postgres:// or postgresql:// URL",
 });
 
+// A public link to the résumé; optional so builds work without it.
+const httpUrl = z.url().regex(/^https?:\/\//, {
+  message: "Expected an http(s) URL",
+});
+
 const serverEnvSchema = z.object({
   DATABASE_URL: postgresUrl,
   DATABASE_URL_UNPOOLED: postgresUrl,
@@ -20,6 +25,7 @@ const serverEnvSchema = z.object({
   ADMIN_EMAIL: optionalSecret(z.email()),
   ADMIN_PASSWORD: optionalSecret(z.string().min(12)),
   ADMIN_SESSION_SECRET: optionalSecret(z.string().min(32)),
+  RESUME_URL: optionalSecret(httpUrl),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -53,5 +59,8 @@ export const serverEnv: ServerEnv = Object.freeze({
   },
   get ADMIN_SESSION_SECRET() {
     return readServerEnv().ADMIN_SESSION_SECRET;
+  },
+  get RESUME_URL() {
+    return readServerEnv().RESUME_URL;
   },
 });

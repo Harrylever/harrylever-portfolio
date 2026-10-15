@@ -115,6 +115,8 @@ export const saySectionSchema = z.strictObject({
   whatsappUrl: safeExternalUrlSchema.optional(),
   email: z.email(),
   resumeUrl: safeExternalUrlSchema.optional(),
+  availability: nonEmptyTextSchema.max(200).optional(),
+  investorNote: nonEmptyTextSchema.max(200).optional(),
 });
 
 export const homeSectionSchema = z.discriminatedUnion("type", [

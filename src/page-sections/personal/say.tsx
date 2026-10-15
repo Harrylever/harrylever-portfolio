@@ -10,10 +10,14 @@ import { Button } from "@/components/design-system/button";
 export function Say({
   profile,
   section,
+  resumeUrl,
 }: {
   profile: PublicSiteProfile;
   section: PublicHomepage["say"];
+  /** From RESUME_URL; takes precedence over the section's own résumé link. */
+  resumeUrl?: string;
 }) {
+  const resumeHref = resumeUrl ?? section.resumeUrl;
   const words = section.heading.split(" ");
 
   return (
@@ -69,6 +73,21 @@ export function Say({
             </React.Fragment>
           ))}
         </h2>
+        {section.availability || section.investorNote ? (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--s-2)",
+              margin: "0 0 var(--s-8)",
+              maxWidth: "52ch",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {section.availability ? <p>{section.availability}</p> : null}
+            {section.investorNote ? <p>{section.investorNote}</p> : null}
+          </div>
+        ) : null}
         <div
           className="sy-act"
           style={{
@@ -92,8 +111,8 @@ export function Say({
           <Button href={`mailto:${section.email}`} variant="quiet">
             {section.email}
           </Button>
-          {section.resumeUrl ? (
-            <Button href={section.resumeUrl} target="_blank" variant="quiet">
+          {resumeHref ? (
+            <Button href={resumeHref} target="_blank" variant="quiet">
               Résumé, if you need it
             </Button>
           ) : null}

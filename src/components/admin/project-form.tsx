@@ -15,9 +15,11 @@ import {
 import {
   FormErrors,
   SaveBar,
+  SelectField,
   SlugField,
   TextField,
 } from "@/components/admin/content-fields";
+import { HomeText, RepeatList } from "@/components/admin/home/fields";
 import {
   MediaField,
   MediaListField,
@@ -30,7 +32,9 @@ import {
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { useUnsavedChangesWarning } from "@/components/admin/unsaved-changes";
 import { useContentEditor } from "@/components/admin/use-content-editor";
+import { projectKinds, statusTones } from "@/domain/content/project";
 import { normalizeSlug } from "@/domain/content/shared";
+import { rowKey } from "@/lib/admin/home-forms";
 import {
   type ProjectFormValues,
   emptyProjectForm,
@@ -46,7 +50,11 @@ const labels: Record<string, string> = {
   year: "Year",
   role: "Role",
   displayStatus: "Status label",
+  kind: "Type",
+  statusTone: "Status tone",
+  metrics: "Metrics",
   externalUrl: "External link",
+  livePreview: "Live preview",
   stack: "Stack",
   coverAssetId: "Cover image",
   galleryAssetIds: "Gallery",
@@ -66,7 +74,11 @@ const inlineKeys = new Set([
   "year",
   "role",
   "displayStatus",
+  "kind",
+  "statusTone",
+  "metrics",
   "externalUrl",
+  "livePreview",
   "stack",
   "coverAssetId",
   "galleryAssetIds",
@@ -74,6 +86,25 @@ const inlineKeys = new Set([
   "seoDescription",
   "caseStudy",
 ]);
+
+const kindLabels: Record<(typeof projectKinds)[number], string> = {
+  product: "Product",
+  client: "Client work",
+  experiment: "Experiment",
+};
+const toneLabels: Record<(typeof statusTones)[number], string> = {
+  live: "Live",
+  paused: "Paused",
+  ended: "Ended",
+};
+const kindOptions = projectKinds.map((value) => ({
+  value,
+  label: kindLabels[value],
+}));
+const toneOptions = [
+  { value: "", label: "Not set" },
+  ...statusTones.map((value) => ({ value, label: toneLabels[value] })),
+];
 
 const fromState = (state: ProjectEditorState) =>
   projectFormFromContent(state.slug, state.draft);
@@ -258,10 +289,83 @@ export function ProjectForm({
               hint: "Optional.",
             })}
           </div>
+          <div className="adm-form-row">
+            <SelectField
+              errors={errors.kind}
+              id="project-kind"
+              label={labels.kind}
+              options={kindOptions}
+              value={values.kind}
+              onChange={(value) => update("kind", value as typeof values.kind)}
+            />
+            <SelectField
+              errors={errors.statusTone}
+              id="project-statusTone"
+              label={labels.statusTone}
+              options={toneOptions}
+              value={values.statusTone}
+              onChange={(value) =>
+                update("statusTone", value as typeof values.statusTone)
+              }
+            />
+          </div>
+          <label className="adm-check" htmlFor="project-livePreview">
+            <input
+              checked={values.livePreview}
+              id="project-livePreview"
+              type="checkbox"
+              onChange={(event) => update("livePreview", event.target.checked)}
+            />
+            Show a live preview of the external link instead of the image
+          </label>
+          <p className="adm-hint">
+            Only works for https sites that allow being embedded; otherwise
+            leave it off and use an image.
+          </p>
           {text("stack", {
             multiline: true,
             hint: "One technology per line.",
           })}
+          <RepeatList
+            addLabel="Add metric"
+            create={() => ({ key: rowKey(), label: "", value: "", asOf: "" })}
+            errors={errors}
+            hint="Up to six dated numbers, shown on the project card and page."
+            legend="Metrics"
+            name="metrics"
+            noun="metric"
+            rows={values.metrics}
+            onChange={(metrics) => update("metrics", metrics)}
+          >
+            {(row, index, patch) => (
+              <div className="adm-form-row">
+                <HomeText
+                  errors={errors}
+                  label={`Metric label ${index + 1}`}
+                  max={40}
+                  name={`metrics.${index}.label`}
+                  value={row.label}
+                  onChange={(label) => patch({ label })}
+                />
+                <HomeText
+                  errors={errors}
+                  label={`Metric value ${index + 1}`}
+                  max={40}
+                  name={`metrics.${index}.value`}
+                  value={row.value}
+                  onChange={(value) => patch({ value })}
+                />
+                <HomeText
+                  errors={errors}
+                  label={`Metric as of ${index + 1}`}
+                  name={`metrics.${index}.asOf`}
+                  type="date"
+                  value={row.asOf}
+                  onChange={(asOf) => patch({ asOf })}
+                />
+              </div>
+            )}
+          </RepeatList>
         </fieldset>
 
         <fieldset className="adm-fieldset">

@@ -272,3 +272,102 @@ From `.superpowers/sdd/2026-10-10-admin-cms/progress.md` (deferred minors):
 - **Not run in this hand-off**: none of the unit, integration, E2E, build or
   migration commands above were executed after the switch to local Postgres.
   Only `bunx tsc --noEmit` and ESLint on the changed files were run.
+
+---
+
+## Repositioning content (draft-only)
+
+The repositioning copy (see
+`docs/superpowers/specs/2026-10-15-portfolio-repositioning-design.md`) is loaded
+as **drafts** by a guarded script. It never publishes, unpublishes, trashes or
+reorders anything that is already public.
+
+```bash
+bun run db:seed                              # once, if the database is empty
+bun run db:draft-repositioning               # dry run: prints what would change
+bun run db:draft-repositioning -- --apply    # writes drafts
+```
+
+- It runs only against a loopback Postgres with a non-production
+  `APP_ENV_LABEL`. Neon hosts and `main`/`master`/`prod`/`production` labels are
+  refused before any query.
+- Re-running with `--apply` **overwrites draft edits** made since the last run.
+  The dry run lists every item it would touch.
+- Existing projects keep their images, featured flag and display order. New
+  projects (Karrigo, Libra Cleaning, Upskill Simulator) are created as drafts
+  with a suggested order; reorder them in `/admin/projects` after publishing.
+
+Your steps after `--apply`:
+
+1. Review each draft in the admin preview (site profile, the homepage sections,
+   every project, and the housing post).
+2. Check every metric's "as of" date. The Shelta numbers are dated 15 Oct 2026.
+3. Check the facts the copy states that came from the repos or earlier site
+   text rather than your answers, and fix any that are wrong:
+   - Karrigo: year 2026, "contract", the kitchens/stores/riders wording and the
+     stack (Expo, NestJS, Prisma, PostgreSQL, Redis, Paystack).
+   - Libra Cleaning: year 2026, "cleaning-service MVP", the Go and PostgreSQL stack.
+   - Upskill Simulator: year 2026, its stack, and that it has no link.
+   - PriceIt: year 2025, the 27 August 2026 pivot date, the Jumia/Konga/Jiji
+     wording, its stack, and that it has no link.
+   - Fola, Crystalizer and the four experience stacks: kept from the old site.
+   - The Shelta "Next" line about landlords and agents running their day on it.
+4. Re-confirm that you may name Karrigo and Libra Cleaning.
+5. Move **SakzPredict** to the trash and unpublish the old placeholder posts
+   (Tree-sitter, first month of Rust, "six products", and the rest). The script
+   does not touch them because that changes the public site.
+6. Write the housing post (`student-housing-in-nigeria`). Each "Write this
+   section" line is a prompt to replace, and the title starts with "[Draft]" and
+   the summary with "Outline only": remove both before publishing, or the
+   instructions go live.
+7. Publish the homepage, then each project and the post.
+8. To apply this to production, make the same edits in the admin there, or run
+   the script yourself against an environment you choose after relaxing the
+   guard deliberately. Never point it at Neon by accident.
+
+### Live site previews
+
+A project can show a scaled, non-interactive preview of its external link in
+place of its image (homepage cards, `/projects` list and the project page). Turn
+it on with "Show a live preview of the external link" in the project editor. The
+preview loads only on screens at least 768px wide, for visitors without a
+reduced-motion preference, and only when the card is near the viewport. Clicking
+it opens the real site in a new tab (on the `/projects` list, the click opens
+the write-up). Everywhere else the image or placeholder shows.
+
+- The draft script switches it on for Karrigo and Crystalizer. Both allow being
+  embedded.
+- **Shelta blocks framing** (`X-Frame-Options: DENY` in
+  `Shelta/shelta-app/apps/web/next.config.ts`, around line 48). Until Shelta
+  allows the portfolio, leave Shelta's preview off. To allow it, replace that
+  header with
+  `Content-Security-Policy: frame-ancestors 'self' https://www.deanukanah.dev https://deanukanah.dev`
+  (add `http://localhost:3000` to test locally), deploy Shelta, then tick the
+  checkbox on the Shelta project. That change is in the Shelta repo and was not
+  made here.
+- The Next data cache under `.next/cache/fetch-cache` is shared by every dev
+  server and the E2E runs. If `/` returns 404 after seeding or running E2E,
+  stop the dev server, delete that folder and start it again.
+
+### Résumé link
+
+The homepage résumé button reads the `RESUME_URL` environment variable
+(`.env.local` locally, the Vercel project environment in production). Set it
+there; the draft script no longer copies a link into the content. The "Résumé
+link" field in the Say section is only a fallback for when `RESUME_URL` is not
+set. After changing the variable in Vercel, redeploy so the page picks it up.
+
+### Image optimisation
+
+- **Before upload (browser):** images of 150 KB or more, or wider than 2400 px,
+  are scaled down to 2400 px on the longest side and re-encoded as WebP
+  (quality 82) with `@jsquash/resize` and `@jsquash/webp`. Smaller files, files
+  that fail to decode, and results that would not be smaller are uploaded
+  unchanged. You can pick files up to 30 MB; the stored image must still be
+  under 10 MB. AVIF and oxipng are not used: in-browser AVIF encoding is slow,
+  and Cloudinary already serves AVIF where supported.
+- **On delivery:** the site asks Cloudinary for `f_auto,q_auto` and a width
+  (`w_<n>,c_limit`), with a responsive `srcset`, for every image that lives on
+  `res.cloudinary.com`. The stored original is never changed. Images already on
+  Cloudinary keep working; only new uploads get the smaller WebP original.
+

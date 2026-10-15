@@ -206,3 +206,98 @@ describe("snapshots, slugs and filters", () => {
     expect(parseListFilters({ q: "x".repeat(500) }).q.length).toBe(120);
   });
 });
+
+describe("repositioning project form fields", () => {
+  const legacy = {
+    name: "Atlas",
+    hook: "Hook",
+    homepageStory: "Story",
+    year: "2026",
+    role: "Lead",
+    displayStatus: "Live",
+    externalUrl: "https://atlas.example",
+    stack: ["TypeScript"],
+    coverAssetId: null,
+    galleryAssetIds: [],
+    seo: { title: "Atlas", description: "Atlas SEO" },
+    caseStudy: doc,
+  };
+
+  test("projectFormFromContent defaults kind, statusTone and metrics for a legacy row", () => {
+    const form = projectFormFromContent("atlas", legacy);
+
+    expect(form.kind).toBe("product");
+    expect(form.statusTone).toBe("");
+    expect(form.metrics).toEqual([]);
+  });
+
+  test("a legacy row round-trips with no new keys added", () => {
+    const form = projectFormFromContent("atlas", legacy);
+
+    expect(projectDraftFromForm(form, legacy)).toEqual(legacy);
+  });
+
+  test("kind, statusTone and metrics are written when set", () => {
+    const metric = { label: "Users", value: "227", asOf: "2026-10-15" };
+    const draft = projectDraftFromForm(
+      {
+        ...projectFormFromContent("atlas", legacy),
+        kind: "client",
+        statusTone: "paused",
+        metrics: [{ key: "m1", ...metric }],
+      },
+      legacy,
+    ) as Record<string, unknown>;
+
+    expect(draft.kind).toBe("client");
+    expect(draft.statusTone).toBe("paused");
+    expect(draft.metrics).toEqual([metric]);
+  });
+
+  test("blank metric rows are dropped and half-filled rows are kept for validation", () => {
+    const blank = { key: "m1", label: " ", value: "", asOf: "" };
+    const half = { key: "m2", label: "Users", value: "", asOf: "" };
+    const draft = projectDraftFromForm(
+      {
+        ...projectFormFromContent("atlas", legacy),
+        metrics: [blank, half],
+      },
+      legacy,
+    ) as Record<string, unknown>;
+
+    expect(draft.metrics).toEqual([{ label: "Users", value: "", asOf: "" }]);
+    expect(projectContentSchema.safeParse(draft).success).toBe(false);
+  });
+
+  test("metric issues map to the metrics field key", () => {
+    expect(
+      fieldErrorsFromIssues([{ path: ["metrics", 0, "asOf"], message: "bad" }]),
+    ).toEqual({ metrics: ["bad"] });
+  });
+
+  test("livePreview defaults to false, round-trips, and is not added to legacy rows", () => {
+    const form = projectFormFromContent("atlas", legacy);
+
+    expect(form.livePreview).toBe(false);
+    expect(projectDraftFromForm(form, legacy)).toEqual(legacy);
+
+    const on = projectDraftFromForm({ ...form, livePreview: true }, legacy);
+
+    expect((on as Record<string, unknown>).livePreview).toBe(true);
+    expect(
+      projectFormFromContent("atlas", { ...legacy, livePreview: true })
+        .livePreview,
+    ).toBe(true);
+  });
+
+  test("turning livePreview off keeps the key only when the row already had it", () => {
+    const had = { ...legacy, livePreview: true };
+    const off = projectDraftFromForm(
+      { ...projectFormFromContent("atlas", had), livePreview: false },
+      had,
+    ) as Record<string, unknown>;
+
+    expect(off.livePreview).toBe(false);
+  });
+});
+

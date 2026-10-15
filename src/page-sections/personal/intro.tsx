@@ -62,37 +62,44 @@ export function Intro({
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: "var(--fw-display-light)",
-              fontSize: "clamp(2.5rem,6.4vw,5.25rem)",
+              fontSize: "clamp(2.5rem,5.4vw,4.75rem)",
               lineHeight: "var(--lh-display)",
               letterSpacing: "var(--tr-display)",
-              maxWidth: "20ch",
+              maxWidth: "22ch",
               margin: "0 0 var(--s-8)",
             }}
           >
-            {section.statement.map((part, i) => (
-              <React.Fragment key={i}>
-                <span
-                  style={{
-                    display: "inline-block",
-                    overflow: "hidden",
-                    verticalAlign: "bottom",
-                  }}
-                >
-                  <span
-                    className="in-word"
-                    style={{
-                      display: "inline-block",
-                      fontWeight: part.emphasis
-                        ? "var(--fw-display-emph)"
-                        : "inherit",
-                      color: part.emphasis ? "var(--sand)" : "inherit",
-                    }}
-                  >
-                    {part.text}
-                  </span>
-                </span>{" "}
-              </React.Fragment>
-            ))}
+            {section.statement.flatMap((part, i) =>
+              // One inline-block per word, so a fragment never forces a line
+              // break and the headline wraps like ordinary text.
+              part.text
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((word, j) => (
+                  <React.Fragment key={`${i}-${j}`}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        overflow: "hidden",
+                        verticalAlign: "bottom",
+                      }}
+                    >
+                      <span
+                        className="in-word"
+                        style={{
+                          display: "inline-block",
+                          fontWeight: part.emphasis
+                            ? "var(--fw-display-emph)"
+                            : "inherit",
+                          color: part.emphasis ? "var(--sand)" : "inherit",
+                        }}
+                      >
+                        {word}
+                      </span>
+                    </span>{" "}
+                  </React.Fragment>
+                )),
+            )}
           </h1>
 
           <div style={{ overflow: "hidden", marginBottom: "var(--s-9)" }}>
@@ -143,7 +150,6 @@ export function Intro({
               section.portraitAsset?.caption ??
               section.portraitPlaceholder?.caption
             }
-            placeholder="Drop a portrait"
             slotId={section.portraitPlaceholder?.slotId ?? "intro-portrait"}
           />
         </div>

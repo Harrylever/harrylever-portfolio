@@ -3,11 +3,16 @@ import type { PublicProject, PublicSiteProfile } from "@/server/content/public";
 import * as React from "react";
 import Link from "next/link";
 
+import { kindLabel, statusToneStyle } from "./project-meta";
+import { ProjectVisual } from "./project-visual";
+
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Prose } from "@/components/design-system/prose";
 import { RichText } from "@/components/content/rich-text";
 import { Tag } from "@/components/design-system/tag";
+import { MetricsStrip } from "@/components/design-system/metrics-strip";
+import { projectKindOf } from "@/domain/content/project";
 import { Button } from "@/components/design-system/button";
 
 export function ProjectDetail({
@@ -27,6 +32,7 @@ export function ProjectDetail({
   const facts: [string, string][] = [
     ["Year", project.year],
     ["Role", project.role],
+    ["Type", kindLabel(projectKindOf(project))],
     ["State", project.displayStatus],
   ];
 
@@ -99,6 +105,12 @@ export function ProjectDetail({
             </p>
           </div>
 
+          {project.metrics?.length ? (
+            <div style={{ marginBottom: "var(--s-8)" }}>
+              <MetricsStrip metrics={project.metrics} />
+            </div>
+          ) : null}
+
           <div
             className="pd-facts"
             style={{
@@ -131,6 +143,9 @@ export function ProjectDetail({
                   style={{
                     fontSize: "var(--fs-sm)",
                     color: "var(--text-primary)",
+                    ...(k === "State"
+                      ? statusToneStyle(project.statusTone)
+                      : {}),
                   }}
                 >
                   {v}
@@ -199,10 +214,12 @@ export function ProjectDetail({
           </div>
 
           <div className="pd-lead" style={{ marginBottom: "var(--s-11)" }}>
-            <Figure
+            <ProjectVisual
+              link
               aspect={project.coverPlaceholder?.aspectRatio ?? "16 / 9"}
               asset={project.coverAsset}
-              placeholder={`Drop the main ${project.name} image`}
+              project={project}
+              sizes="(min-width: 1280px) 1180px, 100vw"
               slotId={
                 project.coverPlaceholder?.slotId ?? `project-${project.slug}`
               }
@@ -237,7 +254,6 @@ export function ProjectDetail({
                       "4 / 3"
                     }
                     asset={asset}
-                    placeholder="Drop a screen"
                     slotId={
                       project.galleryPlaceholders?.[index]?.slotId ?? asset.id
                     }
@@ -250,7 +266,6 @@ export function ProjectDetail({
                       <Figure
                         aspect={placeholder.aspectRatio}
                         caption={placeholder.caption}
-                        placeholder="Drop a screen"
                         slotId={placeholder.slotId}
                       />
                     </div>

@@ -1,9 +1,15 @@
 import type { PublicHomepage } from "@/server/content/public";
 
 import { SectionHeading } from "@/components/design-system/section-heading";
-import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
+import { MetricsStrip } from "@/components/design-system/metrics-strip";
+import { projectKindOf } from "@/domain/content/project";
+import {
+  kindLabel,
+  statusToneStyle,
+} from "@/page-sections/projects/project-meta";
+import { ProjectVisual } from "@/page-sections/projects/project-visual";
 
 export function Built({ section }: { section: PublicHomepage["built"] }) {
   return (
@@ -43,14 +49,15 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                 className="bt-shot"
                 style={{ order: i % 2 ? 2 : 1, minWidth: 0 }}
               >
-                <Figure
+                <ProjectVisual
+                  link
                   aspect={
                     project.homepagePlaceholder?.aspectRatio ??
                     project.coverPlaceholder?.aspectRatio ??
                     "3 / 2"
                   }
                   asset={project.coverAsset}
-                  placeholder={`Drop a ${project.name} screenshot`}
+                  project={project}
                   slotId={
                     project.homepagePlaceholder?.slotId ??
                     project.coverPlaceholder?.slotId ??
@@ -98,6 +105,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                 >
                   {project.homepageStory}
                 </p>
+                <MetricsStrip metrics={project.metrics} />
                 <div
                   style={{
                     display: "flex",
@@ -105,6 +113,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                     gap: "var(--s-2)",
                   }}
                 >
+                  <Tag>{kindLabel(projectKindOf(project))}</Tag>
                   {project.stack.map((s) => (
                     <Tag key={s}>{s}</Tag>
                   ))}
@@ -117,7 +126,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                     fontSize: "var(--fs-micro)",
                   }}
                 >
-                  <span style={{ color: "var(--sand)" }}>
+                  <span style={statusToneStyle(project.statusTone)}>
                     {project.displayStatus}
                   </span>
                   {project.externalUrl ? (

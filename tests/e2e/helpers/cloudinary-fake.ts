@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -66,7 +66,8 @@ function sha1(value: string) {
 }
 
 /** A tiny valid PNG of the given size (solid sage). */
-export function pngBytes(width = 4, height = 3): Buffer {
+/** `noisy` fills the pixels with random bytes so the PNG does not compress. */
+export function pngBytes(width = 4, height = 3, noisy = false): Buffer {
   const crcTable = Array.from({ length: 256 }, (_, n) => {
     let c = n;
 
@@ -98,11 +99,17 @@ export function pngBytes(width = 4, height = 3): Buffer {
   header.writeUInt32BE(height, 4);
   header[8] = 8;
   header[9] = 2;
-  const row = Buffer.concat([
+  const flatRow = Buffer.concat([
     Buffer.from([0]),
     Buffer.alloc(width * 3, Buffer.from([0x9d, 0xb0, 0x9a])),
   ]);
-  const raw = Buffer.concat(Array.from({ length: height }, () => row));
+  const raw = Buffer.concat(
+    Array.from({ length: height }, () =>
+      noisy
+        ? Buffer.concat([Buffer.from([0]), randomBytes(width * 3)])
+        : flatRow,
+    ),
+  );
 
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
@@ -139,8 +146,55 @@ function parseMultipart(body: Buffer, contentType: string): Part[] {
   return parts;
 }
 
+/** Format and pixel size of an uploaded PNG or WebP (VP8, VP8L or VP8X). */
+function imageInfo(data: Buffer): {
+  format: "png" | "webp";
+  width: number;
+  height: number;
+} {
+  if (data.subarray(8, 12).toString("latin1") === "WEBP") {
+    const kind = data.subarray(12, 16).toString("latin1");
+
+    if (kind === "VP8X") {
+      return {
+        format: "webp",
+        width: 1 + data.readUIntLE(24, 3),
+        height: 1 + data.readUIntLE(27, 3),
+      };
+    }
+    if (kind === "VP8L") {
+      const bits = data.readUInt32LE(21);
+
+      return {
+        format: "webp",
+        width: (bits & 0x3fff) + 1,
+        height: ((bits >>> 14) & 0x3fff) + 1,
+      };
+    }
+
+    return {
+      format: "webp",
+      width: data.readUInt16LE(26) & 0x3fff,
+      height: data.readUInt16LE(28) & 0x3fff,
+    };
+  }
+
+  return {
+    format: "png",
+    width: data.readUInt32BE(16),
+    height: data.readUInt32BE(20),
+  };
+}
+
 export type FakeUploadLog = {
-  uploads: Array<{ publicId: string; fields: Record<string, string> }>;
+  uploads: Array<{
+    publicId: string;
+    fields: Record<string, string>;
+    format: "png" | "webp";
+    bytes: number;
+    width: number;
+    height: number;
+  }>;
   rawBodies: string[];
   /** Makes the next upload response disagree with what Cloudinary stores. */
   tamperNextResponse: boolean;
@@ -204,23 +258,29 @@ export async function installCloudinaryFake(
     sequence += 1;
     const publicId = `${fakeCloudinary.folder}/e2e-cms-${Date.now().toString(36)}-${sequence}`;
     const version = 1_700_000_000 + sequence;
-    const width = file.data.readUInt32BE(16);
-    const height = file.data.readUInt32BE(20);
+    const { format, width, height } = imageInfo(file.data);
     const stored = {
       publicId,
       resourceType: "image",
-      secureUrl: `https://res.cloudinary.com/${fakeCloudinary.cloudName}/image/upload/v${version}/${publicId}.png`,
+      secureUrl: `https://res.cloudinary.com/${fakeCloudinary.cloudName}/image/upload/v${version}/${publicId}.${format}`,
       width,
       height,
       bytes: file.data.length,
-      format: "png",
+      format,
     };
 
     writeFileSync(
       join(resourcesDir, `${encodeURIComponent(publicId)}.json`),
       JSON.stringify(stored),
     );
-    log.uploads.push({ publicId, fields });
+    log.uploads.push({
+      publicId,
+      fields,
+      format,
+      bytes: file.data.length,
+      width,
+      height,
+    });
     const tamper = log.tamperNextResponse;
 
     log.tamperNextResponse = false;
@@ -237,7 +297,7 @@ export async function installCloudinaryFake(
         width: tamper ? width + 1000 : width,
         height,
         bytes: stored.bytes,
-        format: "png",
+        format,
         api_key: fakeCloudinary.apiKey,
       },
     });

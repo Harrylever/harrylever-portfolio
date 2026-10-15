@@ -3,7 +3,10 @@ import { describe, expect, test } from "bun:test";
 import { homeSectionSchema } from "@/domain/content/home";
 import { mediaAssetInputSchema } from "@/domain/content/media";
 import { postContentSchema } from "@/domain/content/post";
-import { projectContentSchema } from "@/domain/content/project";
+import {
+  projectContentSchema,
+  projectKindOf,
+} from "@/domain/content/project";
 import { siteProfileContentSchema } from "@/domain/content/site-profile";
 import { safeExternalUrlSchema } from "@/domain/content/shared";
 import { createId } from "@/server/db/id";
@@ -192,5 +195,88 @@ describe("content schemas", () => {
     for (const href of ["javascript:alert(1)", "data:text/html,boom"]) {
       expect(safeExternalUrlSchema.safeParse(href).success).toBe(false);
     }
+  });
+});
+
+describe("repositioning content fields", () => {
+  const legacyProject = {
+    name: "Shelta",
+    hook: "Verified student housing.",
+    homepageStory: "Students find verified housing.",
+    year: "2025",
+    role: "Co-founder",
+    displayStatus: "Live",
+    externalUrl: "https://sheltahomes.com",
+    stack: ["Next.js"],
+    galleryAssetIds: [],
+    seo: { title: "Shelta", description: "Verified student housing." },
+    caseStudy: emptyDocument,
+  };
+  const metric = { label: "Registered users", value: "227", asOf: "2026-10-15" };
+
+  test("project schema accepts a row with none of the new fields", () => {
+    expect(projectContentSchema.safeParse(legacyProject).success).toBe(true);
+  });
+
+  test("project schema accepts kind, statusTone and up to six metrics", () => {
+    const result = projectContentSchema.safeParse({
+      ...legacyProject,
+      kind: "client",
+      statusTone: "paused",
+      metrics: Array.from({ length: 6 }, () => metric),
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("project schema rejects invalid metrics, kind and tone", () => {
+    const rejects = (extra: object) =>
+      projectContentSchema.safeParse({ ...legacyProject, ...extra }).success;
+
+    expect(rejects({ metrics: Array.from({ length: 7 }, () => metric) })).toBe(
+      false,
+    );
+    expect(rejects({ metrics: [{ ...metric, label: " " }] })).toBe(false);
+    expect(rejects({ metrics: [{ ...metric, asOf: "15/10/2026" }] })).toBe(
+      false,
+    );
+    expect(rejects({ kind: "hobby" })).toBe(false);
+    expect(rejects({ statusTone: "dead" })).toBe(false);
+  });
+
+  test("project schema accepts livePreview as a boolean only", () => {
+    expect(
+      projectContentSchema.safeParse({ ...legacyProject, livePreview: true })
+        .success,
+    ).toBe(true);
+    expect(
+      projectContentSchema.safeParse({ ...legacyProject, livePreview: "yes" })
+        .success,
+    ).toBe(false);
+  });
+
+  test("projectKindOf returns product when kind is absent", () => {
+    expect(projectKindOf({})).toBe("product");
+    expect(projectKindOf({ kind: "experiment" })).toBe("experiment");
+  });
+
+  test("say schema accepts availability and investorNote up to 200 characters", () => {
+    const say = {
+      type: "say" as const,
+      heading: "Talk to me.",
+      email: "hello@example.com",
+    };
+
+    expect(
+      homeSectionSchema.safeParse({
+        ...say,
+        availability: "Open to remote contract work.",
+        investorNote: "Happy to talk about Shelta.",
+      }).success,
+    ).toBe(true);
+    expect(
+      homeSectionSchema.safeParse({ ...say, availability: "a".repeat(201) })
+        .success,
+    ).toBe(false);
   });
 });

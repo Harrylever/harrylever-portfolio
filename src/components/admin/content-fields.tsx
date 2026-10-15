@@ -36,7 +36,7 @@ export function TextField({
   hint?: ReactNode;
   max?: number;
   multiline?: boolean;
-  type?: "text" | "url";
+  type?: "text" | "url" | "date";
   placeholder?: string;
 }) {
   const errorId = `${id}-error`;
@@ -83,6 +83,44 @@ export function TextField({
  * The public URL. Editable (with a live preview of the normalised slug)
  * until the first publication, then shown read-only.
  */
+export function SelectField({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+  errors,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: readonly { value: string; label: string }[];
+  onChange: (value: string) => void;
+  errors?: string[];
+}) {
+  const errorId = `${id}-error`;
+
+  return (
+    <div className="adm-field">
+      <label htmlFor={id}>{label}</label>
+      <select
+        aria-describedby={errors?.length ? errorId : undefined}
+        aria-invalid={errors?.length ? "true" : undefined}
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <FieldError errors={errors} id={errorId} />
+    </div>
+  );
+}
+
 export function SlugField({
   id,
   prefix,

@@ -90,4 +90,20 @@ describe("parseServerEnv", () => {
       ),
     ).not.toContain("BETTER_AUTH_SECRET");
   });
+
+  test("RESUME_URL is optional, blank counts as unset, and only http(s) is accepted", () => {
+    const base = { DATABASE_URL: pooled, DATABASE_URL_UNPOOLED: direct };
+
+    expect(parseServerEnv(base).RESUME_URL).toBeUndefined();
+    expect(
+      parseServerEnv({ ...base, RESUME_URL: "" }).RESUME_URL,
+    ).toBeUndefined();
+    expect(
+      parseServerEnv({ ...base, RESUME_URL: "https://example.com/cv.pdf" })
+        .RESUME_URL,
+    ).toBe("https://example.com/cv.pdf");
+    expect(() =>
+      parseServerEnv({ ...base, RESUME_URL: "javascript:alert(1)" }),
+    ).toThrow("RESUME_URL");
+  });
 });

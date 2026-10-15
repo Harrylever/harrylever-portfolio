@@ -1,5 +1,7 @@
 import { ImageSlot } from "./image-slot";
 
+import { imageSrcSet, optimizedImageUrl } from "@/lib/media-url";
+
 /* Photograph frame: 4px radius, a hairline, an optional caption, and a slight
    desaturation so a warm phone photo sits in the room without fighting the
    sage/sand accents. */
@@ -8,7 +10,7 @@ export function Figure({
   asset,
   caption,
   aspect = "4 / 5",
-  placeholder = "Drop an image",
+  sizes = "(min-width: 1024px) 560px, 100vw",
   shape = "rounded",
   tone = "room",
   style,
@@ -22,7 +24,8 @@ export function Figure({
   } | null;
   caption?: string;
   aspect?: string;
-  placeholder?: string;
+  /** The `sizes` attribute for the responsive image. */
+  sizes?: string;
   shape?: "rect" | "rounded" | "circle" | "pill";
   tone?: "room" | "sunken";
   style?: React.CSSProperties;
@@ -57,12 +60,18 @@ export function Figure({
           <img
             alt={asset.altText}
             height={asset.height}
-            src={asset.secureUrl}
+            loading="lazy"
+            sizes={sizes}
+            src={optimizedImageUrl(
+              asset.secureUrl,
+              Math.min(asset.width, 1200),
+            )}
+            srcSet={imageSrcSet(asset.secureUrl, asset.width)}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             width={asset.width}
           />
         ) : (
-          <ImageSlot placeholder={placeholder} shape={shape} slotId={slotId} />
+          <ImageSlot shape={shape} slotId={slotId} />
         )}
       </div>
       {caption ? (

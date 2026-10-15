@@ -7,6 +7,8 @@ import type {
   RichTextTextNode,
 } from "@/domain/content/rich-text";
 
+import { imageSrcSet, optimizedImageUrl } from "@/lib/media-url";
+
 export type ResolvedRichTextMedia = Record<
   string,
   {
@@ -141,12 +143,17 @@ function renderBlock(
 
       return (
         <figure key={key}>
-          {/* Cloudinary transformations are applied before this resolved URL reaches the renderer. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt={asset.altText}
             height={asset.height}
-            src={asset.secureUrl}
+            loading="lazy"
+            sizes="(min-width: 760px) 720px, 100vw"
+            src={optimizedImageUrl(
+              asset.secureUrl,
+              Math.min(asset.width, 1200),
+            )}
+            srcSet={imageSrcSet(asset.secureUrl, asset.width)}
             width={asset.width}
           />
           {asset.caption ? <figcaption>{asset.caption}</figcaption> : null}
