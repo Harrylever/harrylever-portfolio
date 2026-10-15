@@ -152,6 +152,16 @@ describe("repositioning content", () => {
     expect(say.resumeUrl).toBeUndefined();
   });
 
+  test("the closing heading is open to any sector, not just students or shoppers", () => {
+    const say = repositioningHomeSections(baseMap).find(
+      (x) => x.type === "say",
+    );
+
+    if (say?.type !== "say") throw new Error("missing say");
+    expect(say.heading).toContain("any sector");
+    expect(say.heading).not.toMatch(/students|shoppers|Nigerian/i);
+  });
+
   test("AIZEN is an experiment", () => {
     expect(bySlug("aizen").content.kind).toBe("experiment");
   });

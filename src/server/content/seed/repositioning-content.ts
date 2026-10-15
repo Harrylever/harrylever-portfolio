@@ -171,7 +171,7 @@ export function repositioningHomeSections(
     {
       ...say,
       heading:
-        "Building something for Nigerian students or shoppers, or need a product engineer on contract? I'd like to hear from you.",
+        "Working on a problem worth solving, in any sector, or need a product engineer on contract? I'd like to hear from you.",
       availability:
         "Open to remote contract product-engineering work, Abuja also fine, and to a cybersecurity internship.",
       investorNote: "Investors: I'm happy to talk about Shelta.",
