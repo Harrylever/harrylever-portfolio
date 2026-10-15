@@ -159,6 +159,12 @@ async function resetPublicFixtures() {
     description: "Published project SEO description",
   };
   featuredFirst.homepageStory = "Featured project story";
+  featuredFirst.kind = "client";
+  featuredFirst.statusTone = "paused";
+  featuredFirst.metrics = [
+    { label: "Users", value: "227", asOf: "2026-10-15" },
+    { label: "Listings", value: "100+", asOf: "2026-10-15" },
+  ];
 
   await db.insert(projects).values([
     {
@@ -307,6 +313,20 @@ describe.serial("public content repositories", () => {
     expect(await getPublishedPost("unpublished-post")).toBeNull();
     expect(await getPublishedPost("trashed-post")).toBeNull();
     expect(await getPublishedPost("missing-post")).toBeNull();
+  }, 120_000);
+
+  test("maps a legacy row to the default kind and a row with metrics in order", async () => {
+    const legacy = await getPublishedProject("published-first");
+    const withMetrics = await getPublishedProject("featured-first");
+
+    expect(legacy?.kind).toBeUndefined();
+    expect(legacy?.metrics).toBeUndefined();
+    expect(withMetrics?.kind).toBe("client");
+    expect(withMetrics?.statusTone).toBe("paused");
+    expect(withMetrics?.metrics?.map(({ label }) => label)).toEqual([
+      "Users",
+      "Listings",
+    ]);
   }, 120_000);
 
   test("uses published SEO and publication timestamps for metadata and sitemap", async () => {

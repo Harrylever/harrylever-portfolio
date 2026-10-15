@@ -3,9 +3,13 @@ import type { PublicProject, PublicSiteProfile } from "@/server/content/public";
 import * as React from "react";
 import Link from "next/link";
 
+import { kindLabel, statusToneStyle } from "./project-meta";
+
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
+import { MetricsStrip } from "@/components/design-system/metrics-strip";
+import { projectKindOf } from "@/domain/content/project";
 
 const TITLE = "Everything I've built, and why.".split(" ");
 
@@ -180,6 +184,7 @@ export function ProjectsIndex({
                 >
                   {project.hook}
                 </p>
+                <MetricsStrip metrics={project.metrics} />
                 <div
                   style={{
                     display: "flex",
@@ -187,6 +192,7 @@ export function ProjectsIndex({
                     gap: "var(--s-2)",
                   }}
                 >
+                  <Tag>{kindLabel(projectKindOf(project))}</Tag>
                   {project.stack.slice(0, 4).map((s) => (
                     <Tag key={s}>{s}</Tag>
                   ))}
@@ -206,7 +212,7 @@ export function ProjectsIndex({
                   <span style={{ fontVariantNumeric: "tabular-nums" }}>
                     {project.year}
                   </span>
-                  <span style={{ color: "var(--sand)" }}>
+                  <span style={statusToneStyle(project.statusTone)}>
                     {project.displayStatus}
                   </span>
                   <Link

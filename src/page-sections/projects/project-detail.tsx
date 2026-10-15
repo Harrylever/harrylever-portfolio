@@ -3,11 +3,15 @@ import type { PublicProject, PublicSiteProfile } from "@/server/content/public";
 import * as React from "react";
 import Link from "next/link";
 
+import { kindLabel, statusToneStyle } from "./project-meta";
+
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
 import { Prose } from "@/components/design-system/prose";
 import { RichText } from "@/components/content/rich-text";
 import { Tag } from "@/components/design-system/tag";
+import { MetricsStrip } from "@/components/design-system/metrics-strip";
+import { projectKindOf } from "@/domain/content/project";
 import { Button } from "@/components/design-system/button";
 
 export function ProjectDetail({
@@ -27,6 +31,7 @@ export function ProjectDetail({
   const facts: [string, string][] = [
     ["Year", project.year],
     ["Role", project.role],
+    ["Type", kindLabel(projectKindOf(project))],
     ["State", project.displayStatus],
   ];
 
@@ -99,6 +104,12 @@ export function ProjectDetail({
             </p>
           </div>
 
+          {project.metrics?.length ? (
+            <div style={{ marginBottom: "var(--s-8)" }}>
+              <MetricsStrip metrics={project.metrics} />
+            </div>
+          ) : null}
+
           <div
             className="pd-facts"
             style={{
@@ -131,6 +142,9 @@ export function ProjectDetail({
                   style={{
                     fontSize: "var(--fs-sm)",
                     color: "var(--text-primary)",
+                    ...(k === "State"
+                      ? statusToneStyle(project.statusTone)
+                      : {}),
                   }}
                 >
                   {v}

@@ -69,6 +69,21 @@ export function Say({
             </React.Fragment>
           ))}
         </h2>
+        {section.availability || section.investorNote ? (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--s-2)",
+              margin: "0 0 var(--s-8)",
+              maxWidth: "52ch",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {section.availability ? <p>{section.availability}</p> : null}
+            {section.investorNote ? <p>{section.investorNote}</p> : null}
+          </div>
+        ) : null}
         <div
           className="sy-act"
           style={{

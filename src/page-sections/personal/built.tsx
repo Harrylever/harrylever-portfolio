@@ -4,6 +4,12 @@ import { SectionHeading } from "@/components/design-system/section-heading";
 import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
 import { Button } from "@/components/design-system/button";
+import { MetricsStrip } from "@/components/design-system/metrics-strip";
+import { projectKindOf } from "@/domain/content/project";
+import {
+  kindLabel,
+  statusToneStyle,
+} from "@/page-sections/projects/project-meta";
 
 export function Built({ section }: { section: PublicHomepage["built"] }) {
   return (
@@ -98,6 +104,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                 >
                   {project.homepageStory}
                 </p>
+                <MetricsStrip metrics={project.metrics} />
                 <div
                   style={{
                     display: "flex",
@@ -105,6 +112,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                     gap: "var(--s-2)",
                   }}
                 >
+                  <Tag>{kindLabel(projectKindOf(project))}</Tag>
                   {project.stack.map((s) => (
                     <Tag key={s}>{s}</Tag>
                   ))}
@@ -117,7 +125,7 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                     fontSize: "var(--fs-micro)",
                   }}
                 >
-                  <span style={{ color: "var(--sand)" }}>
+                  <span style={statusToneStyle(project.statusTone)}>
                     {project.displayStatus}
                   </span>
                   {project.externalUrl ? (
