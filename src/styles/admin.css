@@ -1,0 +1,1675 @@
+/* Admin workspace. Built on the portfolio tokens in design-system.css:
+   the same room/haze palette and Outfit/Inter pairing, quieter rhythm.
+   Sage = interactive/current, sand = needs attention (drafts, unsaved),
+   rose = failure. No motion beyond hover/focus feedback. */
+
+.adm {
+  --adm-rail: 232px;
+  --adm-rose: #e3a99c;
+  --adm-gutter: var(--s-9);
+  min-height: 100vh;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.adm a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.adm :where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--r-inline);
+}
+
+/* Shell ----------------------------------------------------------------- */
+
+.adm-rail {
+  display: none;
+}
+
+.adm-main {
+  padding: var(--s-8) var(--gutter-sm) var(--s-11);
+  max-width: 920px;
+}
+
+/* loading/error boundaries reuse .adm-main; inside the shell they must not
+   add a second set of padding. */
+.adm-main .adm-main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.adm-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--gutter-sm);
+  background: var(--veil);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-mark {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  font-size: var(--fs-lede);
+  letter-spacing: var(--tr-title);
+}
+
+.adm-mark small {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+  letter-spacing: 0;
+}
+
+@media (min-width: 960px) {
+  .adm-topbar,
+  .adm-drawer,
+  .adm-scrim {
+    display: none !important;
+  }
+
+  .adm-rail {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--adm-rail);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-9);
+    /* Extra bottom room keeps the account controls clear of corner badges
+       (e.g. the Next.js dev indicator). */
+    padding: var(--s-8) var(--s-6) var(--s-11);
+    background: var(--bg-sunken);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+  }
+
+  .adm-main {
+    margin-left: var(--adm-rail);
+    padding: var(--s-10) var(--adm-gutter) var(--s-11);
+  }
+}
+
+/* Nav list: the portfolio's sage-dot index, set vertically. */
+.adm-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.adm-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  margin: 0 calc(-1 * var(--s-3));
+  border-radius: var(--r-card);
+  color: var(--text-meta);
+  font-size: var(--fs-sm);
+  transition:
+    color var(--dur-fast) var(--ease-inout),
+    background var(--dur-fast) var(--ease-inout);
+}
+
+.adm-nav a:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.adm-nav a[aria-current="page"] {
+  color: var(--text-primary);
+}
+
+.adm-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+}
+
+[aria-current="page"] > .adm-dot {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.adm-account {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+  overflow-wrap: anywhere;
+}
+
+/* Drawer (below 960px) */
+.adm-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 28;
+  background: var(--veil);
+}
+
+.adm-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 29;
+  width: min(340px, 86vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding: var(--s-6);
+  background: var(--bg-sunken);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--elev-lift);
+  overflow-y: auto;
+}
+
+.adm-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Controls -------------------------------------------------------------- */
+
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  padding: 9px 20px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-control);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-meta);
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-inout),
+    border-color var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.adm-btn:hover:not(:disabled) {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--on-accent);
+}
+
+.adm-btn[data-variant="solid"] {
+  background: var(--haze);
+  border-color: var(--haze);
+  color: var(--on-accent);
+}
+
+.adm-btn[data-variant="solid"]:hover:not(:disabled) {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.adm-btn[data-variant="quiet"] {
+  border-color: transparent;
+  padding-inline: 0;
+  min-height: 0;
+  color: var(--text-link);
+}
+
+.adm-btn[data-variant="quiet"]:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.adm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.adm-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.adm-field label,
+.adm-label {
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+}
+
+.adm-field input,
+.adm-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  transition: border-color var(--dur-fast) var(--ease-inout);
+}
+
+.adm-field textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.adm-field input:hover,
+.adm-field textarea:hover {
+  border-color: var(--border-control);
+}
+
+.adm-field input:focus-visible,
+.adm-field textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.adm-field [aria-invalid="true"] {
+  border-color: var(--adm-rose);
+}
+
+.adm-hint {
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+}
+
+.adm-field-error {
+  font-size: var(--fs-micro);
+  color: var(--adm-rose);
+}
+
+/* Type ------------------------------------------------------------------ */
+
+.adm-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-light);
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: var(--lh-section);
+  letter-spacing: var(--tr-section);
+}
+
+.adm-lede {
+  margin: var(--s-3) 0 0;
+  max-width: var(--measure-lede);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.adm-h2 {
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  font-size: var(--fs-subtitle);
+  letter-spacing: var(--tr-title);
+}
+
+.adm-section {
+  margin-top: var(--s-10);
+}
+
+/* Overview -------------------------------------------------------------- */
+
+.adm-summary {
+  margin: var(--s-6) 0 0;
+  max-width: 24ch;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-light);
+  font-size: clamp(1.75rem, 4vw, 2.6rem);
+  line-height: 1.18;
+  letter-spacing: var(--tr-section);
+  color: var(--text-secondary);
+}
+
+.adm-summary strong {
+  font-weight: var(--fw-display-emph);
+  color: var(--text-primary);
+}
+
+.adm-ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-ledger th,
+.adm-ledger td {
+  padding: var(--s-3) var(--s-2);
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.adm-ledger th:first-child,
+.adm-ledger td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+
+.adm-ledger thead th {
+  font-weight: var(--fw-body);
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+}
+
+.adm-ledger tbody th a {
+  color: var(--text-link);
+}
+
+.adm-ledger tbody th a:hover {
+  color: var(--text-primary);
+}
+
+.adm-ledger .is-attention {
+  color: var(--text-status);
+}
+
+.adm-ledger .is-zero {
+  color: var(--text-meta);
+}
+
+.adm-scroll {
+  overflow-x: auto;
+}
+
+.adm-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.adm-activity li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-1) var(--s-6);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+.adm-activity time {
+  color: var(--text-meta);
+  font-size: var(--fs-micro);
+}
+
+.adm-empty {
+  color: var(--text-meta);
+  font-size: var(--fs-sm);
+}
+
+/* Forms ----------------------------------------------------------------- */
+
+.adm-form {
+  display: grid;
+  gap: var(--s-6);
+  max-width: 640px;
+}
+
+.adm-form-row {
+  display: grid;
+  gap: var(--s-6);
+}
+
+@media (min-width: 640px) {
+  .adm-form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.adm-links {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.adm-link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) auto;
+  gap: var(--s-3);
+  align-items: start;
+}
+
+@media (max-width: 559px) {
+  .adm-link-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .adm-link-row > :nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+.adm-savebar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-4);
+  padding: var(--s-4) 0;
+  background: var(--bg-page);
+  border-top: 1px solid var(--line);
+}
+
+.adm-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-right: auto;
+  font-size: var(--fs-meta);
+  color: var(--text-meta);
+}
+
+.adm-status[data-tone="attention"] {
+  color: var(--text-status);
+}
+
+.adm-status[data-tone="error"] {
+  color: var(--adm-rose);
+}
+
+.adm-status[data-tone="ok"] {
+  color: var(--sage);
+}
+
+.adm-note {
+  max-width: 640px;
+  margin-top: var(--s-10);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+.adm-note code {
+  font-size: 0.92em;
+  color: var(--text-primary);
+}
+
+/* Sign-in --------------------------------------------------------------- */
+
+.adm-gate {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  padding: var(--s-10) var(--gutter-sm);
+}
+
+.adm-gate-inner {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.adm-gate .adm-form {
+  margin-top: var(--s-8);
+}
+
+.adm-alert {
+  padding: var(--s-3) var(--s-4);
+  border-left: 2px solid var(--adm-rose);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+}
+
+/* Loading / error ------------------------------------------------------- */
+
+.adm-placeholder {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 640px;
+}
+
+.adm-bar {
+  height: 14px;
+  border-radius: var(--r-inline);
+  background: var(--bg-surface);
+}
+
+.adm-form-errors {
+  margin: 0;
+  padding-left: var(--s-8);
+  display: grid;
+  gap: var(--s-1);
+}
+
+/* Content lists (projects, blog) ---------------------------------------- */
+
+.adm-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.adm-pagehead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.adm-back {
+  display: inline-block;
+  margin-bottom: var(--s-4);
+  font-size: var(--fs-meta);
+  color: var(--text-link) !important;
+}
+
+.adm-back::before {
+  content: "← ";
+}
+
+.adm-back:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Views read as a quiet index, like the nav: the current one gets the dot. */
+.adm-tabs {
+  display: flex;
+  gap: var(--s-6);
+  margin-top: var(--s-8);
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) 0;
+  margin-bottom: -1px;
+  border-bottom: 1px solid transparent;
+  font-size: var(--fs-sm);
+  color: var(--text-meta);
+  transition: color var(--dur-fast) var(--ease-inout);
+}
+
+.adm-tabs a:hover {
+  color: var(--text-primary);
+}
+
+.adm-tabs a[aria-current="page"] {
+  color: var(--text-primary);
+  border-bottom-color: var(--sage);
+}
+
+.adm-filters {
+  display: grid;
+  gap: var(--s-4);
+  align-items: end;
+  margin: var(--s-6) 0 var(--s-4);
+}
+
+@media (min-width: 640px) {
+  .adm-filters {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  }
+}
+
+.adm-filters-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.adm-field select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.adm-field select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.adm-table th,
+.adm-table td {
+  padding: var(--s-4) var(--s-3) var(--s-4) 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.adm-table thead th {
+  padding-block: var(--s-2);
+  font-weight: var(--fw-body);
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+}
+
+.adm-table tbody th {
+  font-weight: var(--fw-body);
+  min-width: 14rem;
+}
+
+.adm-table time {
+  color: var(--text-meta);
+  font-size: var(--fs-micro);
+  white-space: nowrap;
+}
+
+.adm-row-title {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+}
+
+a.adm-row-title:hover {
+  color: var(--sage) !important;
+}
+
+.adm-row-slug {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+  overflow-wrap: anywhere;
+}
+
+.adm-row-actions {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.adm-row-actions .adm-btn + .adm-btn {
+  margin-left: var(--s-2);
+}
+
+.adm-btn-icon {
+  min-width: 40px;
+  padding-inline: 0;
+}
+
+.adm-btn[data-variant="danger"] {
+  background: var(--adm-rose);
+  border-color: var(--adm-rose);
+  color: var(--on-accent);
+}
+
+.adm-btn[data-variant="danger"]:hover:not(:disabled) {
+  background: transparent;
+  border-color: var(--adm-rose);
+  color: var(--adm-rose);
+}
+
+.adm-btn[data-variant="danger-quiet"] {
+  border-color: transparent;
+  color: var(--adm-rose);
+}
+
+.adm-btn[data-variant="danger-quiet"]:hover:not(:disabled) {
+  background: transparent;
+  border-color: var(--adm-rose);
+  color: var(--adm-rose);
+}
+
+/* Lifecycle state: the nav's dot vocabulary. Sage = live, sand = draft or
+   pending changes, hollow = off the site. */
+.adm-state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  color: var(--text-secondary);
+}
+
+.adm-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+}
+
+.adm-state[data-state="published"] .adm-state-dot {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.adm-state[data-state="draft"] .adm-state-dot {
+  background: var(--sand);
+  border-color: var(--sand);
+}
+
+.adm-state[data-state="trashed"] .adm-state-dot {
+  border-color: var(--adm-rose);
+}
+
+.adm-state-note {
+  flex-basis: 100%;
+  font-size: var(--fs-micro);
+  color: var(--text-status);
+}
+
+td > .adm-state-note {
+  display: block;
+  margin-top: var(--s-1);
+  color: var(--text-meta);
+}
+
+/* Confirmation and picker dialogs (native <dialog>, no motion). */
+.adm-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  width: min(460px, calc(100vw - 2 * var(--gutter-sm)));
+  max-height: calc(100vh - 2 * var(--s-8));
+  padding: var(--s-6);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  box-shadow: var(--elev-lift);
+  font-family: var(--font-body);
+}
+
+.adm-dialog::backdrop {
+  background: var(--veil);
+  backdrop-filter: blur(6px);
+}
+
+.adm-dialog-wide {
+  width: min(760px, calc(100vw - 2 * var(--gutter-sm)));
+}
+
+.adm-dialog-title {
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  font-size: var(--fs-subtitle);
+  line-height: var(--lh-title);
+  letter-spacing: var(--tr-title);
+  overflow-wrap: anywhere;
+}
+
+.adm-dialog-body {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+.adm-dialog-body p {
+  margin: 0;
+}
+
+.adm-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+}
+
+/* Editor ---------------------------------------------------------------- */
+
+.adm-editor {
+  max-width: 720px;
+}
+
+.adm-fieldset {
+  display: grid;
+  gap: var(--s-6);
+  margin: 0;
+  padding: var(--s-6) 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+
+.adm-fieldset > legend {
+  float: left;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.adm-fieldset > legend + * {
+  clear: both;
+}
+
+/* The publication strip: where the item stands and what can happen next. */
+.adm-publish {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4) var(--s-6);
+  max-width: 720px;
+  margin: var(--s-6) 0 var(--s-8);
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.adm-publish-state {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.adm-publish-state .adm-state {
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+}
+
+.adm-publish-state .adm-hint {
+  margin: 0;
+}
+
+.adm-publish-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.adm-slug {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--bg-sunken);
+}
+
+.adm-slug:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.adm-slug-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 14px;
+  color: var(--text-meta);
+  font-size: var(--fs-sm);
+}
+
+.adm-field .adm-slug input {
+  border: 0;
+  padding-left: 2px;
+  background: transparent;
+}
+
+.adm-field .adm-slug input:focus-visible {
+  outline: none;
+}
+
+.adm-slug-locked {
+  margin: 0;
+}
+
+.adm-slug-locked code {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.adm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+}
+
+/* Rich text --------------------------------------------------------------- */
+
+.adm-rte-frame {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--bg-sunken);
+}
+
+.adm-rte-frame:focus-within {
+  border-color: var(--border-control);
+}
+
+.adm-rte-frame[data-invalid="true"] {
+  border-color: var(--adm-rose);
+}
+
+.adm-rte-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-3);
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-sunken);
+  border-radius: var(--r-card) var(--r-card) 0 0;
+}
+
+.adm-rte-group {
+  display: flex;
+  gap: 2px;
+}
+
+.adm-rte-group + .adm-rte-group {
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--line);
+}
+
+.adm-rte-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--r-inline);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.adm-rte-tool:hover:not(:disabled) {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.adm-rte-tool[aria-pressed="true"] {
+  background: var(--bg-surface);
+  color: var(--sage);
+}
+
+.adm-rte-tool:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.adm-rte-link {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-rte-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+/* The writing surface borrows the public prose rhythm. */
+.adm-rte-content {
+  min-height: 260px;
+  padding: var(--s-5) var(--s-5) var(--s-8);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.adm-rte-content:focus-visible {
+  outline: none;
+}
+
+.adm-rte-content > * + * {
+  margin-top: var(--s-4);
+}
+
+.adm-rte-content p {
+  margin: 0;
+}
+
+.adm-rte-content h2,
+.adm-rte-content h3 {
+  margin: var(--s-6) 0 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  letter-spacing: var(--tr-title);
+  line-height: var(--lh-title);
+}
+
+.adm-rte-content h2 {
+  font-size: var(--fs-subtitle);
+}
+
+.adm-rte-content h3 {
+  font-size: var(--fs-lede);
+}
+
+.adm-rte-content ul,
+.adm-rte-content ol {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.adm-rte-content blockquote {
+  margin: 0;
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--sage);
+  color: var(--text-secondary);
+}
+
+.adm-rte-content code {
+  font-size: 0.92em;
+  padding: 1px 4px;
+  border-radius: var(--r-inline);
+  background: var(--bg-surface);
+}
+
+.adm-rte-content pre {
+  margin: 0;
+  padding: var(--s-4);
+  border-radius: var(--r-inline);
+  background: var(--bg-page);
+  overflow-x: auto;
+}
+
+.adm-rte-content pre code {
+  padding: 0;
+  background: none;
+}
+
+.adm-rte-content a {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.adm-rte-image {
+  margin: 0;
+  padding: var(--s-2);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-inline);
+  color: var(--text-meta);
+  font-size: var(--fs-micro);
+}
+
+.adm-rte-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.adm-rte-image.ProseMirror-selectednode {
+  outline: 2px solid var(--focus-ring);
+}
+
+.adm-rte-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--text-meta);
+  pointer-events: none;
+}
+
+/* Media picker ------------------------------------------------------------ */
+
+.adm-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--s-3);
+  max-height: 52vh;
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+}
+
+.adm-media-option {
+  position: relative;
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-inline);
+  cursor: pointer;
+}
+
+.adm-media-option:has(input:checked) {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 1px var(--sage);
+}
+
+.adm-media-option:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.adm-media-option input {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+}
+
+.adm-media-option img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.adm-media-alt {
+  font-size: var(--fs-micro);
+  color: var(--text-meta);
+  overflow-wrap: anywhere;
+}
+
+.adm-media-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.adm-media-field-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.adm-media-thumb {
+  width: 160px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--r-inline);
+  border: 1px solid var(--line);
+}
+
+.adm-media-missing {
+  font-size: var(--fs-micro);
+  color: var(--adm-rose);
+}
+
+.adm-media-list {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adm-media-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+/* Narrow screens: each row becomes a stacked entry instead of a wide table. */
+@media (max-width: 639px) {
+  .adm-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .adm-table,
+  .adm-table tbody,
+  .adm-table tr,
+  .adm-table th,
+  .adm-table td {
+    display: block;
+  }
+
+  .adm-table tr {
+    padding: var(--s-4) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .adm-table th,
+  .adm-table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .adm-table tbody th {
+    min-width: 0;
+  }
+
+  .adm-table td {
+    margin-top: var(--s-2);
+  }
+
+  .adm-row-actions {
+    text-align: left !important;
+    white-space: normal;
+  }
+}
+
+/* Homepage running order ------------------------------------------------ */
+/* The order is a real sequence, so the position numeral carries meaning:
+   it doubles as the drag handle. Hidden sections keep their place but sit
+   back (dimmed, dashed rule). No motion: rows jump to their new place. */
+
+.adm-btn-small {
+  min-height: 32px;
+  padding: 5px 14px;
+}
+
+.adm-order-help {
+  max-width: 720px;
+  margin: var(--s-4) 0 var(--s-3);
+}
+
+.adm-order-status {
+  min-height: 1.5em;
+  margin: 0;
+}
+
+.adm-order-alert {
+  max-width: 720px;
+  margin-top: var(--s-3);
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+}
+
+.adm-order-alert p,
+.adm-upload-error p {
+  margin: 0;
+}
+
+.adm-order {
+  max-width: 720px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-strong);
+}
+
+.adm-order-row {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: var(--s-2) var(--s-4);
+  align-items: start;
+  padding: var(--s-5, 20px) 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-page);
+}
+
+.adm-order-row[draggable="true"] .adm-order-handle {
+  cursor: grab;
+}
+
+.adm-order-row[data-dragging="true"] {
+  opacity: 0.45;
+}
+
+.adm-order-row[data-drop="true"] {
+  box-shadow: inset 0 2px 0 var(--sage);
+}
+
+.adm-order-row[data-hidden="true"] {
+  border-bottom-style: dashed;
+}
+
+.adm-order-row[data-hidden="true"] .adm-order-name,
+.adm-order-row[data-hidden="true"] .adm-order-summary {
+  color: var(--text-meta);
+}
+
+.adm-order-handle {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-light);
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+  line-height: 1;
+  color: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.adm-order-main {
+  min-width: 0;
+}
+
+.adm-order-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-regular);
+  font-size: var(--fs-subtitle);
+  letter-spacing: var(--tr-title);
+  line-height: var(--lh-title);
+}
+
+.adm-order-summary {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.adm-order-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-micro);
+}
+
+.adm-order-visibility {
+  color: var(--text-meta);
+}
+
+.adm-order-controls {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.adm-order-controls .adm-check {
+  margin-right: var(--s-2);
+}
+
+@media (min-width: 720px) {
+  .adm-order-row {
+    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  }
+
+  .adm-order-controls {
+    grid-column: 3;
+    justify-content: flex-end;
+  }
+}
+
+.adm-state[data-state="unpublished"] .adm-state-dot {
+  background: transparent;
+}
+
+/* Repeatable rows inside section forms ----------------------------------- */
+
+.adm-repeat {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.adm-repeat > legend {
+  padding: 0;
+  margin-bottom: var(--s-2);
+}
+
+.adm-repeat-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.adm-repeat-row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--s-3) var(--s-4);
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-repeat-index {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display-light);
+  font-size: var(--fs-subtitle);
+  line-height: 1.2;
+  color: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-repeat-fields {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.adm-repeat-controls {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.adm-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-6);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.adm-choice > legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--s-2);
+}
+
+/* Uploader ---------------------------------------------------------------- */
+
+.adm-uploader {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 640px;
+}
+
+.adm-uploader-actions,
+.adm-media-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-4);
+}
+
+.adm-uploader-actions .adm-status,
+.adm-media-detail-actions .adm-status {
+  margin: 0;
+}
+
+.adm-field .adm-file {
+  padding: 8px 10px;
+  background: transparent;
+  border-style: dashed;
+}
+
+.adm-upload-error {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+}
+
+.adm-upload-details {
+  margin: 0 0 var(--s-4);
+  padding: var(--s-3) 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-upload-details > summary {
+  cursor: pointer;
+  font-size: var(--fs-meta);
+  color: var(--text-link);
+}
+
+.adm-upload-details[open] > summary {
+  margin-bottom: var(--s-4);
+}
+
+/* Media library ----------------------------------------------------------- */
+
+.adm-library-status {
+  min-height: 1.5em;
+  margin: var(--s-6) 0 0;
+}
+
+.adm-media-layout {
+  display: grid;
+  gap: var(--s-8);
+  margin-top: var(--s-6);
+}
+
+@media (min-width: 1100px) {
+  .adm-media-layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr);
+    align-items: start;
+  }
+
+  .adm-media-detail {
+    position: sticky;
+    top: var(--s-6);
+  }
+}
+
+.adm-media-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adm-media-card {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.adm-media-card[aria-current="true"] {
+  border-bottom-color: var(--sage);
+}
+
+.adm-media-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--r-inline);
+  background: var(--bg-surface);
+}
+
+.adm-media-card-alt {
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+
+.adm-media-card-alt[data-missing="true"] {
+  color: var(--text-status);
+}
+
+.adm-media-card .adm-btn {
+  justify-self: start;
+}
+
+.adm-media-detail {
+  display: grid;
+  gap: var(--s-5, 20px);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line-strong);
+  min-width: 0;
+}
+
+.adm-media-detail .adm-h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.adm-media-detail .adm-h2:focus {
+  outline: none;
+}
+
+.adm-media-preview {
+  width: 100%;
+  max-height: 360px;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--r-card);
+  background: var(--bg-surface);
+}
+
+.adm-media-detail-empty {
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+}
+
+.adm-copy {
+  display: flex;
+  gap: var(--s-3);
+}
+
+.adm-copy input {
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-media-usage h3 {
+  margin: 0 0 var(--s-2);
+  font-weight: var(--fw-body);
+}
+
+.adm-media-usage ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.adm-media-usage a {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

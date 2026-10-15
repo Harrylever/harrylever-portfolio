@@ -1,105 +1,88 @@
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
+
 import clsx from "clsx";
+import { Inter, Outfit } from "next/font/google";
 
 import { Providers } from "./providers";
 
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { getPublishedSiteProfile } from "@/server/content/public";
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
-  authors: [
-    {
-      name: "Dean Ukanah",
-      url: "https://www.deanukanah.dev",
+const outfitHeading = Outfit({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await getPublishedSiteProfile();
+  const name = profile?.name ?? siteConfig.name;
+  const tagline = profile?.tagline ?? siteConfig.tagline;
+  const description = profile?.description ?? siteConfig.description;
+
+  return {
+    title: {
+      default: `${name} — ${tagline}`,
+      template: `%s — ${name}`,
     },
-  ],
-  creator: "Dean Onesi Ukanah",
-  publisher: "Dean Onesi Ukanah @ Vercel",
-  applicationName: "Dean's Portfolio",
-  generator: "Next.js",
-  keywords: [
-    "Harrylever",
-    "Portfolio",
-    "Dean",
-    "Onesi",
-    "Ukanah",
-    "Dean Onesi",
-    "Ukanah Dean",
-    "Onesi Ukanah",
-    "Dean Onesi Ukanah",
-    "Software Engineer",
-    "Web Developer",
-    "Mobile Developer",
-    "Full-Stack Engineer",
-    "Full Stack Engineer",
-    "Full-Stack Developer",
-    "Full Stack Developer",
-    "Frontend Engineer",
-    "Backend Engineer",
-    "DevOps Engineer",
-    "Cloud Engineer",
-    "Cybersecurity Engineer",
-    "AI Engineer",
-    "Machine Learning Engineer",
-    "Data Engineer",
-    "Data Scientist",
-    "Data Analyst",
-    "Data Visualization Engineer",
-    "Data Engineering",
-    "Data Science",
-    "Data Analysis",
-    "Data Visualization",
-    "Data Engineering",
-    "Data Science",
-    "Data Analysis",
-    "Data Visualization",
-  ],
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name, url: siteConfig.url }],
+    creator: name,
+    publisher: `${name} @ Vercel`,
+    applicationName: `${name}'s Portfolio`,
+    generator: "Next.js",
+    keywords: [
+      "Harrylever",
+      "Dean Ukanah",
+      "Dean Onesi Ukanah",
+      "Indie Hacker",
+      "Software Engineer",
+      "Full-Stack Engineer",
+      "Product Engineering",
+      "Cybersecurity",
+      "Next.js",
+      "React",
+      "Solana",
+      "Rust",
+    ],
+    robots: {
       index: true,
       follow: true,
+      googleBot: { index: true, follow: true },
     },
-  },
-  metadataBase: new URL("https://www.deanukanah.dev"),
-  description: siteConfig.description,
-  icons: {
-    icon: "/favicon.ico",
-  },
-  openGraph: {
-    title: siteConfig.name,
-    description: siteConfig.description,
-    url: "https://www.deanukanah.dev",
-    siteName: siteConfig.name,
-    images: [
-      {
-        url: "https://www.deanukanah.dev/deanukanah.jpg",
-        width: 620,
-        height: 620,
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  alternates: {
-    canonical: "/",
-    languages: {
-      "en-US": "/en-US",
+    metadataBase: new URL(siteConfig.url),
+    description,
+    icons: { icon: "/favicon.ico" },
+    openGraph: {
+      title: `${name} — ${tagline}`,
+      description,
+      url: siteConfig.url,
+      siteName: name,
+      images: [
+        {
+          url: `${siteConfig.url}/deanukanah.jpg`,
+          width: 620,
+          height: 620,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
     },
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
-    images: { url: "https://www.deanukanah.dev/deanukanah.jpg" },
-  },
-};
+    alternates: {
+      canonical: "/",
+      languages: { "en-US": "/en-US" },
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} — ${tagline}`,
+      description,
+      images: { url: `${siteConfig.url}/deanukanah.jpg` },
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -114,16 +97,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html
+      suppressHydrationWarning
+      className={cn("font-sans", inter.variable, outfitHeading.variable)}
+      lang="en"
+    >
       <head />
-      <body
-        className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
-      >
+      <body className={clsx("min-h-screen font-sans antialiased")}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </Providers>
       </body>
     </html>
