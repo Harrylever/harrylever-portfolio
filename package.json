@@ -12,6 +12,7 @@
     "db:migrate": "bun scripts/migrate.ts",
     "db:migrate:test": "bun scripts/migrate.ts --test",
     "db:seed": "bun scripts/seed-content.ts",
+    "db:draft-repositioning": "bun scripts/draft-repositioning.ts",
     "test": "bun test tests/unit",
     "test:integration": "bun test --timeout 240000 tests/integration",
     "test:e2e": "playwright test"
