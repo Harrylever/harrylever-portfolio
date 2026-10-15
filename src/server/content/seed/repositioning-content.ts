@@ -65,8 +65,8 @@ export function repositioningHomeSections(
     {
       ...intro,
       statement: [
-        { text: "I build software that makes" },
-        { text: "student and Nigerian life easier.", emphasis: true },
+        { text: "I speak to the people with the problem," },
+        { text: "then build the product that solves it.", emphasis: true },
       ],
       lede: "Co-founder and Head of Product and Engineering at Shelta, verified off-campus housing for students. I own product and engineering end to end, and I am a final-year Cybersecurity student at FUTMinna.",
     },

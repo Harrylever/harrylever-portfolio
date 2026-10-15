@@ -162,6 +162,18 @@ describe("repositioning content", () => {
     expect(say.heading).not.toMatch(/students|shoppers|Nigerian/i);
   });
 
+  test("the headline is the chosen sentence, with the second half emphasised", () => {
+    const intro = repositioningHomeSections(baseMap).find(
+      (x) => x.type === "intro",
+    );
+
+    if (intro?.type !== "intro") throw new Error("missing intro");
+    expect(intro.statement).toEqual([
+      { text: "I speak to the people with the problem," },
+      { text: "then build the product that solves it.", emphasis: true },
+    ]);
+  });
+
   test("AIZEN is an experiment", () => {
     expect(bySlug("aizen").content.kind).toBe("experiment");
   });
