@@ -244,7 +244,7 @@ describe("repositioning project form fields", () => {
         ...projectFormFromContent("atlas", legacy),
         kind: "client",
         statusTone: "paused",
-        metrics: [metric],
+        metrics: [{ key: "m1", ...metric }],
       },
       legacy,
     ) as Record<string, unknown>;
@@ -255,8 +255,8 @@ describe("repositioning project form fields", () => {
   });
 
   test("blank metric rows are dropped and half-filled rows are kept for validation", () => {
-    const blank = { label: " ", value: "", asOf: "" };
-    const half = { label: "Users", value: "", asOf: "" };
+    const blank = { key: "m1", label: " ", value: "", asOf: "" };
+    const half = { key: "m2", label: "Users", value: "", asOf: "" };
     const draft = projectDraftFromForm(
       {
         ...projectFormFromContent("atlas", legacy),
@@ -265,7 +265,7 @@ describe("repositioning project form fields", () => {
       legacy,
     ) as Record<string, unknown>;
 
-    expect(draft.metrics).toEqual([half]);
+    expect(draft.metrics).toEqual([{ label: "Users", value: "", asOf: "" }]);
     expect(projectContentSchema.safeParse(draft).success).toBe(false);
   });
 

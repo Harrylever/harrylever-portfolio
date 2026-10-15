@@ -7,6 +7,7 @@ import type {
 import type { RichTextDocument } from "@/domain/content/rich-text";
 
 import { projectKindOf } from "@/domain/content/project";
+import { rowKey } from "@/lib/admin/home-forms";
 
 /* Pure helpers shared by the project/post forms and their server actions. */
 
@@ -20,7 +21,8 @@ export type ProjectFormValues = {
   displayStatus: string;
   kind: ProjectKind;
   statusTone: StatusTone | "";
-  metrics: { label: string; value: string; asOf: string }[];
+  /** `key` is a React key only; it is never sent to the server. */
+  metrics: { key: string; label: string; value: string; asOf: string }[];
   externalUrl: string;
   /** One technology per line (commas also split). */
   stack: string;
@@ -93,7 +95,10 @@ export function projectFormFromContent(
     displayStatus: content.displayStatus,
     kind: projectKindOf(content),
     statusTone: content.statusTone ?? "",
-    metrics: (content.metrics ?? []).map((metric) => ({ ...metric })),
+    metrics: (content.metrics ?? []).map((metric) => ({
+      ...metric,
+      key: rowKey(),
+    })),
     externalUrl: content.externalUrl ?? "",
     stack: content.stack.join("\n"),
     coverAssetId: content.coverAssetId ?? null,

@@ -11,6 +11,7 @@ import {
   expectHostilePasteNeutralised,
   expectPublicStatus,
   expectStatus,
+  fillProjectForm,
   hostilePaste,
   openEditorInTwoPages,
   pasteHtml,
@@ -36,6 +37,60 @@ test.afterAll(async ({ baseURL }) => {
 test.describe("project administration", () => {
   test.beforeEach(async ({ page }) => {
     await signInAsAdmin(page);
+  });
+
+  test("saves type, status tone and metrics, and shows them on the public project page", async ({
+    page,
+    baseURL,
+  }) => {
+    const name = `CMS metrics project ${Date.now()}`;
+    const slug = uniqueSlug("project");
+
+    await page.goto("/admin/projects/new");
+    await fillProjectForm(page, { name, slug });
+    await page.getByLabel("Type", { exact: true }).selectOption("client");
+    await page.getByLabel("Status tone").selectOption("paused");
+    await page.getByRole("button", { name: "Add metric" }).click();
+    await page.getByLabel("Metric label 1").fill("Registered users");
+    await page.getByLabel("Metric value 1").fill("227");
+    await page.getByLabel("Metric as of 1").fill("2026-10-15");
+    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page).toHaveURL(/\/admin\/projects\/[a-z0-9]{24}$/);
+    await expectStatus(page, /Saved/);
+
+    await page.reload();
+    await expect(page.getByLabel("Type", { exact: true })).toHaveValue(
+      "client",
+    );
+    await expect(page.getByLabel("Metric value 1")).toHaveValue("227");
+
+    await page.getByRole("button", { name: "Publish changes" }).click();
+    await confirmNamedDialog(page, name, "Publish");
+    await expectStatus(page, /Published/);
+
+    await expectPublicStatus(baseURL!, `/projects/${slug}`, 200);
+    const html = await publicHtml(baseURL!, `/projects/${slug}`);
+
+    expect(html).toContain("Registered users");
+    expect(html).toContain("227");
+    expect(html).toContain("15 Oct 2026");
+    expect(html).toContain("Client work");
+  });
+
+  test("a half-filled metric shows an error and does not save", async ({
+    page,
+  }) => {
+    await page.goto("/admin/projects/new");
+    await fillProjectForm(page, {
+      name: `CMS bad metric ${Date.now()}`,
+      slug: uniqueSlug("project"),
+    });
+    await page.getByRole("button", { name: "Add metric" }).click();
+    await page.getByLabel("Metric label 1").fill("Registered users");
+    await page.getByRole("button", { name: "Create draft" }).click();
+
+    await expect(page).toHaveURL(/\/admin\/projects\/new$/);
+    await expect(page.locator("#home-metrics-error")).toBeVisible();
   });
 
   test("publishes a project only after a named confirmation, keeping later draft edits private", async ({

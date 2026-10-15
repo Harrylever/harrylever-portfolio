@@ -125,6 +125,8 @@ async function createSections(page: Page) {
   await page.goto("/admin/home/say");
   await heading(page).fill(`Say hello ${run}`);
   await page.getByLabel("Email").fill("e2e@example.invalid");
+  await page.getByLabel("Availability").fill(`Open to remote contracts ${run}`);
+  await page.getByLabel("Investor note").fill(`Ask me about Shelta ${run}`);
   await saveSection(page);
 }
 
@@ -211,6 +213,9 @@ test("publishes homepage order and visibility as one snapshot", async ({
     "Published. The public homepage is updated.",
     { timeout: 45_000 },
   );
+  // The Say availability and investor note reach the public homepage.
+  await expectPublicHome(baseURL!, `Open to remote contracts ${run}`, true);
+  await expectPublicHome(baseURL!, `Ask me about Shelta ${run}`, true);
   await expectPublishedHomeOrder(baseURL!, [
     "intro",
     "built",

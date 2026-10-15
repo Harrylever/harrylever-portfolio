@@ -36,6 +36,24 @@ export function SayForm({
       />
       <HomeText
         errors={errors}
+        hint="Optional. E.g. open to remote contract work."
+        label="Availability"
+        max={200}
+        name="availability"
+        value={values.availability}
+        onChange={(availability) => set({ availability })}
+      />
+      <HomeText
+        errors={errors}
+        hint="Optional. A line for investors."
+        label="Investor note"
+        max={200}
+        name="investorNote"
+        value={values.investorNote}
+        onChange={(investorNote) => set({ investorNote })}
+      />
+      <HomeText
+        errors={errors}
         hint="Optional."
         label="WhatsApp link"
         name="whatsappUrl"
