@@ -65,8 +65,8 @@ export function repositioningHomeSections(
     {
       ...intro,
       statement: [
-        { text: "I speak to the people with the problem," },
-        { text: "then build the product that solves it.", emphasis: true },
+        { text: "I find real-world problems," },
+        { text: "then build the software to fix them.", emphasis: true },
       ],
       lede: "Co-founder and Head of Product and Engineering at Shelta, verified off-campus housing for students. I own product and engineering end to end, and I am a final-year Cybersecurity student at FUTMinna.",
     },
@@ -171,7 +171,7 @@ export function repositioningHomeSections(
     {
       ...say,
       heading:
-        "Working on a problem worth solving, in any sector, or need a product engineer on contract? I'd like to hear from you.",
+        "Working on a problem worth solving, or need a product engineer on contract? I'd like to hear from you.",
       availability:
         "Open to remote contract product-engineering work, Abuja also fine, and to a cybersecurity internship.",
       investorNote: "Investors: I'm happy to talk about Shelta.",
@@ -375,6 +375,8 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     kind: "product",
     statusTone: "ended",
     metrics: [metric("Users", "67"), metric("Revenue", "₦38,000")],
+    externalUrl: "https://upskill-simulator.xyz",
+    livePreview: true,
     stack: ["Next.js", "NestJS", "Prisma", "Redis", "BullMQ", "Clerk"],
     seo: {
       title: "Upskill Simulator — practice platform",
@@ -397,6 +399,8 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     displayStatus: "Paused",
     kind: "product",
     statusTone: "paused",
+    externalUrl: "https://www.priceit.app",
+    livePreview: true,
     stack: ["Expo", "Clerk", "FastAPI", "PostgreSQL", "Gemini Vision"],
     seo: {
       title: "PriceIt — crowdsourced prices",

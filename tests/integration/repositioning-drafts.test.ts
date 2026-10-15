@@ -92,7 +92,7 @@ describe.serial("repositioning drafts", () => {
 
   test("fails with the db:seed message when the database is unseeded", async () => {
     await expect(
-      applyRepositioning({ apply: true, ...target() }),
+      applyRepositioning({ apply: true, overwrite: "all", ...target() }),
     ).rejects.toThrow(/db:seed first/);
   }, 120_000);
 
@@ -100,7 +100,11 @@ describe.serial("repositioning drafts", () => {
     await seedLegacyContent();
     const drafts = await draftSnapshot();
     const events = await eventCount();
-    const report = await applyRepositioning({ apply: false, ...target() });
+    const report = await applyRepositioning({
+      apply: false,
+      overwrite: "all",
+      ...target(),
+    });
 
     expect(report.applied).toBe(false);
     expect(report.items.some(({ action }) => action === "update")).toBe(true);
@@ -112,7 +116,11 @@ describe.serial("repositioning drafts", () => {
   test("apply writes drafts and leaves every published column untouched", async () => {
     await seedLegacyContent();
     const published = await publishedSnapshot();
-    const report = await applyRepositioning({ apply: true, ...target() });
+    const report = await applyRepositioning({
+      apply: true,
+      overwrite: "all",
+      ...target(),
+    });
 
     expect(report.applied).toBe(true);
     expect(await publishedSnapshot()).toBe(published);
@@ -129,7 +137,7 @@ describe.serial("repositioning drafts", () => {
 
   test("apply creates the missing projects and the housing post as drafts only", async () => {
     await seedLegacyContent();
-    await applyRepositioning({ apply: true, ...target() });
+    await applyRepositioning({ apply: true, overwrite: "all", ...target() });
 
     const projectRows = await db.select().from(projects);
     const postRows = await db.select().from(posts);
@@ -148,13 +156,79 @@ describe.serial("repositioning drafts", () => {
 
   test("a second apply reports every item unchanged and adds no events", async () => {
     await seedLegacyContent();
-    await applyRepositioning({ apply: true, ...target() });
+    await applyRepositioning({ apply: true, overwrite: "all", ...target() });
     const events = await eventCount();
-    const second = await applyRepositioning({ apply: true, ...target() });
+    const second = await applyRepositioning({
+      apply: true,
+      overwrite: "all",
+      ...target(),
+    });
 
     expect(second.items.every(({ action }) => action === "unchanged")).toBe(
       true,
     );
     expect(await eventCount()).toBe(events);
+  }, 120_000);
+
+  test("without --overwrite, existing drafts are skipped and only missing items are created", async () => {
+    await seedLegacyContent();
+    const before = JSON.stringify(
+      (await db.select().from(projects)).map((p) => [p.slug, p.draftContent]),
+    );
+    const report = await applyRepositioning({ apply: true, ...target() });
+    const actions = Object.fromEntries(
+      report.items.map(({ type, key, action }) => [`${type}:${key}`, action]),
+    );
+
+    expect(actions["project:shelta"]).toBe("skipped");
+    expect(actions["site_profile:site"]).toBe("skipped");
+    expect(actions["home_section:intro"]).toBe("skipped");
+    expect(actions["project:karrigo"]).toBe("create");
+    expect(actions["post:student-housing-in-nigeria"]).toBe("create");
+
+    const rows = await db.select().from(projects);
+    const unchanged = JSON.stringify(
+      rows
+        .filter(
+          (p) =>
+            !["karrigo", "libra-cleaning", "upskill-simulator"].includes(
+              p.slug,
+            ),
+        )
+        .map((p) => [p.slug, p.draftContent]),
+    );
+
+    expect(unchanged).toBe(
+      JSON.stringify(
+        JSON.parse(before).filter(
+          ([slug]: [string]) =>
+            !["karrigo", "libra-cleaning", "upskill-simulator"].includes(slug),
+        ),
+      ),
+    );
+  }, 120_000);
+
+  test("--overwrite updates only the named items", async () => {
+    await seedLegacyContent();
+    await applyRepositioning({
+      apply: true,
+      overwrite: ["project:shelta", "home"],
+      ...target(),
+    });
+
+    const rows = await db.select().from(projects);
+    const sections = await db.select().from(homeSections);
+    const profile = (await db.select().from(siteProfile))[0];
+
+    expect(
+      rows.find((p) => p.slug === "shelta")?.draftContent.metrics,
+    ).toHaveLength(5);
+    expect(
+      rows.find((p) => p.slug === "aizen")?.draftContent.kind,
+    ).toBeUndefined();
+    expect(sections.find((s) => s.type === "say")?.draftContent).toMatchObject({
+      availability: expect.any(String),
+    });
+    expect(profile.draftContent.tagline).not.toContain("Product-minded");
   }, 120_000);
 });

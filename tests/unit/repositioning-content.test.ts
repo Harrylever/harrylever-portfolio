@@ -152,26 +152,38 @@ describe("repositioning content", () => {
     expect(say.resumeUrl).toBeUndefined();
   });
 
-  test("the closing heading is open to any sector, not just students or shoppers", () => {
+  test("the closing heading is the owner's published sentence", () => {
     const say = repositioningHomeSections(baseMap).find(
       (x) => x.type === "say",
     );
 
     if (say?.type !== "say") throw new Error("missing say");
-    expect(say.heading).toContain("any sector");
-    expect(say.heading).not.toMatch(/students|shoppers|Nigerian/i);
+    expect(say.heading).toBe(
+      "Working on a problem worth solving, or need a product engineer on contract? I'd like to hear from you.",
+    );
   });
 
-  test("the headline is the chosen sentence, with the second half emphasised", () => {
+  test("the headline is the owner's published sentence, with the second half emphasised", () => {
     const intro = repositioningHomeSections(baseMap).find(
       (x) => x.type === "intro",
     );
 
     if (intro?.type !== "intro") throw new Error("missing intro");
     expect(intro.statement).toEqual([
-      { text: "I speak to the people with the problem," },
-      { text: "then build the product that solves it.", emphasis: true },
+      { text: "I find real-world problems," },
+      { text: "then build the software to fix them.", emphasis: true },
     ]);
+  });
+
+  test("PriceIt and Upskill Simulator keep the owner's links and live previews", () => {
+    expect(bySlug("priceit").content).toMatchObject({
+      externalUrl: "https://www.priceit.app",
+      livePreview: true,
+    });
+    expect(bySlug("upskill-simulator").content).toMatchObject({
+      externalUrl: "https://upskill-simulator.xyz",
+      livePreview: true,
+    });
   });
 
   test("AIZEN is an experiment", () => {

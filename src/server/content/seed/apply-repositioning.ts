@@ -37,7 +37,7 @@ import {
 export type RepositioningItem = {
   type: "site_profile" | "home_section" | "project" | "post";
   key: string;
-  action: "create" | "update" | "unchanged";
+  action: "create" | "update" | "unchanged" | "skipped";
 };
 
 export type RepositioningReport = {
@@ -66,6 +66,13 @@ function unwrap<T>(result: ActionResult<T>, operation: string): T {
  */
 export async function applyRepositioning(options: {
   apply: boolean;
+  /**
+   * Existing drafts that may be replaced: "all", or any of "profile", "home",
+   * "post" and "project:<slug>". Anything else that differs is skipped, so a
+   * re-run never overwrites edits made in /admin. Missing items are always
+   * created on `apply`.
+   */
+  overwrite?: "all" | readonly string[];
   databaseUrl: string | undefined;
   envLabel: string | undefined;
 }): Promise<RepositioningReport> {
@@ -85,6 +92,8 @@ export async function applyRepositioning(options: {
     throw new Error("Run bun run db:seed first");
   }
 
+  const mayOverwrite = (key: string) =>
+    options.overwrite === "all" || (options.overwrite ?? []).includes(key);
   const items: RepositioningItem[] = [];
   const record = (
     type: RepositioningItem["type"],
@@ -96,6 +105,8 @@ export async function applyRepositioning(options: {
 
   if (sameJson(profile.draftContent, profileTarget)) {
     record("site_profile", "site", "unchanged");
+  } else if (!mayOverwrite("profile")) {
+    record("site_profile", "site", "skipped");
   } else {
     record("site_profile", "site", "update");
     if (options.apply) {
@@ -119,6 +130,10 @@ export async function applyRepositioning(options: {
 
     if (sameJson(row.draftContent, target)) {
       record("home_section", target.type, "unchanged");
+      continue;
+    }
+    if (!mayOverwrite("home")) {
+      record("home_section", target.type, "skipped");
       continue;
     }
     record("home_section", target.type, "update");
@@ -183,6 +198,10 @@ export async function applyRepositioning(options: {
       record("project", item.slug, "unchanged");
       continue;
     }
+    if (!mayOverwrite(`project:${item.slug}`)) {
+      record("project", item.slug, "skipped");
+      continue;
+    }
     record("project", item.slug, "update");
     if (options.apply) {
       unwrap(
@@ -215,6 +234,8 @@ export async function applyRepositioning(options: {
     }
   } else if (sameJson(existingPost.draftContent, post.content)) {
     record("post", post.slug, "unchanged");
+  } else if (!mayOverwrite("post")) {
+    record("post", post.slug, "skipped");
   } else {
     record("post", post.slug, "update");
     if (options.apply) {
