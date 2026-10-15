@@ -244,6 +244,17 @@ describe("repositioning content fields", () => {
     expect(rejects({ statusTone: "dead" })).toBe(false);
   });
 
+  test("project schema accepts livePreview as a boolean only", () => {
+    expect(
+      projectContentSchema.safeParse({ ...legacyProject, livePreview: true })
+        .success,
+    ).toBe(true);
+    expect(
+      projectContentSchema.safeParse({ ...legacyProject, livePreview: "yes" })
+        .success,
+    ).toBe(false);
+  });
+
   test("projectKindOf returns product when kind is absent", () => {
     expect(projectKindOf({})).toBe("product");
     expect(projectKindOf({ kind: "experiment" })).toBe("experiment");

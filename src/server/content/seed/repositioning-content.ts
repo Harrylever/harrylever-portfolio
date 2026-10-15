@@ -320,6 +320,7 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     kind: "client",
     statusTone: "live",
     externalUrl: "https://karrigo.app",
+    livePreview: true,
     stack: [
       "Expo",
       "React Native",
@@ -473,6 +474,7 @@ export const repositioningProjects: readonly RepositioningProject[] = [
     kind: "client",
     statusTone: "live",
     externalUrl: "https://crystalizer.net",
+    livePreview: true,
     stack: ["Next.js", "Tailwind CSS"],
     seo: {
       title: "Crystalizer Fertilizer — website",

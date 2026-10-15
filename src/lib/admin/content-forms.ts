@@ -23,6 +23,7 @@ export type ProjectFormValues = {
   statusTone: StatusTone | "";
   /** `key` is a React key only; it is never sent to the server. */
   metrics: { key: string; label: string; value: string; asOf: string }[];
+  livePreview: boolean;
   externalUrl: string;
   /** One technology per line (commas also split). */
   stack: string;
@@ -58,6 +59,7 @@ export function emptyProjectForm(): ProjectFormValues {
     kind: "product",
     statusTone: "",
     metrics: [],
+    livePreview: false,
     externalUrl: "",
     stack: "",
     coverAssetId: null,
@@ -99,6 +101,7 @@ export function projectFormFromContent(
       ...metric,
       key: rowKey(),
     })),
+    livePreview: content.livePreview ?? false,
     externalUrl: content.externalUrl ?? "",
     stack: content.stack.join("\n"),
     coverAssetId: content.coverAssetId ?? null,
@@ -171,6 +174,10 @@ export function projectDraftFromForm(
     ...(values.kind !== "product" || base?.kind ? { kind: values.kind } : {}),
     ...(values.statusTone ? { statusTone: values.statusTone } : {}),
     ...(metrics.length ? { metrics } : {}),
+    // Written only when on, or when the row already carried the key.
+    ...(values.livePreview || base?.livePreview !== undefined
+      ? { livePreview: values.livePreview }
+      : {}),
     externalUrl: values.externalUrl.trim() || null,
     stack: splitList(values.stack),
     coverAssetId: values.coverAssetId,

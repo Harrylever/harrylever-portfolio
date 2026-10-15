@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 
 import { kindLabel, statusToneStyle } from "./project-meta";
+import { ProjectVisual } from "./project-visual";
 
 import { SiteNav } from "@/components/design-system/site-nav";
 import { Figure } from "@/components/design-system/figure";
@@ -213,10 +214,12 @@ export function ProjectDetail({
           </div>
 
           <div className="pd-lead" style={{ marginBottom: "var(--s-11)" }}>
-            <Figure
+            <ProjectVisual
+              link
               aspect={project.coverPlaceholder?.aspectRatio ?? "16 / 9"}
               asset={project.coverAsset}
               placeholder={`Drop the main ${project.name} image`}
+              project={project}
               slotId={
                 project.coverPlaceholder?.slotId ?? `project-${project.slug}`
               }

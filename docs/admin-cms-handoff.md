@@ -324,3 +324,28 @@ Your steps after `--apply`:
 8. To apply this to production, make the same edits in the admin there, or run
    the script yourself against an environment you choose after relaxing the
    guard deliberately. Never point it at Neon by accident.
+
+### Live site previews
+
+A project can show a scaled, non-interactive preview of its external link in
+place of its image (homepage cards, `/projects` list and the project page). Turn
+it on with "Show a live preview of the external link" in the project editor. The
+preview loads only on screens at least 768px wide, for visitors without a
+reduced-motion preference, and only when the card is near the viewport. Clicking
+it opens the real site in a new tab (on the `/projects` list, the click opens
+the write-up). Everywhere else the image or placeholder shows.
+
+- The draft script switches it on for Karrigo and Crystalizer. Both allow being
+  embedded.
+- **Shelta blocks framing** (`X-Frame-Options: DENY` in
+  `Shelta/shelta-app/apps/web/next.config.ts`, around line 48). Until Shelta
+  allows the portfolio, leave Shelta's preview off. To allow it, replace that
+  header with
+  `Content-Security-Policy: frame-ancestors 'self' https://www.deanukanah.dev https://deanukanah.dev`
+  (add `http://localhost:3000` to test locally), deploy Shelta, then tick the
+  checkbox on the Shelta project. That change is in the Shelta repo and was not
+  made here.
+- The Next data cache under `.next/cache/fetch-cache` is shared by every dev
+  server and the E2E runs. If `/` returns 404 after seeding or running E2E,
+  stop the dev server, delete that folder and start it again.
+

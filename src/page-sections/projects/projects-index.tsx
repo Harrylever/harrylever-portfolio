@@ -4,9 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 
 import { kindLabel, statusToneStyle } from "./project-meta";
+import { ProjectVisual } from "./project-visual";
 
 import { SiteNav } from "@/components/design-system/site-nav";
-import { Figure } from "@/components/design-system/figure";
 import { Tag } from "@/components/design-system/tag";
 import { MetricsStrip } from "@/components/design-system/metrics-strip";
 import { projectKindOf } from "@/domain/content/project";
@@ -137,10 +137,11 @@ export function ProjectsIndex({
                   href={`/projects/${project.slug}`}
                   style={{ display: "block", borderRadius: "var(--r-card)" }}
                 >
-                  <Figure
+                  <ProjectVisual
                     aspect={project.coverPlaceholder?.aspectRatio ?? "3 / 2"}
                     asset={project.coverAsset}
                     placeholder={`Drop a ${project.name} image`}
+                    project={project}
                     slotId={
                       project.coverPlaceholder?.slotId ??
                       `project-${project.slug}`

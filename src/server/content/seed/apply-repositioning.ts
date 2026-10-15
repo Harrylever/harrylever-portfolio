@@ -9,6 +9,13 @@ import { isDeepStrictEqual } from "node:util";
 
 import { and, eq, isNull } from "drizzle-orm";
 
+import {
+  repositioningHomeSections,
+  repositioningPost,
+  repositioningProjects,
+  repositioningSiteProfile,
+} from "./repositioning-content";
+
 import { homeSectionTypes } from "@/domain/content/home";
 import { buildAdminSession } from "@/server/auth/session";
 import { saveHomeSectionDraft } from "@/server/content/home/service";
@@ -26,13 +33,6 @@ import {
   projects,
   siteProfile,
 } from "@/server/db/schema/content";
-
-import {
-  repositioningHomeSections,
-  repositioningPost,
-  repositioningProjects,
-  repositioningSiteProfile,
-} from "./repositioning-content";
 
 export type RepositioningItem = {
   type: "site_profile" | "home_section" | "project" | "post";

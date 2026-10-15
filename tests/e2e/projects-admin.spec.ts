@@ -77,6 +77,41 @@ test.describe("project administration", () => {
     expect(html).toContain("Client work");
   });
 
+  test("a live preview replaces the image on the public project page when switched on", async ({
+    page,
+    baseURL,
+  }) => {
+    const name = `CMS live preview ${Date.now()}`;
+    const slug = uniqueSlug("project");
+
+    await page.goto("/admin/projects/new");
+    await fillProjectForm(page, { name, slug });
+    await page.getByLabel("External link", { exact: true }).fill("https://example.com/");
+    await page
+      .getByLabel(
+        "Show a live preview of the external link instead of the image",
+      )
+      .check();
+    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page).toHaveURL(/\/admin\/projects\/[a-z0-9]{24}$/);
+    await expectStatus(page, /Saved/);
+    await page.getByRole("button", { name: "Publish changes" }).click();
+    await confirmNamedDialog(page, name, "Publish");
+    await expectStatus(page, /Published/);
+
+    expect(await publicHtml(baseURL!, `/projects/${slug}`)).toContain(
+      'data-live-preview="https://example.com/"',
+    );
+
+    await page.goto(`/projects/${slug}`);
+    await expect(
+      page.locator(`iframe[title="${name} live preview"]`),
+    ).toHaveAttribute("sandbox", "allow-scripts allow-same-origin");
+    await expect(
+      page.getByRole("link", { name: `Open ${name} in a new tab` }),
+    ).toHaveAttribute("target", "_blank");
+  });
+
   test("a half-filled metric shows an error and does not save", async ({
     page,
   }) => {

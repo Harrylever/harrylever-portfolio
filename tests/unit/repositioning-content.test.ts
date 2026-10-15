@@ -132,6 +132,12 @@ describe("repositioning content", () => {
     expect(bySlug("libra-cleaning").content.externalUrl).toBeUndefined();
   });
 
+  test("live previews are on for Karrigo and Crystalizer, and off for Shelta", () => {
+    expect(bySlug("karrigo").content.livePreview).toBe(true);
+    expect(bySlug("crystalizer").content.livePreview).toBe(true);
+    expect(bySlug("shelta").content.livePreview).toBeUndefined();
+  });
+
   test("AIZEN is an experiment", () => {
     expect(bySlug("aizen").content.kind).toBe("experiment");
   });

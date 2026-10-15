@@ -33,6 +33,7 @@ export const projectContentSchema = z.strictObject({
   kind: z.enum(projectKinds).optional(),
   statusTone: z.enum(statusTones).optional(),
   metrics: z.array(projectMetricSchema).max(6).optional(),
+  livePreview: z.boolean().optional(),
   externalUrl: safeExternalUrlSchema.nullable().optional(),
   stack: z.array(nonEmptyTextSchema.max(80)).min(1),
   coverAssetId: mediaAssetIdSchema.nullable().optional(),

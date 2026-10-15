@@ -274,4 +274,30 @@ describe("repositioning project form fields", () => {
       fieldErrorsFromIssues([{ path: ["metrics", 0, "asOf"], message: "bad" }]),
     ).toEqual({ metrics: ["bad"] });
   });
+
+  test("livePreview defaults to false, round-trips, and is not added to legacy rows", () => {
+    const form = projectFormFromContent("atlas", legacy);
+
+    expect(form.livePreview).toBe(false);
+    expect(projectDraftFromForm(form, legacy)).toEqual(legacy);
+
+    const on = projectDraftFromForm({ ...form, livePreview: true }, legacy);
+
+    expect((on as Record<string, unknown>).livePreview).toBe(true);
+    expect(
+      projectFormFromContent("atlas", { ...legacy, livePreview: true })
+        .livePreview,
+    ).toBe(true);
+  });
+
+  test("turning livePreview off keeps the key only when the row already had it", () => {
+    const had = { ...legacy, livePreview: true };
+    const off = projectDraftFromForm(
+      { ...projectFormFromContent("atlas", had), livePreview: false },
+      had,
+    ) as Record<string, unknown>;
+
+    expect(off.livePreview).toBe(false);
+  });
 });
+

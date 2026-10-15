@@ -54,6 +54,7 @@ const labels: Record<string, string> = {
   statusTone: "Status tone",
   metrics: "Metrics",
   externalUrl: "External link",
+  livePreview: "Live preview",
   stack: "Stack",
   coverAssetId: "Cover image",
   galleryAssetIds: "Gallery",
@@ -77,6 +78,7 @@ const inlineKeys = new Set([
   "statusTone",
   "metrics",
   "externalUrl",
+  "livePreview",
   "stack",
   "coverAssetId",
   "galleryAssetIds",
@@ -307,6 +309,19 @@ export function ProjectForm({
               }
             />
           </div>
+          <label className="adm-check" htmlFor="project-livePreview">
+            <input
+              checked={values.livePreview}
+              id="project-livePreview"
+              type="checkbox"
+              onChange={(event) => update("livePreview", event.target.checked)}
+            />
+            Show a live preview of the external link instead of the image
+          </label>
+          <p className="adm-hint">
+            Only works for https sites that allow being embedded; otherwise
+            leave it off and use an image.
+          </p>
           {text("stack", {
             multiline: true,
             hint: "One technology per line.",
