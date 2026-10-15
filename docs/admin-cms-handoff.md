@@ -272,3 +272,46 @@ From `.superpowers/sdd/2026-10-10-admin-cms/progress.md` (deferred minors):
 - **Not run in this hand-off**: none of the unit, integration, E2E, build or
   migration commands above were executed after the switch to local Postgres.
   Only `bunx tsc --noEmit` and ESLint on the changed files were run.
+
+---
+
+## Repositioning content (draft-only)
+
+The repositioning copy (see
+`docs/superpowers/specs/2026-10-15-portfolio-repositioning-design.md`) is loaded
+as **drafts** by a guarded script. It never publishes, unpublishes, trashes or
+reorders anything that is already public.
+
+```bash
+bun run db:seed                              # once, if the database is empty
+bun run db:draft-repositioning               # dry run: prints what would change
+bun run db:draft-repositioning -- --apply    # writes drafts
+```
+
+- It runs only against a loopback Postgres with a non-production
+  `APP_ENV_LABEL`. Neon hosts and `main`/`master`/`prod`/`production` labels are
+  refused before any query.
+- Re-running with `--apply` **overwrites draft edits** made since the last run.
+  The dry run lists every item it would touch.
+- Existing projects keep their images, featured flag and display order. New
+  projects (Karrigo, Libra Cleaning, Upskill Simulator) are created as drafts
+  with a suggested order; reorder them in `/admin/projects` after publishing.
+
+Your steps after `--apply`:
+
+1. Review each draft in the admin preview (site profile, the homepage sections,
+   every project, and the housing post).
+2. Check every metric's "as of" date. The Shelta numbers are dated 15 Oct 2026.
+3. Check the inferred fields: project years (Karrigo, Libra and Upskill Simulator
+   say 2026), the contract roles, and that PriceIt and Upskill Simulator have no
+   link.
+4. Re-confirm that you may name Karrigo and Libra Cleaning.
+5. Move **SakzPredict** to the trash and unpublish the old placeholder posts
+   (Tree-sitter, first month of Rust, "six products", and the rest). The script
+   does not touch them because that changes the public site.
+6. Write the housing post (`student-housing-in-nigeria`); each "Write this
+   section" line is a prompt to replace.
+7. Publish the homepage, then each project and the post.
+8. To apply this to production, make the same edits in the admin there, or run
+   the script yourself against an environment you choose after relaxing the
+   guard deliberately. Never point it at Neon by accident.
