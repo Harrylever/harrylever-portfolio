@@ -357,3 +357,17 @@ there; the draft script no longer copies a link into the content. The "Résumé
 link" field in the Say section is only a fallback for when `RESUME_URL` is not
 set. After changing the variable in Vercel, redeploy so the page picks it up.
 
+### Image optimisation
+
+- **Before upload (browser):** images of 150 KB or more, or wider than 2400 px,
+  are scaled down to 2400 px on the longest side and re-encoded as WebP
+  (quality 82) with `@jsquash/resize` and `@jsquash/webp`. Smaller files, files
+  that fail to decode, and results that would not be smaller are uploaded
+  unchanged. You can pick files up to 30 MB; the stored image must still be
+  under 10 MB. AVIF and oxipng are not used: in-browser AVIF encoding is slow,
+  and Cloudinary already serves AVIF where supported.
+- **On delivery:** the site asks Cloudinary for `f_auto,q_auto` and a width
+  (`w_<n>,c_limit`), with a responsive `srcset`, for every image that lives on
+  `res.cloudinary.com`. The stored original is never changed. Images already on
+  Cloudinary keep working; only new uploads get the smaller WebP original.
+

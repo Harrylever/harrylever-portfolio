@@ -15,7 +15,18 @@ import {
   validateAltText,
   validateImageFile,
 } from "@/lib/admin/media-upload";
-import { maximumImageBytes } from "@/domain/content/media";
+import { compressImage } from "@/lib/admin/image-compress";
+import {
+  allowedImageFormats,
+  maximumImageBytes,
+  maximumSourceBytes,
+} from "@/domain/content/media";
+
+/** What a visitor may pick from disk; it is compressed before upload. */
+const sourceLimits = {
+  maxBytes: maximumSourceBytes,
+  allowedFormats: allowedImageFormats,
+};
 
 type Phase =
   | { kind: "idle" }
@@ -55,7 +66,7 @@ export function MediaUploader({
   async function upload() {
     if (working) return;
     const nextFileError = file
-      ? validateImageFile(file)
+      ? validateImageFile(file, sourceLimits)
       : "Choose an image to upload.";
     const nextAltError = validateAltText(altText);
 
@@ -83,7 +94,11 @@ export function MediaUploader({
       if (!signature) {
         return fail("Uploads aren't available right now. Try again shortly.");
       }
-      const limitError = validateImageFile(file, {
+      setPhase({ kind: "working", text: "Optimising image…" });
+      // Scales large images down and re-encodes them as WebP; falls back to
+      // the original file if anything goes wrong.
+      const prepared = await compressImage(file);
+      const limitError = validateImageFile(prepared, {
         maxBytes: signature.maxBytes,
         allowedFormats: signature.allowedFormats,
       });
@@ -98,7 +113,7 @@ export function MediaUploader({
       setPhase({ kind: "working", text: "Uploading to Cloudinary…" });
       const body = new FormData();
 
-      body.append("file", file);
+      body.append("file", prepared);
       for (const [key, value] of Object.entries(uploadFormFields(signature))) {
         body.append(key, value);
       }
@@ -181,12 +196,16 @@ export function MediaUploader({
             const chosen = event.target.files?.[0] ?? null;
 
             setFile(chosen);
-            setFileError(chosen ? validateImageFile(chosen) : null);
+            setFileError(
+              chosen ? validateImageFile(chosen, sourceLimits) : null,
+            );
             if (phase.kind !== "working") setPhase({ kind: "idle" });
           }}
         />
         <p className="adm-hint" id={`${prefix}-file-hint`}>
-          JPEG, PNG, WebP or AVIF, up to {formatBytes(maximumImageBytes)}.
+          JPEG, PNG, WebP or AVIF, up to {formatBytes(maximumSourceBytes)}.
+          Large images are scaled down and converted to WebP before upload
+          (stored images must be under {formatBytes(maximumImageBytes)}).
           {file && !fileError
             ? ` Selected: ${file.name}, ${formatBytes(file.size)}.`
             : ""}

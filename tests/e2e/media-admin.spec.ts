@@ -93,10 +93,10 @@ test("uploads directly to Cloudinary and registers only verified metadata", asyn
   await expect(page.locator("#media-upload-alt-error")).toHaveText(
     "Describe the image for people who can't see it.",
   );
-  // Files over 10 MiB are refused in the browser.
-  await chooseFile(page, "huge.png", Buffer.alloc(10 * 1024 * 1024 + 1));
+  // Files over 30 MiB are refused in the browser, before any compression.
+  await chooseFile(page, "huge.png", Buffer.alloc(30 * 1024 * 1024 + 1));
   await expect(page.locator("#media-upload-file-error")).toContainText(
-    "The limit is 10 MB per image.",
+    "The limit is 30 MB per image.",
   );
   expect(log.uploads).toHaveLength(0);
 
@@ -134,6 +134,26 @@ test("uploads directly to Cloudinary and registers only verified metadata", asyn
   expect(rows).toEqual([
     { public_id: log.uploads[1].publicId, width: 8, alt_text: alt },
   ]);
+});
+
+test("scales a large image down and uploads it as a smaller WebP", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
+  const log = await installCloudinaryFake(page);
+  const source = pngBytes(2600, 1000, true);
+
+  await signInAsAdmin(page, "/admin/media");
+  await assertFakeCloud(page);
+  await chooseFile(page, "wide.png", source);
+  await page.getByLabel("Describe this image").fill(`Wide image ${run}`);
+  await page.getByRole("button", { name: "Upload image" }).click();
+  await expectStatus(page, /Uploaded/);
+
+  expect(log.uploads).toHaveLength(1);
+  expect(log.uploads[0]).toMatchObject({ format: "webp", width: 2400 });
+  expect(log.uploads[0].height).toBe(923);
+  expect(log.uploads[0].bytes).toBeLessThan(source.length);
 });
 
 test("retries an upload whose registration was orphaned", async ({

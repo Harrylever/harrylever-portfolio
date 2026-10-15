@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
+import { maximumImageBytes, maximumSourceBytes } from "@/domain/content/media";
 import {
   cloudinaryUploadUrl,
   formatBytes,
@@ -34,6 +35,21 @@ const signature = {
   },
   signature: "abc123",
 };
+
+describe("source image limit", () => {
+  test("accepts a large phone photo as a source but not as a stored image", () => {
+    const photo = { name: "p.jpg", size: 20 * MiB, type: "image/jpeg" };
+
+    expect(maximumSourceBytes).toBeGreaterThan(maximumImageBytes);
+    expect(
+      validateImageFile(photo, {
+        maxBytes: maximumSourceBytes,
+        allowedFormats: ["jpeg"],
+      }),
+    ).toBeNull();
+    expect(validateImageFile(photo)).toContain("The limit is 10 MB");
+  });
+});
 
 describe("browser upload helpers", () => {
   test("validates size and type before anything is uploaded", () => {
