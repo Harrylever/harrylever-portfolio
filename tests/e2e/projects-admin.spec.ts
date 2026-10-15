@@ -86,7 +86,9 @@ test.describe("project administration", () => {
 
     await page.goto("/admin/projects/new");
     await fillProjectForm(page, { name, slug });
-    await page.getByLabel("External link", { exact: true }).fill("https://example.com/");
+    await page
+      .getByLabel("External link", { exact: true })
+      .fill("https://example.com/");
     await page
       .getByLabel(
         "Show a live preview of the external link instead of the image",
@@ -110,6 +112,36 @@ test.describe("project administration", () => {
     await expect(
       page.getByRole("link", { name: `Open ${name} in a new tab` }),
     ).toHaveAttribute("target", "_blank");
+  });
+
+  test("a site that forbids framing keeps its image even with live preview on", async ({
+    page,
+    baseURL,
+  }) => {
+    const name = `CMS blocked preview ${Date.now()}`;
+    const slug = uniqueSlug("project");
+
+    await page.goto("/admin/projects/new");
+    await fillProjectForm(page, { name, slug });
+    // github.com sends X-Frame-Options and frame-ancestors 'none'.
+    await page
+      .getByLabel("External link", { exact: true })
+      .fill("https://github.com/");
+    await page
+      .getByLabel(
+        "Show a live preview of the external link instead of the image",
+      )
+      .check();
+    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page).toHaveURL(/\/admin\/projects\/[a-z0-9]{24}$/);
+    await expectStatus(page, /Saved/);
+    await page.getByRole("button", { name: "Publish changes" }).click();
+    await confirmNamedDialog(page, name, "Publish");
+    await expectStatus(page, /Published/);
+
+    expect(await publicHtml(baseURL!, `/projects/${slug}`)).not.toContain(
+      "data-live-preview",
+    );
   });
 
   test("a half-filled metric shows an error and does not save", async ({
