@@ -1,12 +1,9 @@
-/* Stand-in for the design tool's <image-slot> authoring element, which only
-   works inside the omelette runtime. Renders a bordered placeholder — swap
-   for a real <Image> once photography exists for these slots. */
+/* The frame shown where a project or photo has no image yet. Visitors see
+   "Image not available"; the slot id only records which slot it stands for. */
 export function ImageSlot({
-  placeholder,
   shape = "rounded",
 }: {
   slotId: string;
-  placeholder?: string;
   shape?: "rect" | "rounded" | "circle" | "pill";
 }) {
   const radius =
@@ -35,7 +32,7 @@ export function ImageSlot({
         padding: "var(--s-3)",
       }}
     >
-      {placeholder}
+      Image not available
     </div>
   );
 }

@@ -40,4 +40,11 @@ describe("Figure images", () => {
     expect(html).toContain('src="https://example.com/a.png"');
     expect(html).not.toContain("srcSet=");
   });
+
+  test("an empty frame says the image is not available, with no authoring prompt", () => {
+    const html = renderToStaticMarkup(<Figure slotId="s" />);
+
+    expect(html).toContain("Image not available");
+    expect(html).not.toMatch(/drop/i);
+  });
 });

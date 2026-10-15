@@ -57,7 +57,6 @@ export function Built({ section }: { section: PublicHomepage["built"] }) {
                     "3 / 2"
                   }
                   asset={project.coverAsset}
-                  placeholder={`Drop a ${project.name} screenshot`}
                   project={project}
                   slotId={
                     project.homepagePlaceholder?.slotId ??

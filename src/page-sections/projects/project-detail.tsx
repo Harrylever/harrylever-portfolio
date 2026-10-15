@@ -216,11 +216,10 @@ export function ProjectDetail({
           <div className="pd-lead" style={{ marginBottom: "var(--s-11)" }}>
             <ProjectVisual
               link
-              sizes="(min-width: 1280px) 1180px, 100vw"
               aspect={project.coverPlaceholder?.aspectRatio ?? "16 / 9"}
               asset={project.coverAsset}
-              placeholder={`Drop the main ${project.name} image`}
               project={project}
+              sizes="(min-width: 1280px) 1180px, 100vw"
               slotId={
                 project.coverPlaceholder?.slotId ?? `project-${project.slug}`
               }
@@ -255,7 +254,6 @@ export function ProjectDetail({
                       "4 / 3"
                     }
                     asset={asset}
-                    placeholder="Drop a screen"
                     slotId={
                       project.galleryPlaceholders?.[index]?.slotId ?? asset.id
                     }
@@ -268,7 +266,6 @@ export function ProjectDetail({
                       <Figure
                         aspect={placeholder.aspectRatio}
                         caption={placeholder.caption}
-                        placeholder="Drop a screen"
                         slotId={placeholder.slotId}
                       />
                     </div>

@@ -143,7 +143,6 @@ export function Intro({
               section.portraitAsset?.caption ??
               section.portraitPlaceholder?.caption
             }
-            placeholder="Drop a portrait"
             slotId={section.portraitPlaceholder?.slotId ?? "intro-portrait"}
           />
         </div>

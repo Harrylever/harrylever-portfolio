@@ -43,7 +43,6 @@ export function Frames({ section }: { section: PublicHomepage["frames"] }) {
                 aspect={item.aspectRatio}
                 asset={"mediaAssetId" in item ? item.mediaAsset : null}
                 caption={item.caption}
-                placeholder="Drop a photo"
                 slotId={
                   "placeholderSlot" in item
                     ? item.placeholderSlot

@@ -10,7 +10,6 @@ export function Figure({
   asset,
   caption,
   aspect = "4 / 5",
-  placeholder = "Drop an image",
   sizes = "(min-width: 1024px) 560px, 100vw",
   shape = "rounded",
   tone = "room",
@@ -25,7 +24,6 @@ export function Figure({
   } | null;
   caption?: string;
   aspect?: string;
-  placeholder?: string;
   /** The `sizes` attribute for the responsive image. */
   sizes?: string;
   shape?: "rect" | "rounded" | "circle" | "pill";
@@ -73,7 +71,7 @@ export function Figure({
             width={asset.width}
           />
         ) : (
-          <ImageSlot placeholder={placeholder} shape={shape} slotId={slotId} />
+          <ImageSlot shape={shape} slotId={slotId} />
         )}
       </div>
       {caption ? (

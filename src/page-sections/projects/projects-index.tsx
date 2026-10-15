@@ -140,7 +140,6 @@ export function ProjectsIndex({
                   <ProjectVisual
                     aspect={project.coverPlaceholder?.aspectRatio ?? "3 / 2"}
                     asset={project.coverAsset}
-                    placeholder={`Drop a ${project.name} image`}
                     project={project}
                     slotId={
                       project.coverPlaceholder?.slotId ??
