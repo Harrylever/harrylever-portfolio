@@ -52,8 +52,9 @@ const baseSections: HomeSectionContent[] = [
     type: "reach",
     heading: "Reach",
     groups: [
-      { label: "When it fits", items: ["Python"] },
+      { label: "When it fits", items: ["Python", "LangGraph", "Paystack"] },
       { label: "Currently learning", items: ["Rust"] },
+      { label: "AI in the loop", items: ["LangGraph"] },
     ],
     experiences: [],
   },
@@ -178,6 +179,26 @@ describe("repositioning content", () => {
         });
       }
     }
+  });
+
+  test("LangGraph is removed from reach groups and groups left empty are dropped", () => {
+    const reach = repositioningHomeSections(baseMap).find(
+      (section) => section.type === "reach",
+    );
+
+    if (reach?.type !== "reach") throw new Error("missing reach");
+    expect(reach.groups.map(({ label }) => label)).toEqual([
+      "When it fits",
+      "Exploring",
+    ]);
+    expect(reach.groups[0].items).toEqual(["Python", "Paystack", "Go"]);
+  });
+
+  test("the housing post title and summary say it is an unfinished draft", () => {
+    const { content } = repositioningPost();
+
+    expect(content.title.startsWith("[Draft] ")).toBe(true);
+    expect(content.summary.startsWith("Outline only")).toBe(true);
   });
 
   test("the housing post is a draft outline with no invented anecdotes", () => {

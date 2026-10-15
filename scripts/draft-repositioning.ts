@@ -6,6 +6,12 @@ async function main() {
   process.env.CONTENT_CACHE_INVALIDATION = "off";
 
   const apply = process.argv.includes("--apply");
+  if (apply) {
+    // eslint-disable-next-line no-console -- warns before drafts are replaced.
+    console.warn(
+      "--apply replaces the current draft of every item this script covers, including edits you made in /admin since the last run.",
+    );
+  }
   const { applyRepositioning } = await import(
     "@/server/content/seed/apply-repositioning"
   );

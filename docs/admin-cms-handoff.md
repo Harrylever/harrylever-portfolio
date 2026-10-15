@@ -302,15 +302,24 @@ Your steps after `--apply`:
 1. Review each draft in the admin preview (site profile, the homepage sections,
    every project, and the housing post).
 2. Check every metric's "as of" date. The Shelta numbers are dated 15 Oct 2026.
-3. Check the inferred fields: project years (Karrigo, Libra and Upskill Simulator
-   say 2026), the contract roles, and that PriceIt and Upskill Simulator have no
-   link.
+3. Check the facts the copy states that came from the repos or earlier site
+   text rather than your answers, and fix any that are wrong:
+   - Karrigo: year 2026, "contract", the kitchens/stores/riders wording and the
+     stack (Expo, NestJS, Prisma, PostgreSQL, Redis, Paystack).
+   - Libra Cleaning: year 2026, "cleaning-service MVP", the Go and PostgreSQL stack.
+   - Upskill Simulator: year 2026, its stack, and that it has no link.
+   - PriceIt: year 2025, the 27 August 2026 pivot date, the Jumia/Konga/Jiji
+     wording, its stack, and that it has no link.
+   - Fola, Crystalizer and the four experience stacks: kept from the old site.
+   - The Shelta "Next" line about landlords and agents running their day on it.
 4. Re-confirm that you may name Karrigo and Libra Cleaning.
 5. Move **SakzPredict** to the trash and unpublish the old placeholder posts
    (Tree-sitter, first month of Rust, "six products", and the rest). The script
    does not touch them because that changes the public site.
-6. Write the housing post (`student-housing-in-nigeria`); each "Write this
-   section" line is a prompt to replace.
+6. Write the housing post (`student-housing-in-nigeria`). Each "Write this
+   section" line is a prompt to replace, and the title starts with "[Draft]" and
+   the summary with "Outline only": remove both before publishing, or the
+   instructions go live.
 7. Publish the homepage, then each project and the post.
 8. To apply this to production, make the same edits in the admin there, or run
    the script yourself against an environment you choose after relaxing the

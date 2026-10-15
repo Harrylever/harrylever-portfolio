@@ -31,6 +31,18 @@ describe("assertLocalDatabaseTarget", () => {
     expect(() => assertLocalDatabaseTarget(local, "  ")).toThrow(/label/i);
   });
 
+  test("rejects a host or hostaddr query parameter that overrides the URL host", () => {
+    for (const query of [
+      "host=ep-x.neon.tech",
+      "hostaddr=10.0.0.5",
+      "HOST=x",
+    ]) {
+      expect(() =>
+        assertLocalDatabaseTarget(`${local}?${query}`, "local-dev"),
+      ).toThrow(/host/i);
+    }
+  });
+
   test("rejects an unparsable or missing URL and a non-loopback host", () => {
     expect(() => assertLocalDatabaseTarget("not a url", "local-dev")).toThrow();
     expect(() => assertLocalDatabaseTarget(undefined, "local-dev")).toThrow();

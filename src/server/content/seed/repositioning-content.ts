@@ -44,6 +44,9 @@ function section<T extends HomeSectionType>(
   return found as Extract<HomeSectionContent, { type: T }>;
 }
 
+/** Skills the owner cannot back with shipped work; never shown. */
+const droppedTools = new Set(["LangGraph"]);
+
 const frameCaptions = [
   "At the desk.",
   "Abuja.",
@@ -114,16 +117,22 @@ export function repositioningHomeSections(
     {
       ...reach,
       note: "Grouped by how often I use it.",
-      groups: reach.groups.map((group) => {
-        if (group.label === "Currently learning") {
-          return { ...group, label: "Exploring" };
-        }
-        if (group.label === "When it fits" && !group.items.includes("Go")) {
-          return { ...group, items: [...group.items, "Go"] };
-        }
+      groups: reach.groups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => !droppedTools.has(item)),
+        }))
+        .filter((group) => group.items.length > 0)
+        .map((group) => {
+          if (group.label === "Currently learning") {
+            return { ...group, label: "Exploring" };
+          }
+          if (group.label === "When it fits" && !group.items.includes("Go")) {
+            return { ...group, items: [...group.items, "Go"] };
+          }
 
-        return group;
-      }),
+          return group;
+        }),
       experienceIntro:
         "At Clique, a learning management system for K–12 schools, I implemented requirements. At Provarex, Jejelove Solutions and Stanrute Technologies, I also helped shape scope and priorities.",
       experiences: [
@@ -155,6 +164,7 @@ export function repositioningHomeSections(
     },
     {
       ...loop,
+      items: loop.items.filter(({ tool }) => !droppedTools.has(tool)),
       heading: "AI, built and used",
       note: "PriceIt is the product work. The tools are how I build.",
       intro:
@@ -483,13 +493,13 @@ export function repositioningPost(): { slug: string; content: PostContent } {
   return {
     slug: "student-housing-in-nigeria",
     content: {
-      title: "Why finding a room near campus feels like a gamble",
+      title: "[Draft] Why finding a room near campus feels like a gamble",
       summary:
-        "How students near FUTMinna look for housing, why the usual routes leave them exposed to scams, and what a small survey and months of building Shelta suggest.",
+        "Outline only, not ready to publish. How students near FUTMinna look for housing, why the usual routes leave them exposed to scams, and what a small survey and months of building Shelta suggest.",
       tag: "Student housing",
       coverAssetId: null,
       seo: {
-        title: "Why finding a room near campus feels like a gamble",
+        title: "[Draft] Why finding a room near campus feels like a gamble",
         description:
           "How students near FUTMinna find housing, why scams follow the usual routes, and what a small survey and building Shelta suggest.",
       },

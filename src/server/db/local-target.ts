@@ -15,8 +15,19 @@ export function assertLocalDatabaseTarget(
   let host: string;
 
   try {
-    host = new URL(databaseUrl).hostname.toLowerCase();
-  } catch {
+    const url = new URL(databaseUrl);
+
+    // The pg driver lets these override the URL's own host.
+    for (const key of Array.from(url.searchParams.keys())) {
+      if (["host", "hostaddr"].includes(key.toLowerCase())) {
+        throw new Error("Refusing a database URL with a host override");
+      }
+    }
+    host = url.hostname.toLowerCase();
+  } catch (error) {
+    if (error instanceof Error && /host override/.test(error.message)) {
+      throw error;
+    }
     throw new Error("DATABASE_URL is not a valid database URL");
   }
   if (neonHost.test(host)) {
