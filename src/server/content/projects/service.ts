@@ -570,3 +570,68 @@ export async function setProjectFeatured(input: {
     return infrastructureFailure();
   }
 }
+
+/**
+ * Sets the order of the homepage's featured projects. `featuredOrder` is a
+ * live column, so this applies immediately. `orderedIds` must be exactly the
+ * set of active featured projects, otherwise nothing changes.
+ */
+export async function reorderFeaturedProjects(input: {
+  orderedIds: string[];
+  actor: AdminSession;
+}): Promise<ActionResult<ProjectRecord[]>> {
+  if (new Set(input.orderedIds).size !== input.orderedIds.length) {
+    return validationFailure("Project order is invalid");
+  }
+
+  try {
+    const result = await db.transaction(async (transaction) => {
+      const featured = (await listActiveProjects(transaction)).filter(
+        (row) => row.featured,
+      );
+
+      if (
+        featured.length !== input.orderedIds.length ||
+        featured.some((row) => !input.orderedIds.includes(row.id))
+      ) {
+        return failure(
+          "CONFLICT",
+          "The featured projects changed. Reload and try again.",
+        );
+      }
+
+      const updated: ProjectRecord[] = [];
+
+      for (let index = 0; index < input.orderedIds.length; index += 1) {
+        const id = input.orderedIds[index];
+        const row = featured.find((candidate) => candidate.id === id)!;
+        const [record] = await transaction
+          .update(projects)
+          .set({ featuredOrder: index, updatedAt: row.updatedAt })
+          .where(eq(projects.id, id))
+          .returning();
+
+        updated.push(record);
+        await recordContentEvent(
+          transaction,
+          input.actor,
+          { type: "project", id },
+          "update",
+          { featuredOrder: index },
+        );
+      }
+
+      return success(updated);
+    });
+
+    invalidateContentCache(result, {
+      type: "project",
+      slug: "",
+      event: "reorder",
+    });
+
+    return result;
+  } catch {
+    return infrastructureFailure();
+  }
+}

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { listPickerMedia } from "@/app/admin/_lib/media";
 import { requireAdminPage } from "@/app/admin/_lib/require-admin-page";
+import { FeaturedProjectsOrder } from "@/components/admin/home/featured-projects-order";
 import { HomeSectionEditor } from "@/components/admin/home/home-section-editor";
 import {
   homeSectionNames,
@@ -12,6 +13,7 @@ import {
   isHomeSectionType,
 } from "@/lib/admin/home-forms";
 import { readHomeSectionForEditing } from "@/server/content/home/admin";
+import { listFeaturedProjectsForAdmin } from "@/server/content/projects/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,8 @@ export default async function HomeSectionPage({
   ]);
 
   if (!state) notFound();
+  const featured =
+    state.type === "built" ? await listFeaturedProjectsForAdmin() : null;
 
   return (
     <>
@@ -55,6 +59,7 @@ export default async function HomeSectionPage({
         initial={state}
         media={media}
       />
+      {featured ? <FeaturedProjectsOrder initial={featured} /> : null}
     </>
   );
 }

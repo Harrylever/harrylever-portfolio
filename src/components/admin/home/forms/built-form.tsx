@@ -30,7 +30,7 @@ export function BuiltForm({
       />
       <p className="adm-hint">
         Which projects appear here is set per project, in{" "}
-        <Link href="/admin/projects">Projects</Link>.
+        <Link href="/admin/projects">Projects</Link>. Their order is set below.
       </p>
     </fieldset>
   );

@@ -1,7 +1,7 @@
 import type { ActionResult } from "@/domain/content/action-result";
 import type { ProjectRecord } from "@/server/content/projects/repository";
 
-import { asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
 
 import {
   type ProjectContent,
@@ -32,6 +32,7 @@ import {
   deleteProjectPermanently,
   duplicateProject,
   publishProject,
+  reorderFeaturedProjects,
   reorderProjects,
   setProjectFeatured,
   restoreProject,
@@ -346,4 +347,51 @@ export async function runSetProjectFeatured(
   );
 
   return result.ok ? success({ featured: result.data.featured }) : result;
+}
+
+export type FeaturedProjectRow = {
+  id: string;
+  slug: string;
+  name: string;
+  status: LifecycleStatus;
+};
+
+/** The homepage's featured projects, in their current order. */
+export async function listFeaturedProjectsForAdmin(): Promise<
+  FeaturedProjectRow[]
+> {
+  const records = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.featured, true), isNull(projects.deletedAt)))
+    .orderBy(asc(projects.featuredOrder), asc(projects.createdAt));
+
+  return records.map((record) => ({
+    id: record.id,
+    slug: record.slug,
+    name: record.draftContent.name,
+    status: record.status,
+  }));
+}
+
+export async function runReorderFeaturedProjects(
+  input: { orderedIds: unknown },
+  { authorize }: AdminDependencies,
+): Promise<ActionResult<{ ids: string[] }>> {
+  const auth = await authorizeOrFail(authorize);
+
+  if (auth.failure) return auth.failure;
+  const orderedIds = input?.orderedIds;
+
+  if (!Array.isArray(orderedIds) || !orderedIds.every(isId)) {
+    return invalidRequest();
+  }
+  const actor = auth.session;
+  const result = await guarded(() =>
+    reorderFeaturedProjects({ orderedIds, actor }),
+  );
+
+  return result.ok
+    ? success({ ids: result.data.map((row) => row.id) })
+    : result;
 }

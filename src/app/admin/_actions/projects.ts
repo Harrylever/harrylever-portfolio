@@ -8,6 +8,7 @@ import {
   runDeleteProject,
   runDuplicateProject,
   runProjectTransition,
+  runReorderFeaturedProjects,
   runReorderProjects,
   runSaveProject,
   runSetProjectFeatured,
@@ -80,4 +81,10 @@ export async function setProjectFeaturedAction(input: {
     { id: input?.id, featured: input?.featured },
     deps,
   );
+}
+
+export async function reorderFeaturedProjectsAction(input: {
+  orderedIds: unknown;
+}) {
+  return runReorderFeaturedProjects({ orderedIds: input?.orderedIds }, deps);
 }
