@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 
 import { signOutAction } from "@/app/admin/_actions/auth";
 
@@ -61,6 +62,7 @@ export function SignOutButton() {
   async function signOut() {
     setPending(true);
     setFailed(false);
+    posthog.reset();
     try {
       // On success the action redirects to /admin/sign-in.
       await signOutAction();

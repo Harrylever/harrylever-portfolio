@@ -2,6 +2,7 @@
 
 import type { HomeSectionEditorState } from "@/server/content/home/admin";
 
+import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 
 import { saveHomeSectionAction } from "@/app/admin/_actions/home";
@@ -116,6 +117,7 @@ export function useHomeSectionEditor(initial: HomeSectionEditorState) {
       }
       const serverValues = valuesOf(result.data);
 
+      posthog.capture("homepage_section_saved", { section_type: state.type });
       setFieldErrors({});
       // Keep anything typed while the save was in flight.
       setValues((now) =>

@@ -3,6 +3,7 @@
 import type { AdminMediaAsset } from "@/server/content/media/admin";
 
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -80,6 +81,7 @@ function AssetDetails({
       setErrors({});
       setAltText(result.data.altText);
       setCaption(result.data.caption ?? "");
+      posthog.capture("media_details_saved");
       onUpdated(result.data);
       setNote({ tone: "ok", text: "Details saved" });
     } catch {
@@ -129,6 +131,7 @@ function AssetDetails({
       const result = await deleteMediaAssetAction({ id: asset.id });
 
       if (result.ok) {
+        posthog.capture("media_deleted");
         onDeleted(asset);
 
         return;

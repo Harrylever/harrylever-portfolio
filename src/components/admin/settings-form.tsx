@@ -4,6 +4,7 @@ import type { ActionResult } from "@/domain/content/action-result";
 import type { SiteProfileContent } from "@/domain/content/site-profile";
 import type { SiteProfileEditorState } from "@/server/content/site-profile/admin";
 
+import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -196,7 +197,16 @@ export function SettingsForm({
 
     setStatus(pending);
     try {
-      applyResult(await call(), done, submitted);
+      const result = await call();
+
+      if (result.ok) {
+        posthog.capture(
+          done.kind === "saved"
+            ? "site_profile_saved"
+            : "site_profile_published",
+        );
+      }
+      applyResult(result, done, submitted);
     } catch {
       setStatus({
         kind: "error",

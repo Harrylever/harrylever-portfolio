@@ -2,6 +2,7 @@
 
 import type { AdminMediaAsset } from "@/server/content/media/admin";
 
+import posthog from "posthog-js";
 import { type KeyboardEvent, useId, useRef, useState } from "react";
 
 import { registerMediaUploadAction } from "@/app/admin/_actions/media";
@@ -158,6 +159,7 @@ export function MediaUploader({
         );
       }
 
+      posthog.capture("media_uploaded");
       setPhase({ kind: "done", text: `Uploaded “${result.data.altText}”.` });
       setFile(null);
       setAltText("");

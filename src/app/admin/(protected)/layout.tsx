@@ -14,5 +14,9 @@ export default async function ProtectedAdminLayout({
 }) {
   const session = await requireAdminPage();
 
-  return <AdminShell email={session.user.email}>{children}</AdminShell>;
+  return (
+    <AdminShell email={session.user.email} userId={session.user.id}>
+      {children}
+    </AdminShell>
+  );
 }

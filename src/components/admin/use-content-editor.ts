@@ -4,6 +4,7 @@ import type { ActionResult } from "@/domain/content/action-result";
 import type { LifecycleStatus } from "@/server/content/admin-actions";
 
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 
 import { formSnapshot } from "@/lib/admin/content-forms";
@@ -33,6 +34,12 @@ export type EditorStatus =
   | { kind: "error"; message: string; conflict: boolean };
 
 type Transition = "publish" | "unpublish" | "trash";
+
+const transitionEvents: Record<Transition, string> = {
+  publish: "content_published",
+  unpublish: "content_unpublished",
+  trash: "content_trashed",
+};
 
 export type ContentEditorConfig<
   Values,
@@ -166,6 +173,9 @@ export function useContentEditor<
         : await config.actions.create({ slug, draft });
 
       if (!result.ok) return fail(result);
+      posthog.capture(state ? "content_saved" : "content_created", {
+        content_type: config.noun,
+      });
       setFieldErrors({});
       if (!state) {
         // The editor route loads the created record fresh.
@@ -203,6 +213,7 @@ export function useContentEditor<
       });
 
       if (!result.ok) return fail(result);
+      posthog.capture(transitionEvents[event], { content_type: config.noun });
       setFieldErrors({});
       if (event === "trash") {
         setSaved(formSnapshot(values));
@@ -226,6 +237,7 @@ export function useContentEditor<
       const result = await config.actions.duplicate({ id: state.id });
 
       if (!result.ok) return fail(result);
+      posthog.capture("content_duplicated", { content_type: config.noun });
       setStatus({ kind: "idle" });
       router.push(`/admin/${config.segment}/${result.data.id}`);
     } catch {

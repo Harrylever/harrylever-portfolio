@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 
 import { AdminNav, SignOutButton } from "@/components/admin/admin-nav";
 
@@ -22,15 +23,21 @@ function Mark() {
  */
 export function AdminShell({
   email,
+  userId,
   children,
 }: {
   email: string;
+  userId: string;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const drawer = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    posthog.identify(userId, { email, role: "admin" });
+  }, [email, userId]);
 
   // Close the drawer whenever navigation completes.
   useEffect(() => setOpen(false), [pathname]);
