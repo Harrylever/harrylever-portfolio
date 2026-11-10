@@ -19,6 +19,9 @@ export function Prose({
       <style>{`
 .${cls}{font-family:var(--font-body);font-size:1.0625rem;line-height:1.75;color:var(--text-secondary)}
 .${cls} > * + *{margin-top:var(--s-6)}
+.${cls} .rich-text > * + *{margin-top:var(--s-6)}
+.${cls} .rich-text > h2{margin-top:var(--s-10)}
+.${cls} .rich-text > h3{margin-top:var(--s-8)}
 .${cls} p{max-width:68ch}
 .${cls} strong{color:var(--text-primary);font-weight:var(--fw-body-medium)}
 .${cls} a{color:var(--sage);text-decoration:none;box-shadow:inset 0 -1px 0 0 currentColor}

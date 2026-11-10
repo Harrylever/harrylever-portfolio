@@ -223,7 +223,7 @@ export function PostForm({
           <legend className="adm-h2">Post</legend>
           <RichTextEditor
             error={errors.document}
-            hint="Headings, lists, quotes, code, links and images from the media library."
+            hint="Press Enter for a new paragraph; press it again for a blank line. Headings, lists, quotes, code, links and images from the media library."
             label="Post body"
             library={library}
             value={values.document}

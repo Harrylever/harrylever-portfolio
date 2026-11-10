@@ -87,8 +87,20 @@ function renderBlock(
   media: ResolvedRichTextMedia,
 ): ReactNode {
   switch (node.type) {
-    case "paragraph":
-      return <p key={key}>{renderInlineContent(node.content, key)}</p>;
+    case "paragraph": {
+      // An empty paragraph is a blank line the author added with Enter.
+      // Render it with a <br> (as ProseMirror does in the editor) so it
+      // occupies a line instead of collapsing to zero height.
+      const isEmpty =
+        !node.content?.length ||
+        node.content.every((inline) => inline.type === "text" && !inline.text);
+
+      return (
+        <p key={key}>
+          {isEmpty ? <br /> : renderInlineContent(node.content, key)}
+        </p>
+      );
+    }
     case "heading": {
       const content = renderInlineContent(node.content, key);
 

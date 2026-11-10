@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { RichText } from "@/components/content/rich-text";
+import { Prose } from "@/components/design-system/prose";
 import { deriveReadingTime, richTextSchema } from "@/domain/content/rich-text";
 import { createId } from "@/server/db/id";
 
@@ -198,6 +199,52 @@ describe("rich text", () => {
     );
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain("AIZEN report screen");
+  });
+
+  test("renders empty paragraphs as blank lines, not collapsed markup", () => {
+    const document = richTextSchema.parse({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Line one" }],
+        },
+        { type: "paragraph" },
+        { type: "paragraph" },
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Line two" }],
+        },
+      ],
+    });
+    const html = renderToStaticMarkup(<RichText document={document} />);
+
+    // Each blank paragraph must occupy a line (a <br>, as in the editor)
+    // instead of a heightless <p></p> that collapses in the browser.
+    expect(html).toContain("<p><br/></p><p><br/></p>");
+    expect(html).not.toContain("<p></p>");
+  });
+
+  test("spaces rich-text blocks apart inside Prose (the preview styles)", () => {
+    const document = richTextSchema.parse({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "One" }] },
+        { type: "paragraph", content: [{ type: "text", text: "Two" }] },
+      ],
+    });
+    const html = renderToStaticMarkup(
+      <Prose>
+        <RichText document={document} />
+      </Prose>,
+    );
+
+    // Prose only spaced its direct children, but RichText wraps blocks in
+    // .rich-text, so paragraphs rendered with no gap between them.
+    // `>` is HTML-escaped to &gt; inside the rendered <style> element.
+    expect(html).toMatch(
+      /\.rich-text (?:>|&gt;) \* \+ \*\{margin-top:var\(--s-6\)\}/,
+    );
   });
 
   test("derives reading time from text content at 200 words per minute", () => {

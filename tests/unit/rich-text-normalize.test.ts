@@ -205,6 +205,26 @@ describe("normalizeEditorDocument", () => {
     ]);
   });
 
+  test("keeps empty paragraphs created by pressing Enter", () => {
+    const result = normalizeEditorDocument({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "Line one" }] },
+        { type: "paragraph", content: [] },
+        { type: "paragraph" },
+        { type: "paragraph", content: [{ type: "text", text: "Line two" }] },
+      ],
+    });
+
+    expect(richTextSchema.safeParse(result).success).toBe(true);
+    expect(result.content).toEqual([
+      { type: "paragraph", content: [{ type: "text", text: "Line one" }] },
+      { type: "paragraph" },
+      { type: "paragraph" },
+      { type: "paragraph", content: [{ type: "text", text: "Line two" }] },
+    ]);
+  });
+
   test("returns an empty document for garbage input", () => {
     expect(normalizeEditorDocument(null)).toEqual({ type: "doc", content: [] });
     expect(

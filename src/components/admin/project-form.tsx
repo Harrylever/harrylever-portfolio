@@ -453,7 +453,7 @@ export function ProjectForm({
           <legend className="adm-h2">Case study</legend>
           <RichTextEditor
             error={errors.caseStudy}
-            hint="Headings, lists, quotes, code, links and images from the media library."
+            hint="Press Enter for a new paragraph; press it again for a blank line. Headings, lists, quotes, code, links and images from the media library."
             label="Case study"
             library={library}
             value={values.caseStudy}
